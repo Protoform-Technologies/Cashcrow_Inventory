@@ -2,6 +2,7 @@
 
 :root {
   --background: #ffffff;
+  --background-light: #ffffff;
   --foreground: #171717;
   --cashcrow-primary: #265136;
   --cashcrow-lightgreen: #2f6443;
@@ -9,24 +10,44 @@
   --cashcrow-accent: #d0e8d6;
   --cashcrow-textmuted: #5f766a;
   --cashcrow-bg: #ffffff;
+  --primary: #265035;
+  --light-green: #2f6443;
+  --background-light: #f0f9f1;
+  --background-dark: #151d18;
+  --accent: #d0e8d6;
+  --muted-text: #5f766a;
+  --mint-soft: #f0f9f1;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-light: var(--background-light);
+  --color-background-dark: #0a0a0a;
   --color-foreground: var(--foreground);
+  --color-primary: var(--cashcrow-primary);
+  --color-primary-light: var(--cashcrow-lightgreen);
   --color-cashcrow-primary: var(--cashcrow-primary);
   --color-cashcrow-lightgreen: var(--cashcrow-lightgreen);
   --color-cashcrow-secondary: var(--cashcrow-secondary);
   --color-cashcrow-accent: var(--cashcrow-accent);
   --color-cashcrow-textmuted: var(--cashcrow-textmuted);
   --color-cashcrow-bg: var(--cashcrow-bg);
+  --color-primary: var(--primary);
+  --color-light-green: var(--light-green);
+  --color-background-light: var(--background-light);
+  --color-background-dark: var(--background-dark);
+  --color-accent: var(--accent);
+  --color-muted-text: var(--muted-text);
+  --color-mint-soft: var(--mint-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-geist-sans);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
+    --background-light: #0a0a0a;
     --foreground: #ededed;
     --cashcrow-bg: #0a0a0a;
   }
@@ -35,5 +56,11 @@
 body {
   background: var(--cashcrow-bg);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: 'Inter', var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

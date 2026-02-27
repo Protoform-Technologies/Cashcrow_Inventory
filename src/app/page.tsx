@@ -18,7 +18,7 @@ export default function Home() {
             <Link href="#" className="text-sm font-medium text-cashcrow-textmuted hover:text-cashcrow-primary transition-colors">Contact</Link>
           </div>
           <div className="flex items-center gap-4">
-            <button className="hidden sm:block text-sm font-medium text-cashcrow-primary">Log in</button>
+<Link href="/login" className="hidden sm:block text-sm font-medium text-cashcrow-primary hover:text-cashcrow-lightgreen transition-colors">Log in</Link>
             <button className="rounded-full bg-cashcrow-primary px-5 py-2 text-sm font-semibold text-white shadow-lg hover:bg-cashcrow-lightgreen transition-all hover:scale-105 active:scale-95">
               Get Started
             </button>

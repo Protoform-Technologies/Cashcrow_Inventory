@@ -37,13 +37,12 @@ export default function SignupPage() {
     const { error } = await signUp(email, password, fullName, role);
     
     if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setError("Registration successful! Please check your email to confirm your account.");
-      setLoading(false);
-    }
-  };
+  setError(error.message);
+  setLoading(false);
+} else {
+  setLoading(false);
+  router.push("/dashboard");
+};
 
   return (
     <div className="flex h-full w-full flex-col lg:flex-row">
@@ -261,4 +260,5 @@ export default function SignupPage() {
       </div>
     </div>
   );
+  }
 }

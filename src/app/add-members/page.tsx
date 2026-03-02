@@ -1,24 +1,41 @@
-const handleAddMember = async () => {
-  if (!name || !email) {
-    alert("Please fill all fields");
-    return;
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { AddMemberForm } from "@/components/AddMemberForm";
+
+export default function AddMembersPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // Check role - only admin can access
+  useEffect(() => {
+    if (!loading && user) {
+      const role = user.user_metadata?.role;
+      if (role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-2xl font-bold text-primary">Loading...</div>
+      </div>
+    );
   }
 
-  const response = await fetch("/api/invite", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, email }),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    alert(result.error);
-  } else {
-    alert("Invitation email sent!");
-    setName("");
-    setEmail("");
+  if (!user) {
+    return null;
   }
-};
+
+  return <AddMemberForm />;
+}

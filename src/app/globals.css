@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --color-cashcrow-primary: #265035;
+  --color-cashcrow-lightgreen: #2f6443;
+  --color-cashcrow-secondary: #f0f9f1;
+  --color-cashcrow-accent: #d0e8d6;
+  --color-cashcrow-textmuted: #5f766a;
+  --color-cashcrow-background-light: #f0f9f1;
+  --color-cashcrow-background-dark: #151d18;
+}
+
+@theme {
+  --color-cashcrow-primary: var(--color-cashcrow-primary);
+  --color-cashcrow-lightgreen: var(--color-cashcrow-lightgreen);
+  --color-cashcrow-secondary: var(--color-cashcrow-secondary);
+  --color-cashcrow-accent: var(--color-cashcrow-accent);
+  --color-cashcrow-textmuted: var(--color-cashcrow-textmuted);
+  --color-cashcrow-bg-light: var(--color-cashcrow-background-light);
+}
+
+body {
+  background-color: var(--color-cashcrow-background-light);
+  color: var(--color-cashcrow-primary);
+  font-family: Arial, Helvetica, sans-serif;
+}

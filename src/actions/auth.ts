@@ -34,7 +34,7 @@ export async function login(formData: FormData) {
     const adminClient = getSupabaseAdmin()
     const { data: profile, error: profileError } = await adminClient
         .from('profiles')
-        .select('role')
+        .select('role, is_active')
         .eq('id', userId)
         .single()
 
@@ -43,7 +43,12 @@ export async function login(formData: FormData) {
         return { error: 'Could not fetch user profile. Please contact support.' }
     }
 
-    // 3. Redirect based on role
+    // 3. Check if account is active or needs password setup
+    if (profile.is_active === false) {
+        redirect('/reset-password')
+    }
+
+    // 4. Redirect based on role
     const role = profile.role?.toUpperCase()
 
     if (role === 'ADMIN') {
@@ -83,13 +88,20 @@ export async function sendResetPasswordEmail(email: string) {
 export async function updatePassword(password: string) {
     const supabase = await createServerSupabaseClient()
 
-    const { error } = await supabase.auth.updateUser({
+    const { data: userData, error } = await supabase.auth.updateUser({
         password,
     })
 
     if (error) {
         console.error('Update password error:', error.message)
         return { error: error.message }
+    }
+
+    // Mark the profile as active
+    const userId = userData.user?.id
+    if (userId) {
+        const adminClient = getSupabaseAdmin()
+        await adminClient.from('profiles').update({ is_active: true }).eq('id', userId)
     }
 
     return { success: true }

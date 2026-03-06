@@ -131,7 +131,7 @@ export default function AuthSection() {
                 <div className="mt-10 flex flex-col items-center gap-6">
 
                     <p className="text-sm text-[var(--color-cashcrow-textmuted)] text-center">
-                        Don't have an account? <a className="text-[var(--color-cashcrow-primary)] font-bold hover:underline" href="#">Contact your administrator</a>
+                        Don&apos;t have an account? <a className="text-[var(--color-cashcrow-primary)] font-bold hover:underline" href="#">Contact your administrator</a>
                     </p>
                 </div>
 

@@ -59,6 +59,7 @@ export default function AuthSection() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+
                     {/* Error Feedback */}
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2 duration-200">

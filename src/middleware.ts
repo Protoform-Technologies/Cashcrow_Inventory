@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     const isMemberRoute = request.nextUrl.pathname.startsWith('/member')
 
     if (user) {
+
         // If user is logged in and tries to access login page, redirect to dashboard
         if (isLoginPage) {
             const { data: profile } = await supabase

@@ -1,7 +1,7 @@
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { logout } from '@/actions/auth'
+import DashboardLayout from '@/components/dashboard/layout'
+import { PlusCircle, HandMetal } from "lucide-react"
 
 export default async function MemberPage() {
     const supabase = await createServerSupabaseClient()
@@ -22,38 +22,59 @@ export default async function MemberPage() {
         redirect('/')
     }
 
-    return (
-        <div className="min-h-screen bg-[var(--color-cashcrow-bg-light)] flex items-center justify-center p-6">
-            <div className="bg-white p-8 rounded-2xl shadow-xl border border-[var(--color-cashcrow-accent)] max-w-md w-full text-center">
-                <div className="bg-[var(--color-cashcrow-lightgreen)] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
-                    M
-                </div>
-                <h1 className="text-3xl font-extrabold text-[var(--color-cashcrow-primary)] mb-2">Member Dashboard</h1>
-                <p className="text-[var(--color-cashcrow-textmuted)] mb-8 font-medium">Cashcrow Lab Member View</p>
+    const fullName = `${profile.first_name} ${profile.last_name}`
+    const today = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
 
-                <div className="space-y-4 text-left mb-10">
-                    <div className="p-4 bg-[var(--color-cashcrow-secondary)] rounded-xl border border-[var(--color-cashcrow-accent)]">
-                        <p className="text-xs uppercase tracking-widest text-[var(--color-cashcrow-textmuted)] font-bold mb-1">Name</p>
-                        <p className="text-[var(--color-cashcrow-primary)] font-semibold text-lg">
-                            {profile.first_name} {profile.last_name}
+    return (
+        <DashboardLayout userName={fullName} userRole="Lab Member" title="Researcher Portal">
+
+            {/* Hero Section */}
+            <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-cashcrow-lightgreen)] opacity-[0.02] rounded-full -mr-16 -mt-16"></div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 relative z-10 text-center sm:text-left">
+                    <div className="w-16 h-16 rounded-2xl bg-[var(--color-cashcrow-lightgreen)]/10 flex items-center justify-center text-[var(--color-cashcrow-lightgreen)] shadow-inner border border-[var(--color-cashcrow-lightgreen)]/5 shrink-0">
+                        <HandMetal className="w-8 h-8 rotate-12" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Active Session: {profile.first_name}</h2>
+                        <p className="text-slate-500 text-sm md:text-base font-semibold tracking-wide flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+                            Lab activity for <span className="text-[var(--color-cashcrow-lightgreen)]">{today}</span>
                         </p>
                     </div>
-                    <div className="p-4 bg-[var(--color-cashcrow-secondary)] rounded-xl border border border-[var(--color-cashcrow-accent)]">
-                        <p className="text-xs uppercase tracking-widest text-[var(--color-cashcrow-textmuted)] font-bold mb-1">Email</p>
-                        <p className="text-[var(--color-cashcrow-primary)] font-semibold text-lg">{profile.email}</p>
-                    </div>
-                    <div className="p-4 bg-[var(--color-cashcrow-accent)] rounded-xl border border-[var(--color-cashcrow-primary)]/10">
-                        <p className="text-xs uppercase tracking-widest text-[var(--color-cashcrow-primary)]/60 font-bold mb-1">Current Role</p>
-                        <p className="text-[var(--color-cashcrow-primary)] font-black text-xl tracking-tight">{profile.role}</p>
-                    </div>
                 </div>
 
-                <form action={logout}>
-                    <Button variant="outline" className="w-full py-6">
-                        Log Out
-                    </Button>
-                </form>
+                <button className="w-full sm:w-auto bg-[var(--color-cashcrow-lightgreen)] hover:bg-[#3d7a52] text-white px-8 py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-[var(--color-cashcrow-lightgreen)]/20 active:scale-95 group relative z-10">
+                    <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                    Log Asset Movement
+                </button>
             </div>
-        </div>
+
+            {/* Profile Information Section */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <h3 className="text-xl font-bold text-slate-900 border-b pb-4">Profile Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Full Name</p>
+                        <p className="text-lg font-bold text-slate-700">{fullName}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Email Address</p>
+                        <p className="text-lg font-bold text-slate-700">{user.email}</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Designated Role</p>
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--color-cashcrow-lightgreen)]/10 text-[var(--color-cashcrow-lightgreen)] text-sm font-bold border border-[var(--color-cashcrow-lightgreen)]/20">
+                            {profile.role || 'Member'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </DashboardLayout>
     )
 }

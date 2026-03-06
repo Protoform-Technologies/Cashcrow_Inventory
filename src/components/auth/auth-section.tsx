@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { login } from "@/actions/auth"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function AuthSection() {
     const [showPassword, setShowPassword] = useState(false)
@@ -84,7 +85,7 @@ export default function AuthSection() {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center px-1">
                             <Label htmlFor="password">Password</Label>
-                            <a className="text-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-lightgreen)] text-sm font-semibold transition-colors" href="#">Forgot Password?</a>
+                            <Link className="text-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-lightgreen)] text-sm font-semibold transition-colors" href="/forgot-password">Forgot Password?</Link>
                         </div>
                         <div className="relative group">
                             <Input
@@ -144,7 +145,7 @@ export default function AuthSection() {
                         <a className="hover:text-[var(--color-cashcrow-primary)] transition-colors" href="#">System Status</a>
                     </div>
                 </footer>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

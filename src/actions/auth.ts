@@ -60,3 +60,37 @@ export async function logout() {
     await supabase.auth.signOut()
     redirect('/')
 }
+
+export async function sendResetPasswordEmail(email: string) {
+    const supabase = await createServerSupabaseClient()
+
+    // Construct the reset URL dynamically based on the environment
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const redirectTo = `${origin}/auth/callback?next=/reset-password`
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+    })
+
+    if (error) {
+        console.error('Reset password error:', error.message)
+        return { error: error.message }
+    }
+
+    return { success: true }
+}
+
+export async function updatePassword(password: string) {
+    const supabase = await createServerSupabaseClient()
+
+    const { error } = await supabase.auth.updateUser({
+        password,
+    })
+
+    if (error) {
+        console.error('Update password error:', error.message)
+        return { error: error.message }
+    }
+
+    return { success: true }
+}

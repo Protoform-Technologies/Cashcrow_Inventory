@@ -16,8 +16,8 @@ import { logout } from "@/actions/auth"
 
 const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' }, // This will be dynamic based on role or just a generic link if separated
-    { name: 'Parts', icon: Package, href: '#' },
-    { name: 'Add Product', icon: PlusSquare, href: '#' },
+    { name: 'Parts', icon: Package, href: '/admin/parts' },
+    { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
     { name: 'Daily Log', icon: History, href: '#' },
 ]

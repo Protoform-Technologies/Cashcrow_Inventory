@@ -34,104 +34,90 @@ export default function AddMemberForm() {
                 setError(result.error)
             } else if (result?.success) {
                 setSuccessMsg(result.success)
-                    ; (e.target as HTMLFormElement).reset() // Clear form fields
+                    ; (e.target as HTMLFormElement).reset()
             }
         })
     }
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-5 sm:p-8 md:p-10 w-full max-w-2xl mx-auto">
-            <div className="mb-6 sm:mb-8 text-left">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-2 tracking-tight">Add New Member</h2>
-                <p className="text-sm sm:text-base text-slate-500 font-medium leading-relaxed">
-                    Create an account for a new team member. They will receive an email with instructions to login with the default password <span className="text-[var(--color-cashcrow-primary)] font-bold">Cashcrow@123</span> and set their own password upon first login.
-                </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="font-medium">{error}</p>
-                    </div>
-                )}
-                {successMsg && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
-                        <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                        <p className="font-medium">{successMsg}</p>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                            id="firstName"
-                            name="firstName"
-                            placeholder="John"
-                            icon={User}
-                            required
-                            disabled={isPending}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                            id="lastName"
-                            name="lastName"
-                            placeholder="Doe"
-                            icon={User}
-                            required
-                            disabled={isPending}
-                        />
-                    </div>
+        <form onSubmit={handleSubmit} className="p-6">
+            {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="font-medium">{error}</p>
                 </div>
+            )}
+            {successMsg && (
+                <div className="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                    <p className="font-medium">{successMsg}</p>
+                </div>
+            )}
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                    <Input
+                        id="firstName"
+                        name="firstName"
+                        placeholder="e.g. Sarah"
+                        required
+                        disabled={isPending}
+                        className="h-11"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
+                    <Input
+                        id="lastName"
+                        name="lastName"
+                        placeholder="e.g. Jenkins"
+                        required
+                        disabled={isPending}
+                        className="h-11"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
                     <Input
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="john.doe@protoform.com"
-                        icon={Mail}
+                        placeholder="sarah.j@cashcrowlab.com"
                         required
                         disabled={isPending}
+                        className="h-11"
                     />
                 </div>
-
                 <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                            <Shield className="w-5 h-5" />
-                        </div>
-                        <select
-                            id="role"
-                            name="role"
-                            required
-                            disabled={isPending}
-                            defaultValue=""
-                            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
-                        >
-                            <option value="" disabled>Select a role...</option>
-                            <option value="MEMBER">Member</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
-                    </div>
+                    <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
+                    <select
+                        id="role"
+                        name="role"
+                        required
+                        disabled={isPending}
+                        defaultValue=""
+                        className="w-full h-11 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 dark:text-slate-300"
+                    >
+                        <option value="" disabled>Select a role</option>
+                        <option value="MEMBER">Member (Edit Access)</option>
+                        <option value="ADMIN">Admin (Full Access)</option>
+                    </select>
                 </div>
+            </div>
 
-                <Button type="submit" className="w-full py-7" disabled={isPending}>
+            <div className="flex justify-end pt-4">
+                <Button type="submit" className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2 px-8 rounded-lg transition-all shadow-md flex items-center gap-2" disabled={isPending}>
                     {isPending ? (
-                        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                         <>
                             <span>Add Member</span>
-                            <ArrowRight className="w-5 h-5 ml-2" />
+                            <ArrowRight className="w-5 h-5" />
                         </>
                     )}
                 </Button>
-            </form>
-        </div>
+            </div>
+        </form>
     )
 }

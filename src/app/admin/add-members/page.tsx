@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/dashboard/layout'
 import AddMemberForm from '@/components/dashboard/add-member-form'
 import MembersList from '@/components/dashboard/members-list'
-import { UserPlus } from "lucide-react"
 
 export default async function AddMembersPage() {
     const supabase = await createServerSupabaseClient()
@@ -38,28 +37,28 @@ export default async function AddMembersPage() {
 
     return (
         <DashboardLayout userName={fullName} userRole="Lab Director" title="Add Members">
-            {/* Hero Section */}
-            <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0 mt-4 mb-8">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-cashcrow-primary)] opacity-[0.02] rounded-full -mr-16 -mt-16"></div>
+            {/* Header Section */}
+            <header className="bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-8 py-4">
+                <nav className="flex items-center gap-2 text-sm font-medium mb-1">
+                    <a className="text-slate-500 hover:text-primary" href="#">Management</a>
+                    <span className="text-slate-300">/</span>
+                    <span className="text-primary">Members</span>
+                </nav>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Add New Member</h2>
+                <p className="text-slate-500 text-sm">Expand your team and manage access levels for your lab inventory.</p>
+            </header>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 relative z-10 text-center sm:text-left">
-                    <div className="w-16 h-16 rounded-2xl bg-[var(--color-cashcrow-primary)]/10 flex items-center justify-center text-[var(--color-cashcrow-primary)] shadow-inner border border-[var(--color-cashcrow-primary)]/5 shrink-0">
-                        <UserPlus className="w-8 h-8" />
+            {/* Main Content */}
+            <div className="p-8 max-w-6xl mx-auto space-y-8">
+                {/* Form Section */}
+                <section className="bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h3 className="text-lg font-semibold">Member Information</h3>
                     </div>
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Add Team Members</h2>
-                        <p className="text-slate-500 text-sm md:text-base font-semibold tracking-wide flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-                            Invite new users to the Cashcrow inventory system
-                        </p>
-                    </div>
-                </div>
-            </div>
+                    <AddMemberForm />
+                </section>
 
-            <div className="w-full flex justify-center py-6">
-                <AddMemberForm />
-            </div>
-
-            <div className="w-full py-6 pb-20">
+                {/* List Section */}
                 <MembersList members={members || []} />
             </div>
         </DashboardLayout>

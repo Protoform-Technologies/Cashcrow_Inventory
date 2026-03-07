@@ -1,6 +1,7 @@
 'use server'
 
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 export async function addMember(formData: FormData) {
     const firstName = formData.get('firstName') as string
@@ -40,9 +41,6 @@ export async function addMember(formData: FormData) {
     // 2. Insert into Profiles table with is_active = false
     const { error: profileError } = await adminClient
         .from('profiles')
-        // Upsert because some setups might have a trigger that already created an empty profile on signUp.
-        // If your database has an auth trigger, it might override this. Usually we use an ON CONFLICT update.
-        // Just for safety if it fails, let's see.
         .upsert({
             id: userId,
             first_name: firstName,
@@ -57,8 +55,85 @@ export async function addMember(formData: FormData) {
         return { error: 'Failed to create member profile. Note: Ensure "is_active" (boolean) exists in the profiles table.' }
     }
 
-    // Since we don't have Resend configured, we mock the email success and return it.
-    // Setting up the actual automated email can be done via Supabase dashboard (invite users)
-    // but here we forcefully create them so they can immediately login with Cashcrow@123.
+    revalidatePath('/admin/add-members')
+
     return { success: `Successfully added ${firstName} ${lastName}! Please notify them to login with Cashcrow@123.` }
+}
+
+export async function deleteMember(id: string) {
+    const adminClient = getSupabaseAdmin()
+
+    // Delete from profiles table first
+    const { error: profileError } = await adminClient
+        .from('profiles')
+        .delete()
+        .eq('id', id)
+
+    if (profileError) {
+        console.error('Delete member profile error:', profileError.message)
+        return { error: 'Failed to delete member profile.' }
+    }
+
+    // Delete from auth users
+    const { error: authError } = await adminClient.auth.admin.deleteUser(id)
+
+    if (authError) {
+        console.error('Delete member auth error:', authError.message)
+        // Profile was already deleted, but auth failed - we should still revalidate
+        revalidatePath('/admin/add-members')
+        return { error: 'Failed to delete member authentication.' }
+    }
+
+    revalidatePath('/admin/add-members')
+
+    return { success: true }
+}
+
+export async function updateMember(id: string, formData: FormData) {
+    const firstName = formData.get('firstName') as string
+    const lastName = formData.get('lastName') as string
+    const role = formData.get('role') as string
+    const isActive = formData.get('isActive') === 'true'
+
+    if (!firstName || !lastName || !role) {
+        return { error: 'Please provide all required fields.' }
+    }
+
+    const adminClient = getSupabaseAdmin()
+
+    // Update profile
+    const { error: profileError } = await adminClient
+        .from('profiles')
+        .update({
+            first_name: firstName,
+            last_name: lastName,
+            role: role,
+            is_active: isActive
+        })
+        .eq('id', id)
+
+    if (profileError) {
+        console.error('Update member profile error:', profileError.message)
+        return { error: 'Failed to update member profile.' }
+    }
+
+    // Update user metadata in auth
+    const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+        user_metadata: {
+            first_name: firstName,
+            last_name: lastName,
+            role: role
+        }
+    })
+
+    if (authError) {
+        console.error('Update member auth error:', authError.message)
+        // Profile was updated, but auth metadata failed - we should still revalidate
+        revalidatePath('/admin/add-members')
+        return { error: 'Failed to update member authentication metadata.' }
+    }
+
+    revalidatePath('/admin/add-members')
+
+    return { success: true }
 }

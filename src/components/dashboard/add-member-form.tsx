@@ -115,8 +115,8 @@ export default function AddMemberForm() {
                             className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
                         >
                             <option value="" disabled>Select a role...</option>
-                            <option value="MEMBER">Member (Inventory viewing & logging)</option>
-                            <option value="ADMIN">Admin (Full access)</option>
+                            <option value="MEMBER">Member</option>
+                            <option value="ADMIN">Admin</option>
                         </select>
                     </div>
                 </div>

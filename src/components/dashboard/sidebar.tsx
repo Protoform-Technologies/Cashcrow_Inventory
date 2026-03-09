@@ -19,7 +19,7 @@ const navItems = [
     { name: 'Parts', icon: Package, href: '/admin/parts' },
     { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
-    { name: 'Daily Log', icon: History, href: '#' },
+    { name: 'Daily Log', icon: History, href: '/admin/daily-log' },
 ]
 
 const accountItems = [

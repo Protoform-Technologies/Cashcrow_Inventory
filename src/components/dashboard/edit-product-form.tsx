@@ -1,21 +1,48 @@
 'use client'
 
-import { useState, useRef } from "react"
-import { addProduct } from "@/actions/products"
-import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2 } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { updateProduct } from "@/actions/products"
+import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2, Loader2 } from "lucide-react"
 
-interface AddProductFormProps {
-    onSuccess?: () => void
-    onCancel?: () => void
+interface Vendor {
+    name: string
+    fund: string
+    link: string
 }
 
-export default function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
+interface Product {
+    id: string
+    name: string
+    sku: string
+    category: string
+    shelf_code: string
+    box_code: string
+    quantity: number
+    min_stock_level: number
+    notes?: string
+    image_url?: string
+    vendors?: Vendor[]
+}
+
+interface EditProductFormProps {
+    product: Product
+    onSuccess: () => void
+    onCancel: () => void
+}
+
+export default function EditProductForm({ product, onSuccess, onCancel }: EditProductFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
-    const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null)
 
-    const [vendors, setVendors] = useState([{ name: '', fund: '', link: '' }])
+    const [vendors, setVendors] = useState<Vendor[]>(product.vendors || [{ name: '', fund: '', link: '' }])
+
+    useEffect(() => {
+        if (product.vendors && product.vendors.length > 0) {
+            setVendors(product.vendors)
+        }
+    }, [product.vendors])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -38,7 +65,7 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
         setVendors(newVendors)
     }
 
-    const updateVendor = (index: number, field: keyof typeof vendors[0], value: string) => {
+    const updateVendor = (index: number, field: keyof Vendor, value: string) => {
         const newVendors = [...vendors]
         newVendors[index][field] = value
         setVendors(newVendors)
@@ -50,22 +77,18 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
         setStatus(null)
 
         const formData = new FormData(e.currentTarget)
-        // Ensure vendors is submitted as JSON
+        formData.append('existing_image_url', product.image_url || '')
         formData.append('vendors', JSON.stringify(vendors.filter(v => v.name.trim() !== '')))
 
-        const result = await addProduct(formData)
+        const result = await updateProduct(product.id, formData)
 
-        if (result.error) {
+        if (result?.error) {
             setStatus({ type: 'error', message: result.error })
-        } else {
-            setStatus({ type: 'success', message: 'Product added successfully!' })
-            formRef.current?.reset()
-            setImagePreview(null)
-            setVendors([{ name: '', fund: '', link: '' }])
-            // Call onSuccess callback if provided
-            if (onSuccess) {
+        } else if (result?.success) {
+            setStatus({ type: 'success', message: 'Product updated successfully!' })
+            setTimeout(() => {
                 onSuccess()
-            }
+            }, 1000)
         }
         setIsLoading(false)
     }
@@ -80,7 +103,7 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                 </div>
             )}
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
+            <div className="bglate-200 rounded--white border border-s2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">image</span>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Product Photo</h3>
@@ -102,7 +125,7 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                             />
                         </div>
                         <div className="flex-1">
-                            <h4 className="font-bold text-slate-800 text-sm mb-1">Upload Photo</h4>
+                            <h4 className="font-bold text-slate-800 text-sm mb-1">Update Photo</h4>
                             <p className="text-slate-500 text-xs mb-3">Upload a clear photo of the product. PNG, JPG up to 5MB.</p>
                             <label className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer inline-block">
                                 Browse Files
@@ -125,14 +148,28 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Product Name<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <input required name="name" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. Micro-Centrifuge Tubes" type="text" />
+                            <input 
+                                required 
+                                name="name" 
+                                defaultValue={product.name}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" 
+                                placeholder="e.g. Micro-Centrifuge Tubes" 
+                                type="text" 
+                            />
                         </div>
                         <div className="col-span-2 md:col-span-1">
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 SKU / Item Code<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
                             <div className="relative">
-                                <input required name="sku" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] pl-4 pr-10 py-2.5 text-sm transition-all outline-none" placeholder="Scan or enter code" type="text" />
+                                <input 
+                                    required 
+                                    name="sku" 
+                                    defaultValue={product.sku}
+                                    className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] pl-4 pr-10 py-2.5 text-sm transition-all outline-none" 
+                                    placeholder="Scan or enter code" 
+                                    type="text" 
+                                />
                                 <span className="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 cursor-pointer hover:text-[var(--color-cashcrow-primary)]">barcode_scanner</span>
                             </div>
                         </div>
@@ -140,7 +177,12 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Category<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <select required name="category" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white">
+                            <select 
+                                required 
+                                name="category" 
+                                defaultValue={product.category}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
+                            >
                                 <option value="">Select Category</option>
                                 <option value="Electronics">Electronics</option>
                                 <option value="Hardware">Hardware</option>
@@ -164,13 +206,27 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Shelf Code<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <input required name="shelf_code" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. S2" type="text" />
+                            <input 
+                                required 
+                                name="shelf_code" 
+                                defaultValue={product.shelf_code}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" 
+                                placeholder="e.g. S2" 
+                                type="text" 
+                            />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Box Code<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <input required name="box_code" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. B12" type="text" />
+                            <input 
+                                required 
+                                name="box_code" 
+                                defaultValue={product.box_code}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" 
+                                placeholder="e.g. B12" 
+                                type="text" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -184,16 +240,32 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                     <div className="p-6 space-y-5">
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Initial Quantity<span className="text-red-500 ml-1 font-bold">*</span>
+                                Quantity<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <input required name="initial_quantity" min="0" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="0" type="number" />
+                            <input 
+                                required 
+                                name="quantity" 
+                                min="0" 
+                                defaultValue={product.quantity}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" 
+                                placeholder="0" 
+                                type="number" 
+                            />
                         </div>
                         <div>
                             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Min. Stock Level (Alert)<span className="text-red-500 ml-1 font-bold">*</span>
                                 <span className="material-symbols-outlined text-[14px] text-slate-400 cursor-help" title="System will alert you when stock falls below this number">help</span>
                             </label>
-                            <input required name="min_stock_level" min="0" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="10" type="number" />
+                            <input 
+                                required 
+                                name="min_stock_level" 
+                                min="0" 
+                                defaultValue={product.min_stock_level}
+                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" 
+                                placeholder="10" 
+                                type="number" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -278,7 +350,13 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Additional Notes</h3>
                 </div>
                 <div className="p-6">
-                    <textarea name="notes" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none resize-none" placeholder="Enter any additional product specifications, supplier details, or handling instructions..." rows={5}></textarea>
+                    <textarea 
+                        name="notes" 
+                        defaultValue={product.notes || ''}
+                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none resize-none" 
+                        placeholder="Enter any additional product specifications, supplier details, or handling instructions..." 
+                        rows={5}
+                    ></textarea>
                 </div>
             </div>
 
@@ -291,16 +369,20 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                 >
                     Cancel
                 </button>
-                <button type="submit" disabled={isLoading} className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70">
+                <button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70"
+                >
                     {isLoading ? (
                         <>
-                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             Saving...
                         </>
                     ) : (
                         <>
                             <PlusCircle className="w-5 h-5" />
-                            Save Product
+                            Update Product
                         </>
                     )}
                 </button>
@@ -308,3 +390,4 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
         </form>
     )
 }
+

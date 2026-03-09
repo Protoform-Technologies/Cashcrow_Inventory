@@ -285,55 +285,56 @@ export default function DailyLogClient({ userName, userId, products, members, su
 
     return (
         <DashboardLayout userName={userName} userRole="Lab Director" title="Daily Log Entry">
-            <header className="px-8 py-6">
-                <div className="flex items-center justify-between">
+            <header className="px-4 md:px-8 py-4 md:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Daily Log Entry</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Daily Log Entry</h2>
                         <p className="text-slate-500 text-sm">Convert whiteboard notes into digital ledger transactions.</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
                         <Button 
                             onClick={handleSaveDraft}
                             variant="outline"
-                            className="flex items-center gap-2 px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-sm font-semibold border border-slate-200"
+                            className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-xs md:text-sm font-semibold border border-slate-200"
                         >
-                            <FileText className="w-4 h-4" />
-                            Save as Draft
+                            <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span className="hidden sm:inline">Save as Draft</span>
+                            <span className="sm:hidden">Draft</span>
                         </Button>
                         <Button 
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white rounded-xl transition-all text-sm font-semibold shadow-lg"
+                            className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-2.5 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white rounded-xl transition-all text-xs md:text-sm font-semibold shadow-lg"
                         >
-                            <Send className="w-4 h-4" />
-                            {isSubmitting ? 'Submitting...' : 'Submit Log'}
+                            <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            {isSubmitting ? 'Submitting...' : 'Submit'}
                         </Button>
                     </div>
                 </div>
             </header>
 
-            <div className="px-8 pb-8 max-w-7xl mx-auto space-y-6">
+            <div className="px-3 md:px-8 pb-8 max-w-7xl mx-auto space-y-4 md:space-y-6">
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse min-w-[1000px]">
+                    <div className="overflow-x-auto -mx-2 md:mx-0">
+                        <table className="w-full text-left border-collapse min-w-[800px] md:min-w-0">
                             <thead>
                                 <tr className="bg-slate-50/80">
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[30%]">Part Search</th>
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[120px]">Quantity</th>
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[180px]">Transaction Type</th>
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[20%]">Taken By</th>
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Purpose / Notes</th>
-                                    <th className="px-4 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-[80px] text-center">Actions</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Part</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider w-[80px] md:w-[120px]">Qty</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider w-[100px] md:w-[180px]">Type</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">By</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">Purpose</th>
+                                    <th className="px-2 md:px-4 py-3 md:py-4 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider w-[50px] md:w-[80px] text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {entries.map((entry) => (
                                     <tr key={entry.id} className="group hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-4 py-3">
+                                        <td className="px-2 md:px-4 py-2 md:py-3">
                                             <div className="relative">
                                                 <input
-                                                    className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-sm transition-all px-3 py-2"
-                                                    placeholder="Search part name or SKU..."
+                                                    className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2"
+                                                    placeholder="Search..."
                                                     type="text"
                                                     value={entry.productName || searchQuery}
                                                     onChange={(e) => {
@@ -343,28 +344,28 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                     onFocus={() => setShowProductDropdown(entry.id)}
                                                 />
                                                 {showProductDropdown === entry.id && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 md:max-h-60 overflow-y-auto">
                                                         {filteredProducts.length > 0 ? (
-                                                            filteredProducts.slice(0, 10).map(product => (
+                                                            filteredProducts.slice(0, 8).map(product => (
                                                                 <button
                                                                     key={product.id}
-                                                                    className="w-full text-left px-3 py-2 hover:bg-slate-100 text-sm"
+                                                                    className="w-full text-left px-2 md:px-3 py-2 hover:bg-slate-100 text-xs md:text-sm"
                                                                     onClick={() => selectProduct(entry.id, product)}
                                                                 >
                                                                     <div className="font-medium">{product.name}</div>
-                                                                    <div className="text-xs text-slate-500">SKU: {product.sku} • Available: {product.quantity}</div>
+                                                                    <div className="text-[10px] md:text-xs text-slate-500">SKU: {product.sku}</div>
                                                                 </button>
                                                             ))
                                                         ) : (
-                                                            <div className="px-3 py-2 text-sm text-slate-500">No products found</div>
+                                                            <div className="px-2 md:px-3 py-2 text-xs md:text-sm text-slate-500">No products found</div>
                                                         )}
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-2 md:px-4 py-2 md:py-3">
                                             <input
-                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-sm transition-all px-3 py-2"
+                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2"
                                                 type="number"
                                                 min="0"
                                                 value={entry.quantity || ''}
@@ -372,9 +373,9 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                 placeholder="0"
                                             />
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-2 md:px-4 py-2 md:py-3">
                                             <select
-                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-sm transition-all px-3 py-2 appearance-none"
+                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2 appearance-none"
                                                 value={entry.transactionType}
                                                 onChange={(e) => updateEntry(entry.id, 'transactionType', e.target.value as TransactionType)}
                                             >
@@ -385,13 +386,12 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                 <option value="SCRAP">SCRAP</option>
                                             </select>
                                         </td>
-                                        <td className="px-4 py-3">
-                                            {/* Debug: Show members count */}
+                                        <td className="px-2 md:px-4 py-2 md:py-3">
                                             {members.length === 0 && (
-                                                <div className="text-xs text-red-500 mb-1">No members found</div>
+                                                <div className="text-[10px] text-red-500 mb-1">No members</div>
                                             )}
                                             <select
-                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-sm transition-all px-3 py-2 appearance-none"
+                                                className="w-full bg-slate-100 border-transparent focus:border-border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2 appearance-none"
                                                 value={entry.takenBy}
                                                 onChange={(e) => {
                                                     const member = members.find(m => m.id === e.target.value)
@@ -399,7 +399,7 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                     updateEntry(entry.id, 'takenByName', member ? `${member.first_name} ${member.last_name}` : '')
                                                 }}
                                             >
-                                                <option value="">Select member... ({members.length})</option>
+                                                <option value="">Select...</option>
                                                 {members.map(member => (
                                                     <option key={member.id} value={member.id}>
                                                         {member.first_name} {member.last_name}
@@ -407,22 +407,22 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                 ))}
                                             </select>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-2 md:px-4 py-2 md:py-3">
                                             <input
-                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-sm transition-all px-3 py-2"
-                                                placeholder="Project or reason"
+                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2"
+                                                placeholder="Purpose"
                                                 type="text"
                                                 value={entry.purpose}
                                                 onChange={(e) => updateEntry(entry.id, 'purpose', e.target.value)}
                                             />
                                         </td>
-                                        <td className="px-4 py-3 text-center">
+                                        <td className="px-2 md:px-4 py-2 md:py-3 text-center">
                                             <button 
                                                 onClick={() => removeEntry(entry.id)}
-                                                className="text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-500/10"
+                                                className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-500/10"
                                                 disabled={entries.length === 1}
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                             </button>
                                         </td>
                                     </tr>
@@ -430,57 +430,53 @@ export default function DailyLogClient({ userName, userId, products, members, su
                             </tbody>
                         </table>
                     </div>
-                    <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+                    <div className="p-3 md:p-4 border-t border-slate-100 bg-slate-50/50">
                         <button 
                             onClick={addNewRow}
-                            className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-primary)] transition-all text-sm font-semibold group"
+                            className="flex items-center justify-center gap-2 w-full py-2 md:py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-primary)] transition-all text-xs md:text-sm font-semibold group"
                         >
-                            <PlusCircle className="w-4 h-4 transition-transform group-hover:scale-125" />
-                            Add New Row
+                            <PlusCircle className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover:scale-125" />
+                            Add Row
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm flex flex-col gap-3 md:gap-4">
                         <div className="flex items-center gap-2 text-[var(--color-cashcrow-primary)]">
-                            <Search className="w-4 h-4" />
-                            <span className="text-sm font-bold uppercase tracking-wider">Session Info</span>
+                            <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span className="text-xs md:text-sm font-bold uppercase tracking-wider">Info</span>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-2 md:space-y-3">
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-500">Items to log:</span>
-                                <span className="text-sm font-bold">{entries.filter(e => e.productId).length} Rows</span>
+                                <span className="text-xs md:text-sm text-slate-500">Items:</span>
+                                <span className="text-xs md:text-sm font-bold">{entries.filter(e => e.productId).length}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-sm text-slate-500">Draft Status:</span>
-                                <span className="text-sm font-bold text-amber-500">{currentLogId ? 'In Progress' : 'New'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm text-slate-500">Terminal ID:</span>
-                                <span className="text-sm font-bold">LAB-S04-ENTRY</span>
+                                <span className="text-xs md:text-sm text-slate-500">Status:</span>
+                                <span className="text-xs md:text-sm font-bold text-amber-500">{currentLogId ? 'Draft' : 'New'}</span>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm md:col-span-2 flex flex-col gap-3">
-                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">Global Session Notes (Optional)</label>
+                    <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm md:col-span-2 flex flex-col gap-2 md:gap-3">
+                        <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">Notes (Optional)</label>
                         <textarea 
-                            className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl text-sm transition-all px-4 py-3 resize-none"
-                            placeholder="Add any high-level notes about this batch of transactions..."
-                            rows={3}
+                            className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl text-xs md:text-sm transition-all px-3 md:px-4 py-2 md:py-3 resize-none"
+                            placeholder="Add notes..."
+                            rows={2}
                             value={globalNotes}
                             onChange={(e) => setGlobalNotes(e.target.value)}
                         ></textarea>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-200/50 border border-slate-300">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-                        <Search className="w-4 h-4 text-slate-400" />
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-slate-200/50 border border-slate-300">
+                    <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400" />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-xs font-bold text-slate-600 uppercase tracking-widest">Efficiency Tip</h4>
-                        <p className="text-sm text-slate-500">Use Tab to quickly jump between fields and Enter to submit rows instantly.</p>
+                        <h4 className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-widest">Tip</h4>
+                        <p className="text-xs md:text-sm text-slate-500">Use Tab to jump between fields.</p>
                     </div>
                 </div>
             </div>

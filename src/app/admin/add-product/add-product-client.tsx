@@ -107,15 +107,15 @@ export default function AddProductClient({ userName, products }: AddProductClien
 
     return (
         <DashboardLayout userName={userName} userRole="Lab Admin" title="Add New Product">
-            <header className="px-4 md:px-8 py-4 md:py-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <header className="px-3 md:px-8 py-4 md:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div></div>
                     {!showAddForm && (
                         <Button
                             onClick={() => setShowAddForm(true)}
-                            className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2 px-4 md:px-6 rounded-lg transition-all shadow-md flex items-center justify-center gap-2 w-full sm:w-auto"
+                            className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2.5 md:py-2 px-4 md:px-6 rounded-lg transition-all shadow-md flex items-center justify-center gap-2 w-full sm:w-auto text-sm md:text-base"
                         >
-                            <PlusCircle className="w-5 h-5" />
+                            <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="md:hidden lg:inline">Add New Product</span>
                             <span className="hidden md:inline lg:hidden">Add Product</span>
                         </Button>
@@ -124,7 +124,7 @@ export default function AddProductClient({ userName, products }: AddProductClien
                 <p className="text-slate-500 text-sm mt-2">Manage your lab inventory and product catalog.</p>
             </header>
 
-            <div className="px-4 md:px-8 pb-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
+            <div className="px-2 md:px-8 pb-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
                 {showAddForm && (
                     <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -142,24 +142,24 @@ export default function AddProductClient({ userName, products }: AddProductClien
 
                 {localProducts && localProducts.length > 0 && (
                     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                            <Package className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Existing Products in Inventory</h3>
-                            <span className="ml-auto text-xs font-bold bg-[var(--color-cashcrow-primary)] text-white px-2.5 py-1 rounded-full">
+                        <div className="bg-slate-50 border-b border-slate-200 px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 flex-wrap">
+                            <Package className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                            <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Products</h3>
+                            <span className="ml-auto text-xs font-bold bg-[var(--color-cashcrow-primary)] text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
                                 {localProducts.length}
                             </span>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                        <div className="overflow-x-auto -mx-2 md:mx-0">
+                            <table className="w-full text-left border-collapse min-w-[650px] md:min-w-0">
                                 <thead>
                                     <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
-                                        <th className="px-6 py-4">Item Name</th>
-                                        <th className="px-6 py-4">Category</th>
-                                        <th className="px-6 py-4">SKU</th>
-                                        <th className="px-6 py-4">Location</th>
-                                        <th className="px-6 py-4 text-right">Qty</th>
-                                        <th className="px-6 py-4 text-center">Status</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4">Item</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4">Cat</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4">SKU</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4">Loc</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Qty</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 text-center">Status</th>
+                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -191,44 +191,44 @@ export default function AddProductClient({ userName, products }: AddProductClien
                                         
                                         return (
                                             <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-3">
+                                                <td className="px-2 md:px-6 py-3 md:py-5">
+                                                    <div className="flex items-center gap-2 md:gap-3">
                                                         {product.image_url ? (
-                                                            <img src={product.image_url} alt={product.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
+                                                            <img src={product.image_url} alt={product.name} className="w-8 h-8 md:w-10 md:h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                                                         ) : (
-                                                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                                                                <Package className="w-5 h-5 text-slate-400" />
+                                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                                                <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
                                                             </div>
                                                         )}
-                                                        <p className="font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors">{product.name}</p>
+                                                        <p className="font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors text-xs md:text-sm truncate max-w-[80px] md:max-w-none">{product.name}</p>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <span className="text-sm text-slate-600 font-medium bg-slate-100 px-2 py-1 rounded-lg">{product.category}</span>
+                                                <td className="px-2 md:px-6 py-3 md:py-5">
+                                                    <span className="text-xs md:text-sm text-slate-600 font-medium bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">{product.category}</span>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <code className="text-[11px] bg-slate-50 border border-slate-200 text-slate-500 px-2 py-1 rounded-md font-mono">{product.sku}</code>
+                                                <td className="px-2 md:px-6 py-3 md:py-5">
+                                                    <code className="text-[10px] md:text-[11px] bg-slate-50 border border-slate-200 text-slate-500 px-1 md:px-2 py-0.5 rounded-md font-mono">{product.sku}</code>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-1 text-sm text-slate-600">
+                                                <td className="px-2 md:px-6 py-3 md:py-5">
+                                                    <div className="flex items-center gap-0.5 text-xs md:text-sm text-slate-600">
                                                         <span className="font-semibold">{product.shelf_code}</span>
                                                         <span className="text-slate-400">/</span>
                                                         <span>{product.box_code}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 text-right">
-                                                    <span className={`font-black ${stockInfo.trend === 'warning' ? 'text-orange-600' : stockInfo.trend === 'danger' ? 'text-red-600' : 'text-slate-900'}`}>{product.quantity || 0}</span>
+                                                <td className="px-2 md:px-6 py-3 md:py-5 text-right">
+                                                    <span className={`font-black text-sm md:text-base ${stockInfo.trend === 'warning' ? 'text-orange-600' : stockInfo.trend === 'danger' ? 'text-red-600' : 'text-slate-900'}`}>{product.quantity || 0}</span>
                                                 </td>
-                                                <td className="px-6 py-5 text-center">
-                                                    <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider ${stockInfo.class}`}>{stockInfo.status}</span>
+                                                <td className="px-2 md:px-6 py-3 md:py-5 text-center">
+                                                    <span className={`px-1.5 md:px-3 py-0.5 text-[9px] md:text-[10px] font-black rounded-full uppercase tracking-wider ${stockInfo.class}`}>{stockInfo.status}</span>
                                                 </td>
-                                                <td className="px-6 py-5 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <button onClick={() => handleEdit(product)} className="p-2 text-slate-400 hover:text-primary transition-colors">
-                                                            <Pencil className="w-5 h-5" />
+                                                <td className="px-2 md:px-6 py-3 md:py-5 text-right">
+                                                    <div className="flex justify-end gap-1 md:gap-2">
+                                                        <button onClick={() => handleEdit(product)} className="p-1 md:p-2 text-slate-400 hover:text-primary transition-colors">
+                                                            <Pencil className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                                         </button>
-                                                        <button onClick={() => handleDelete(product.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
-                                                            <Trash2 className="w-5 h-5" />
+                                                        <button onClick={() => handleDelete(product.id)} className="p-1 md:p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                                            <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                                         </button>
                                                     </div>
                                                 </td>

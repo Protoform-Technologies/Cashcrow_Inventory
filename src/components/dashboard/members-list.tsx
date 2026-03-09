@@ -113,34 +113,34 @@ export default function MembersList({ members }: { members: Profile[] }) {
         <>
             <section className="bg-white rounded-xl border border-slate-200 shadow-sm">
                 {/* Header with Search */}
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Current Lab Members</h3>
-                    <div className="relative">
+                <div className="p-4 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <h3 className="text-base md:text-lg font-semibold">Members</h3>
+                    <div className="relative w-full sm:w-auto">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                            <Search className="w-4 h-4" />
+                            <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </span>
                         <input
                             type="text"
-                            placeholder="Filter members..."
+                            placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value)
                                 setCurrentPage(1)
                             }}
-                            className="pl-10 text-sm rounded-full border border-slate-300 h-9 w-48 focus:w-64 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="pl-9 md:pl-10 text-sm rounded-full border border-slate-300 h-9 w-full sm:w-40 md:w-48 focus:w-full sm:focus:w-56 md:focus:w-64 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto -mx-2 md:mx-0">
+                    <table className="w-full text-left border-collapse min-w-[550px] md:min-w-0">
                         <thead>
                             <tr className="bg-slate-50">
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Member</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Member</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -149,31 +149,32 @@ export default function MembersList({ members }: { members: Profile[] }) {
                                     {deleteConfirmId === member.id ? (
                                         // Delete Confirmation
                                         <>
-                                            <td className="px-6 py-4" colSpan={2}>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
-                                                        <Trash2 className="w-5 h-5" />
+                                            <td className="px-3 md:px-6 py-3 md:py-4" colSpan={2}>
+                                                <div className="flex items-center gap-2 md:gap-3">
+                                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                                                        <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                                     </div>
-                                                    <p className="font-medium text-red-600">Delete {member.first_name} {member.last_name}?</p>
+                                                    <p className="font-medium text-red-600 text-sm md:text-base">Delete {member.first_name}?</p>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm text-slate-500">This action cannot be undone.</p>
+                                            <td className="px-3 md:px-6 py-3 md:py-4">
+                                                <p className="text-xs md:text-sm text-slate-500">Cannot be undone.</p>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
+                                            <td className="px-3 md:px-6 py-3 md:py-4 text-right">
+                                                <div className="flex justify-end gap-1 md:gap-2">
                                                     <Button 
                                                         onClick={confirmDelete} 
                                                         disabled={isPending}
                                                         size="sm"
-                                                        className="bg-red-600 hover:bg-red-700 text-white"
+                                                        className="bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm"
                                                     >
-                                                        {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete'}
+                                                        {isPending ? <Loader2 className="w-3 h-3 md:w-4 md:h-4 animate-spin" /> : 'Delete'}
                                                     </Button>
                                                     <Button 
                                                         onClick={handleCancelDelete} 
                                                         variant="outline" 
                                                         size="sm"
+                                                        className="text-xs md:text-sm"
                                                     >
                                                         Cancel
                                                     </Button>
@@ -183,38 +184,38 @@ export default function MembersList({ members }: { members: Profile[] }) {
                                     ) : (
                                         // View Mode
                                         <>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full ${getAvatarColor(member.role)} flex items-center justify-center font-bold text-sm`}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4">
+                                                <div className="flex items-center gap-2 md:gap-3">
+                                                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full ${getAvatarColor(member.role)} flex items-center justify-center font-bold text-xs md:text-sm`}>
                                                         {getInitials(member.first_name, member.last_name)}
                                                     </div>
-                                                    <span className="font-medium">{member.first_name} {member.last_name}</span>
+                                                    <span className="font-medium text-sm md:text-base">{member.first_name} {member.last_name}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-slate-600">
-                                                <div className="flex items-center gap-2">
-                                                    <Mail className="w-4 h-4" />
-                                                    {member.email}
+                                            <td className="px-3 md:px-6 py-3 md:py-4 text-slate-600">
+                                                <div className="flex items-center gap-1.5 md:gap-2">
+                                                    <Mail className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
+                                                    <span className="text-xs md:text-sm truncate max-w-[120px] md:max-w-none">{member.email}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
+                                            <td className="px-3 md:px-6 py-3 md:py-4">
+                                                <span className={`inline-flex items-center px-2 md:px-2.5 py-0.5 text-[10px] md:text-xs font-medium rounded-full ${getRoleBadgeColor(member.role)}`}>
                                                     {member.role === 'ADMIN' ? 'Admin' : member.role === 'MEMBER' ? 'Member' : 'Viewer'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
+                                            <td className="px-3 md:px-6 py-3 md:py-4 text-right">
+                                                <div className="flex justify-end gap-1 md:gap-2">
                                                     <button 
                                                         onClick={() => handleEdit(member)}
-                                                        className="p-2 text-slate-400 hover:text-primary transition-colors"
+                                                        className="p-1.5 md:p-2 text-slate-400 hover:text-primary transition-colors"
                                                     >
-                                                        <Pencil className="w-5 h-5" />
+                                                        <Pencil className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                                     </button>
                                                     <button 
                                                         onClick={() => handleDelete(member.id)}
-                                                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                                                        className="p-1.5 md:p-2 text-slate-400 hover:text-red-500 transition-colors"
                                                     >
-                                                        <Trash2 className="w-5 h-5" />
+                                                        <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                                     </button>
                                                 </div>
                                             </td>

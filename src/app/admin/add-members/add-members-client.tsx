@@ -43,31 +43,31 @@ export default function AddMembersClient({ userName, members }: AddMembersClient
     return (
         <DashboardLayout userName={userName} userRole="Lab Director" title="Add Members">
             {/* Header Section */}
-            <header className="bg-white border-b border-slate-200 px-8 py-4">
-                <nav className="flex items-center gap-2 text-sm font-medium mb-1">
+            <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-4">
+                <nav className="flex items-center gap-2 text-xs md:text-sm font-medium mb-1">
                     <a className="text-slate-500 hover:text-primary" href="#">Management</a>
                     <span className="text-slate-300">/</span>
                     <span className="text-primary">Members</span>
                 </nav>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900">Team Members</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900">Team Members</h2>
                         <p className="text-slate-500 text-sm">Manage your lab team and access levels.</p>
                     </div>
                     {!showAddForm && (
                         <Button
                             onClick={() => setShowAddForm(true)}
-                            className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-md flex items-center gap-2"
+                            className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2.5 md:py-2 px-4 md:px-6 rounded-lg transition-all shadow-md flex items-center justify-center gap-2 w-full sm:w-auto text-sm md:text-base"
                         >
-                            <PlusCircle className="w-5 h-5" />
-                            Add New Member
+                            <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
+                            Add Member
                         </Button>
                     )}
                 </div>
             </header>
 
             {/* Main Content */}
-            <div className="p-8 max-w-6xl mx-auto space-y-8">
+            <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
                 {/* Form Section - Conditionally Rendered */}
                 {showAddForm && (
                     <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">

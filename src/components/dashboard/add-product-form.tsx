@@ -80,18 +80,18 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                 </div>
             )}
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">image</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Product Photo</h3>
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">image</span>
+                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Product Photo</h3>
                 </div>
-                <div className="p-6">
-                    <div className="flex items-center gap-6">
-                        <div className={`w-32 h-32 rounded-xl border-2 border-dashed ${imagePreview ? 'border-[var(--color-cashcrow-primary)]' : 'border-slate-300'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden shrink-0 group`}>
+                <div className="p-4 md:p-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
+                        <div className={`w-24 h-24 md:w-32 md:h-32 rounded-xl border-2 border-dashed ${imagePreview ? 'border-[var(--color-cashcrow-primary)]' : 'border-slate-300'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden shrink-0 group`}>
                             {imagePreview ? (
                                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
-                                <ImageIcon className="w-8 h-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
+                                <ImageIcon className="w-6 h-6 md:w-8 md:h-8 text-slate-400 mb-1 md:mb-2 group-hover:scale-110 transition-transform" />
                             )}
                             <input
                                 type="file"
@@ -101,11 +101,11 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 text-center sm:text-left">
                             <h4 className="font-bold text-slate-800 text-sm mb-1">Upload Photo</h4>
-                            <p className="text-slate-500 text-xs mb-3">Upload a clear photo of the product. PNG, JPG up to 5MB.</p>
+                            <p className="text-slate-500 text-xs mb-3">PNG, JPG up to 5MB.</p>
                             <label className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer inline-block">
-                                Browse Files
+                                Browse
                                 <input type="file" name="photo" accept="image/*" onChange={handleImageChange} className="hidden" />
                             </label>
                         </div>
@@ -114,33 +114,33 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
             </div>
 
             {/* Section 1: General Info */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">info</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">General Information</h3>
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
+                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">info</span>
+                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">General Information</h3>
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                        <div className="col-span-2 md:col-span-1">
+                <div className="p-4 md:p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 gap-y-4 md:gap-y-6">
+                        <div className="col-span-1 md:col-span-2">
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Product Name<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <input required name="name" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. Micro-Centrifuge Tubes" type="text" />
+                            <input required name="name" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 md:px-4 py-2 md:py-2.5 text-sm transition-all outline-none" placeholder="e.g. Micro-Centrifuge Tubes" type="text" />
                         </div>
-                        <div className="col-span-2 md:col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 SKU / Item Code<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
                             <div className="relative">
-                                <input required name="sku" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] pl-4 pr-10 py-2.5 text-sm transition-all outline-none" placeholder="Scan or enter code" type="text" />
+                                <input required name="sku" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] pl-3 md:pl-4 pr-10 py-2 md:py-2.5 text-sm transition-all outline-none" placeholder="Scan or enter code" type="text" />
                                 <span className="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 cursor-pointer hover:text-[var(--color-cashcrow-primary)]">barcode_scanner</span>
                             </div>
                         </div>
-                        <div className="col-span-2 md:col-span-1">
+                        <div className="col-span-1 md:col-span-2">
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Category<span className="text-red-500 ml-1 font-bold">*</span>
                             </label>
-                            <select required name="category" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white">
+                            <select required name="category" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 md:px-4 py-2 md:py-2.5 text-sm transition-all outline-none bg-white">
                                 <option value="">Select Category</option>
                                 <option value="Electronics">Electronics</option>
                                 <option value="Hardware">Hardware</option>
@@ -152,7 +152,7 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
                 {/* Section 2: Storage Location */}
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">

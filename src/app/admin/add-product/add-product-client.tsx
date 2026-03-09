@@ -107,8 +107,9 @@ export default function AddProductClient({ userName, products }: AddProductClien
 
     return (
         <DashboardLayout userName={userName} userRole="Lab Admin" title="Add New Product">
-            <header className="px-3 md:px-8 py-4 md:py-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="w-full">
+                {/* Title and Button Section */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-2">
                     <div></div>
                     {!showAddForm && (
                         <Button
@@ -121,174 +122,174 @@ export default function AddProductClient({ userName, products }: AddProductClien
                         </Button>
                     )}
                 </div>
-                <p className="text-slate-500 text-sm mt-2">Manage your lab inventory and product catalog.</p>
-            </header>
+                <p className="text-slate-500 text-sm mb-6">Manage your lab inventory and product catalog.</p>
 
-            <div className="px-2 md:px-8 pb-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
-                {showAddForm && (
-                    <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
-                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold">Add New Product</h3>
-                                <p className="text-slate-500 text-sm">Fill in the details to add a new product to your inventory.</p>
+                <div className="space-y-6 md:space-y-8">
+                    {showAddForm && (
+                        <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="p-4 md:p-6 border-b border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold">Add New Product</h3>
+                                    <p className="text-slate-500 text-sm">Fill in the details to add a new product to your inventory.</p>
+                                </div>
+                                <button onClick={handleCancel} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                            <button onClick={handleCancel} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <AddProductForm onSuccess={handleProductAdded} onCancel={handleCancel} />
-                    </section>
-                )}
+                            <AddProductForm onSuccess={handleProductAdded} onCancel={handleCancel} />
+                        </section>
+                    )}
 
-                {localProducts && localProducts.length > 0 && (
-                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div className="bg-slate-50 border-b border-slate-200 px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 flex-wrap">
-                            <Package className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
-                            <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Products</h3>
-                            <span className="ml-auto text-xs font-bold bg-[var(--color-cashcrow-primary)] text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
-                                {localProducts.length}
-                            </span>
-                        </div>
-                        <div className="overflow-x-auto -mx-2 md:mx-0">
-                            <table className="w-full text-left border-collapse min-w-[650px] md:min-w-0">
-                                <thead>
-                                    <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
-                                        <th className="px-2 md:px-6 py-3 md:py-4">Item</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4">Cat</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4">SKU</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4">Loc</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Qty</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 text-center">Status</th>
-                                        <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {paginatedProducts.map((product) => {
-                                        const stockInfo = getStockStatus(product.quantity || 0, product.min_stock_level || 0)
-                                        
-                                        if (deleteConfirmId === product.id) {
-                                            return (
-                                                <tr key={product.id} className="bg-red-50">
-                                                    <td colSpan={7} className="px-6 py-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
-                                                                    <Trash2 className="w-5 h-5" />
+                    {localProducts && localProducts.length > 0 && (
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="bg-slate-50 border-b border-slate-200 px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 flex-wrap">
+                                <Package className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                                <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Products</h3>
+                                <span className="ml-auto text-xs font-bold bg-[var(--color-cashcrow-primary)] text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full">
+                                    {localProducts.length}
+                                </span>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse min-w-[650px] md:min-w-0">
+                                    <thead>
+                                        <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
+                                            <th className="px-2 md:px-6 py-3 md:py-4">Item</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4">Cat</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4">SKU</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4">Loc</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4 text-right">Qty</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4 text-center">Status</th>
+                                            <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {paginatedProducts.map((product) => {
+                                            const stockInfo = getStockStatus(product.quantity || 0, product.min_stock_level || 0)
+                                            
+                                            if (deleteConfirmId === product.id) {
+                                                return (
+                                                    <tr key={product.id} className="bg-red-50">
+                                                        <td colSpan={7} className="px-6 py-4">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                                                                        <Trash2 className="w-5 h-5" />
+                                                                    </div>
+                                                                    <p className="font-medium text-red-600">Delete {product.name}?</p>
                                                                 </div>
-                                                                <p className="font-medium text-red-600">Delete {product.name}?</p>
+                                                                <div className="flex gap-2">
+                                                                    <Button onClick={confirmDelete} disabled={isDeleting} size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                                                                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete'}
+                                                                    </Button>
+                                                                    <Button onClick={handleCancelDelete} variant="outline" size="sm">Cancel</Button>
+                                                                </div>
                                                             </div>
-                                                            <div className="flex gap-2">
-                                                                <Button onClick={confirmDelete} disabled={isDeleting} size="sm" className="bg-red-600 hover:bg-red-700 text-white">
-                                                                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete'}
-                                                                </Button>
-                                                                <Button onClick={handleCancelDelete} variant="outline" size="sm">Cancel</Button>
-                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            }
+                                            
+                                            return (
+                                                <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                    <td className="px-2 md:px-6 py-3 md:py-5">
+                                                        <div className="flex items-center gap-2 md:gap-3">
+                                                            {product.image_url ? (
+                                                                <img src={product.image_url} alt={product.name} className="w-8 h-8 md:w-10 md:h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
+                                                            ) : (
+                                                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                                                    <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
+                                                                </div>
+                                                            )}
+                                                            <p className="font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors text-xs md:text-sm truncate max-w-[80px] md:max-w-none">{product.name}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5">
+                                                        <span className="text-xs md:text-sm text-slate-600 font-medium bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">{product.category}</span>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5">
+                                                        <code className="text-[10px] md:text-[11px] bg-slate-50 border border-slate-200 text-slate-500 px-1 md:px-2 py-0.5 rounded-md font-mono">{product.sku}</code>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5">
+                                                        <div className="flex items-center gap-0.5 text-xs md:text-sm text-slate-600">
+                                                            <span className="font-semibold">{product.shelf_code}</span>
+                                                            <span className="text-slate-400">/</span>
+                                                            <span>{product.box_code}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5 text-right">
+                                                        <span className={`font-black text-sm md:text-base ${stockInfo.trend === 'warning' ? 'text-orange-600' : stockInfo.trend === 'danger' ? 'text-red-600' : 'text-slate-900'}`}>{product.quantity || 0}</span>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5 text-center">
+                                                        <span className={`px-1.5 md:px-3 py-0.5 text-[9px] md:text-[10px] font-black rounded-full uppercase tracking-wider ${stockInfo.class}`}>{stockInfo.status}</span>
+                                                    </td>
+                                                    <td className="px-2 md:px-6 py-3 md:py-5 text-right">
+                                                        <div className="flex justify-end gap-1 md:gap-2">
+                                                            <button onClick={() => handleEdit(product)} className="p-1 md:p-2 text-slate-400 hover:text-primary transition-colors">
+                                                                <Pencil className="w-3.5 h-3.5 md:w-5 md:h-5" />
+                                                            </button>
+                                                            <button onClick={() => handleDelete(product.id)} className="p-1 md:p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                                                <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
                                             )
-                                        }
-                                        
-                                        return (
-                                            <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                <td className="px-2 md:px-6 py-3 md:py-5">
-                                                    <div className="flex items-center gap-2 md:gap-3">
-                                                        {product.image_url ? (
-                                                            <img src={product.image_url} alt={product.name} className="w-8 h-8 md:w-10 md:h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
-                                                        ) : (
-                                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                                                                <Package className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
-                                                            </div>
-                                                        )}
-                                                        <p className="font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors text-xs md:text-sm truncate max-w-[80px] md:max-w-none">{product.name}</p>
-                                                    </div>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5">
-                                                    <span className="text-xs md:text-sm text-slate-600 font-medium bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">{product.category}</span>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5">
-                                                    <code className="text-[10px] md:text-[11px] bg-slate-50 border border-slate-200 text-slate-500 px-1 md:px-2 py-0.5 rounded-md font-mono">{product.sku}</code>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5">
-                                                    <div className="flex items-center gap-0.5 text-xs md:text-sm text-slate-600">
-                                                        <span className="font-semibold">{product.shelf_code}</span>
-                                                        <span className="text-slate-400">/</span>
-                                                        <span>{product.box_code}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5 text-right">
-                                                    <span className={`font-black text-sm md:text-base ${stockInfo.trend === 'warning' ? 'text-orange-600' : stockInfo.trend === 'danger' ? 'text-red-600' : 'text-slate-900'}`}>{product.quantity || 0}</span>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5 text-center">
-                                                    <span className={`px-1.5 md:px-3 py-0.5 text-[9px] md:text-[10px] font-black rounded-full uppercase tracking-wider ${stockInfo.class}`}>{stockInfo.status}</span>
-                                                </td>
-                                                <td className="px-2 md:px-6 py-3 md:py-5 text-right">
-                                                    <div className="flex justify-end gap-1 md:gap-2">
-                                                        <button onClick={() => handleEdit(product)} className="p-1 md:p-2 text-slate-400 hover:text-primary transition-colors">
-                                                            <Pencil className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                                                        </button>
-                                                        <button onClick={() => handleDelete(product.id)} className="p-1 md:p-2 text-slate-400 hover:text-red-500 transition-colors">
-                                                            <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-                                <p>Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, localProducts.length)} of {localProducts.length} products</p>
-                                <div className="flex gap-2">
-                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
-                                        <ChevronLeft className="w-4 h-4" />
-                                        Previous
-                                    </button>
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                        <button key={page} onClick={() => handlePageChange(page)} className={`px-3 py-1 border rounded transition-colors ${currentPage === page ? 'bg-[var(--color-cashcrow-primary)] text-white border-[var(--color-cashcrow-primary)]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                                            {page}
-                                        </button>
-                                    ))}
-                                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
-                                        Next
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
-                    </div>
-                )}
 
-                {localProducts && localProducts.length === 0 && (
-                    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-12 text-center">
-                        <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-bold text-slate-700 mb-2">No Products Yet</h3>
-                        <p className="text-slate-500 text-sm">Your inventory is empty. Click "Add New Product" to get started.</p>
+                            {totalPages > 1 && (
+                                <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+                                    <p>Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, localProducts.length)} of {localProducts.length} products</p>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
+                                            <ChevronLeft className="w-4 h-4" />
+                                            Previous
+                                        </button>
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <button key={page} onClick={() => handlePageChange(page)} className={`px-3 py-1 border rounded transition-colors ${currentPage === page ? 'bg-[var(--color-cashcrow-primary)] text-white border-[var(--color-cashcrow-primary)]' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                                {page}
+                                            </button>
+                                        ))}
+                                        <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
+                                            Next
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {localProducts && localProducts.length === 0 && (
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-12 text-center">
+                            <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-slate-700 mb-2">No Products Yet</h3>
+                            <p className="text-slate-500 text-sm">Your inventory is empty. Click "Add New Product" to get started.</p>
+                        </div>
+                    )}
+                </div>
+
+                {showEditModal && editingProduct && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
+                            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold">Edit Product</h3>
+                                    <p className="text-slate-500 text-sm">Update the product details below.</p>
+                                </div>
+                                <button onClick={handleEditClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                <EditProductForm product={editingProduct} onSuccess={handleEditSuccess} onCancel={handleEditClose} />
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
-
-            {showEditModal && editingProduct && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
-                        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-semibold">Edit Product</h3>
-                                <p className="text-slate-500 text-sm">Update the product details below.</p>
-                            </div>
-                            <button onClick={handleEditClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <EditProductForm product={editingProduct} onSuccess={handleEditSuccess} onCancel={handleEditClose} />
-                        </div>
-                    </div>
-                </div>
-            )}
         </DashboardLayout>
     )
 }

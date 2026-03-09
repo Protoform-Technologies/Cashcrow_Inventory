@@ -331,37 +331,23 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                 {entries.map((entry) => (
                                     <tr key={entry.id} className="group hover:bg-slate-50/50 transition-colors">
                                         <td className="px-2 md:px-4 py-2 md:py-3">
-                                            <div className="relative">
-                                                <input
-                                                    className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2"
-                                                    placeholder="Search..."
-                                                    type="text"
-                                                    value={entry.productName || searchQuery}
-                                                    onChange={(e) => {
-                                                        setSearchQuery(e.target.value)
-                                                        setShowProductDropdown(entry.id)
-                                                    }}
-                                                    onFocus={() => setShowProductDropdown(entry.id)}
-                                                />
-                                                {showProductDropdown === entry.id && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 md:max-h-60 overflow-y-auto">
-                                                        {filteredProducts.length > 0 ? (
-                                                            filteredProducts.slice(0, 8).map(product => (
-                                                                <button
-                                                                    key={product.id}
-                                                                    className="w-full text-left px-2 md:px-3 py-2 hover:bg-slate-100 text-xs md:text-sm"
-                                                                    onClick={() => selectProduct(entry.id, product)}
-                                                                >
-                                                                    <div className="font-medium">{product.name}</div>
-                                                                    <div className="text-[10px] md:text-xs text-slate-500">SKU: {product.sku}</div>
-                                                                </button>
-                                                            ))
-                                                        ) : (
-                                                            <div className="px-2 md:px-3 py-2 text-xs md:text-sm text-slate-500">No products found</div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <select
+                                                className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2 appearance-none"
+                                                value={entry.productId}
+                                                onChange={(e) => {
+                                                    const product = products.find(p => p.id === e.target.value)
+                                                    updateEntry(entry.id, 'productId', e.target.value)
+                                                    updateEntry(entry.id, 'productName', product ? product.name : '')
+                                                    updateEntry(entry.id, 'productSku', product ? product.sku : '')
+                                                }}
+                                            >
+                                                <option value="">Select product...</option>
+                                                {products.map(product => (
+                                                    <option key={product.id} value={product.id}>
+                                                        {product.name} ({product.sku})
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </td>
                                         <td className="px-2 md:px-4 py-2 md:py-3">
                                             <input
@@ -441,25 +427,9 @@ export default function DailyLogClient({ userName, userId, products, members, su
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                    <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm flex flex-col gap-3 md:gap-4">
-                        <div className="flex items-center gap-2 text-[var(--color-cashcrow-primary)]">
-                            <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            <span className="text-xs md:text-sm font-bold uppercase tracking-wider">Info</span>
-                        </div>
-                        <div className="space-y-2 md:space-y-3">
-                            <div className="flex justify-between">
-                                <span className="text-xs md:text-sm text-slate-500">Items:</span>
-                                <span className="text-xs md:text-sm font-bold">{entries.filter(e => e.productId).length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-xs md:text-sm text-slate-500">Status:</span>
-                                <span className="text-xs md:text-sm font-bold text-amber-500">{currentLogId ? 'Draft' : 'New'}</span>
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm md:col-span-2 flex flex-col gap-2 md:gap-3">
-                        <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">Notes (Optional)</label>
+                        <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">Notes</label>
                         <textarea 
                             className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl text-xs md:text-sm transition-all px-3 md:px-4 py-2 md:py-3 resize-none"
                             placeholder="Add notes..."
@@ -632,7 +602,7 @@ export default function DailyLogClient({ userName, userId, products, members, su
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-right font-bold">{item.qty}</td>
-                                                    <td className="px-4 py-3 text-sm text-slate-600">{item.taken_by || '-'}</td>
+                                                    <td className="px-4 py-3 text-sm text-slate-600">{item.taken_by_name || '-'}</td>
                                                     <td className="px-4 py-3 text-sm text-slate-600">{item.purpose || '-'}</td>
                                                 </tr>
                                             ))}

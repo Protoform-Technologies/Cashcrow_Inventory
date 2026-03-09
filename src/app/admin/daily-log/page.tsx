@@ -79,6 +79,41 @@ export default async function DailyLogPage() {
         }
     }
 
+    // Fetch all taken_by member IDs from items
+    const allTakenByIds: string[] = []
+    if (submittedLogs) {
+        for (const log of submittedLogs) {
+            const { data: items } = await adminClient
+                .from('day_log_items')
+                .select('taken_by')
+                .eq('day_log_id', log.id)
+            
+            if (items) {
+                items.forEach((item: any) => {
+                    if (item.taken_by) {
+                        allTakenByIds.push(item.taken_by)
+                    }
+                })
+            }
+        }
+    }
+
+    // Fetch member profiles for taken_by
+    let takenByProfileMap: Record<string, { first_name: string; last_name: string }> = {}
+    if (allTakenByIds.length > 0) {
+        const uniqueTakenByIds = [...new Set(allTakenByIds)]
+        const { data: takenByProfiles } = await adminClient
+            .from('profiles')
+            .select('id, first_name, last_name')
+            .in('id', uniqueTakenByIds)
+        
+        if (takenByProfiles) {
+            takenByProfiles.forEach((profile: any) => {
+                takenByProfileMap[profile.id] = { first_name: profile.first_name, last_name: profile.last_name }
+            })
+        }
+    }
+
     // Fetch items for each log
     const logsWithItems: any[] = []
     
@@ -98,7 +133,15 @@ export default async function DailyLogPage() {
                         .select('name, sku, quantity')
                         .eq('id', item.part_id)
                         .single()
-                    itemsWithProducts.push({ ...item, products: product })
+                    
+                    // Get member name for taken_by
+                    const takenByProfile = item.taken_by ? takenByProfileMap[item.taken_by] : null
+                    
+                    itemsWithProducts.push({ 
+                        ...item, 
+                        products: product,
+                        taken_by_name: takenByProfile ? `${takenByProfile.first_name} ${takenByProfile.last_name}` : null
+                    })
                 }
             }
             

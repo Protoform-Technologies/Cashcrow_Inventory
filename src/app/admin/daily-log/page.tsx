@@ -35,12 +35,11 @@ export default async function DailyLogPage() {
         console.log('Products fetched successfully:', products?.length, 'items')
     }
 
-    // Fetch members with ADMIN role from add_member list using admin client to bypass RLS
+    // Fetch all members from profiles using admin client to bypass RLS
     let members: any[] = []
     const { data: membersData, error: membersError } = await adminClient
         .from('profiles')
         .select('id, first_name, last_name')
-        .eq('role', 'ADMIN')
         .order('first_name', { ascending: true })
 
     console.log('Members query result:', membersData)

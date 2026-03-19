@@ -1,17 +1,24 @@
 'use client'
 
 import Link from 'next/link'
-import { 
+import { useState } from 'react'
+import {
     X,
     ChevronRight,
     Pencil,
     Download,
     Mail,
+    Phone,
     Globe,
     CreditCard,
     AlertTriangle
+
 } from 'lucide-react'
+import { deleteSupplier, updateSupplier } from '@/actions/suppliers'
+import { useRouter } from 'next/navigation'
+import EditSupplierForm from '@/components/dashboard/edit-supplier-form'
 import { generateSupplierPDF } from './supplier-card'
+
 
 interface Supplier {
     id: string
@@ -59,12 +66,12 @@ function getCategoryLabel(value: string) {
 
 function getCategoryColor(category: string) {
     const colors: Record<string, string> = {
-        'logistics': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        'manufacturing': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-        'it_services': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-        'office_supplies': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
-        'electronics': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        'other': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+        'logistics': 'bg-blue-100 text-blue-700',
+        'manufacturing': 'bg-purple-100 text-purple-700',
+        'it_services': 'bg-cyan-100 text-cyan-700',
+        'office_supplies': 'bg-slate-100 text-slate-700',
+        'electronics': 'bg-amber-100 text-amber-700',
+        'other': 'bg-slate-100 text-slate-700'
     }
     return colors[category] || colors['other']
 }
@@ -79,20 +86,25 @@ function getInitials(name: string): string {
 }
 
 export default function SupplierDetailModal({ supplier, onClose }: SupplierDetailModalProps) {
+const router = useRouter()
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4">
             {/* Backdrop */}
-            <div 
+            <div
                 className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                 onClick={onClose}
             />
-            
+
+
             {/* Modal Content */}
-            <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--color-cashcrow-bg-light)] dark:bg-[var(--color-cashcrow-bg-dark)] rounded-xl md:rounded-2xl shadow-2xl mx-2">
+            <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--color-cashcrow-bg-light)] rounded-xl md:rounded-2xl shadow-2xl mx-2">
                 {/* Close Button */}
-                <button 
+                <button
                     onClick={onClose}
-                    className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-600 dark:text-slate-300 transition-colors z-10"
+                    className="absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-600 transition-colors z-10"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -111,24 +123,28 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                             </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <h2 className="text-xl md:text-3xl text-slate-900 dark:text-white tracking-tight font-bold truncate">{supplier.company_name}</h2>
+                            <h2 className="text-xl md:text-3xl text-slate-900 tracking-tight font-bold truncate">{supplier.company_name}</h2>
                             <span className={`inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-xs font-bold mt-1 md:mt-2 ${getCategoryColor(supplier.category)}`}>
                                 {getCategoryLabel(supplier.category)}
                             </span>
                         </div>
                     </div>
-                    
+
                     {/* Action Buttons - Stack on mobile */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3 mt-4 md:mt-6">
-                        <Link 
-                            href="/admin/add-suppliers"
-                            className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors"
+                        <button
+                            onClick={() => {
+                                setEditingSupplier(supplier)
+                                setShowEditModal(true)
+                            }}
+                            className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-[var(--color-cashcrow-primary)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--color-cashcrow-primary)]/90 transition-colors shadow-sm"
+
                         >
                             <Pencil className="w-4 h-4" />
                             <span className="hidden sm:inline">Edit Supplier</span>
                             <span className="sm:hidden">Edit</span>
-                        </Link>
-                        <button 
+                        </button>
+                        <button
                             onClick={() => generateSupplierPDF(supplier)}
                             className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-[var(--color-cashcrow-primary)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--color-cashcrow-primary)]/90 transition-colors shadow-sm"
                         >
@@ -136,11 +152,32 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                             <span className="hidden sm:inline">Download PDF</span>
                             <span className="sm:hidden">PDF</span>
                         </button>
-                        <button className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                            <Mail className="w-4 h-4" />
-                            <span className="hidden sm:inline">Contact Supplier</span>
-                            <span className="sm:hidden">Contact</span>
-                        </button>
+                        {supplier.email ? (
+                            <a 
+                                href={`mailto:${supplier.email}`}
+                                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors" target="_blank" rel="noopener noreferrer"
+
+                            >
+                                <Mail className="w-4 h-4" />
+                                <span className="hidden sm:inline">Email Supplier</span>
+                                <span className="sm:hidden">Email</span>
+                            </a>
+                        ) : supplier.phone ? (
+                            <a 
+                                href={`tel:${supplier.phone}`}
+                                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors" target="_blank" rel="noopener noreferrer"
+
+                            >
+                                <Phone className="w-4 h-4" />
+                                <span className="hidden sm:inline">Call Supplier</span>
+                                <span className="sm:hidden">Call</span>
+                            </a>
+                        ) : (
+                            <button className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-400 rounded-lg text-sm font-semibold cursor-not-allowed opacity-50">
+                                <Mail className="w-4 h-4" />
+                                No Contact Info
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -148,15 +185,15 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                 <div className="px-4 md:px-8 pb-4 md:pb-8">
                     <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                         {/* Contact Person */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
                             <p className="text-slate-500 text-xs md:text-sm font-medium">Contact Person</p>
                             <div className="mt-1 md:mt-2">
-                                <h3 className="text-sm md:text-xl font-bold text-slate-900 dark:text-white truncate">{supplier.contact_name || 'Not specified'}</h3>
+                                <h3 className="text-sm md:text-xl font-bold text-slate-900 truncate">{supplier.contact_name || 'Not specified'}</h3>
                             </div>
                         </div>
 
                         {/* Email */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
                             <p className="text-slate-500 text-xs md:text-sm font-medium">Email</p>
                             <div className="mt-1 md:mt-2">
                                 <a href={`mailto:${supplier.email}`} className="text-[var(--color-cashcrow-primary)] text-xs md:text-sm font-semibold hover:underline truncate block">
@@ -166,20 +203,20 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                         </div>
 
                         {/* Phone */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
                             <p className="text-slate-500 text-xs md:text-sm font-medium">Phone</p>
                             <div className="mt-1 md:mt-2">
-                                <a href={`tel:${supplier.phone}`} className="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 truncate block">
+                                <a href={`tel:${supplier.phone}`} className="text-xs md:text-sm font-semibold text-slate-700 truncate block">
                                     {supplier.phone || 'N/A'}
                                 </a>
                             </div>
                         </div>
 
                         {/* Lead Time */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
                             <p className="text-slate-500 text-xs md:text-sm font-medium">Lead Time</p>
                             <div className="flex items-baseline gap-1 md:gap-2 mt-1 md:mt-2">
-                                <h3 className="text-xl md:text-3xl font-bold text-slate-900 dark:text-white">{supplier.lead_time}</h3>
+                                <h3 className="text-xl md:text-3xl font-bold text-slate-900">{supplier.lead_time}</h3>
                                 <span className="text-slate-400 text-xs md:text-sm">Days</span>
                             </div>
                         </div>
@@ -190,27 +227,27 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                 <div className="px-4 md:px-8 pb-4 md:pb-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
                         {/* Payment Terms */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2 md:mb-4">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
                                 <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
                                 <span className="text-sm md:text-base">Payment Terms</span>
                             </h4>
-                            <div className="p-2 md:p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                                <p className="text-sm md:text-lg font-semibold text-slate-900 dark:text-white">
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                                <p className="text-sm md:text-lg font-semibold text-slate-900">
                                     {getPaymentTermsLabel(supplier.payment_terms)}
                                 </p>
                             </div>
                         </div>
 
                         {/* Website */}
-                        <div className="bg-white dark:bg-slate-900 p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2 md:mb-4">
+                        <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
                                 <Globe className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
                                 <span className="text-sm md:text-base">Website</span>
                             </h4>
-                            <div className="p-2 md:p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
                                 {supplier.website ? (
-                                    <a 
+                                    <a
                                         href={supplier.website.startsWith('http') ? supplier.website : `https://${supplier.website}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -228,23 +265,71 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
 
                 {/* Danger Zone */}
                 <div className="px-4 md:px-8 pb-4 md:pb-8">
-                    <div className="pt-4 md:pt-8 border-t border-red-100 dark:border-red-900/30">
+                    <div className="pt-4 md:pt-8 border-t border-red-100">
                         <h4 className="text-red-600 font-bold flex items-center gap-2 mb-2">
                             <AlertTriangle className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="text-sm md:text-base">Danger Zone</span>
                         </h4>
-                        <div className="dark:bg-red-900/10 p-3 md:p-4 rounded-lg md:rounded-xl border border-red-100 dark:border-red-900/30 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+                        <div className=" p-3 md:p-4 rounded-lg md:rounded-xl border border-red-100 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
                             <div>
-                                <p className="text-sm font-semibold text-red-900 dark:text-red-400">Delete Supplier</p>
-                                <p className="text-xs text-red-700 dark:text-red-500/80">This action cannot be undone.</p>
+                                <p className="text-sm font-semibold text-red-900">Delete Supplier</p>
+                                <p className="text-xs text-red-700">This action cannot be undone.</p>
                             </div>
-                            <button className="px-4 md:px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hover:shadow-lg whitespace-nowrap">
-                                Delete
-                            </button>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={async () => {
+                                        const result = await deleteSupplier(supplier.id)
+                                        if (result.success) {
+                                            onClose()
+                                            router.refresh()
+                                        } else {
+                                            // TODO: Show error toast
+                                            console.error('Delete failed:', result.error)
+                                        }
+                                    }}
+                                    className="px-4 md:px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hover:shadow-lg whitespace-nowrap"
+                                >
+                                    Delete Supplier
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Edit Supplier Modal */}
+            {showEditModal && editingSupplier && (
+                <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">Edit Supplier</h3>
+                                <p className="text-slate-500 text-sm mt-1">Update supplier information</p>
+                            </div>
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            >
+                                <X className="w-5 h-5 text-slate-500" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <EditSupplierForm 
+                                supplier={editingSupplier} 
+                                onSuccess={() => {
+                                    setShowEditModal(false)
+                                    setEditingSupplier(null)
+                                    router.refresh()
+                                }} 
+                                onCancel={() => {
+                                    setShowEditModal(false)
+                                    setEditingSupplier(null)
+                                }} 
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

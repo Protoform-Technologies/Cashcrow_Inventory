@@ -99,15 +99,15 @@ export default function SuppliersTable({
                 </span>
             </div>
             <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[650px] md:min-w-0">
+                <table className="w-full text-left border-collapse min-w-0 table-auto">
                     <thead>
                         <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
-                            <th className="px-2 md:px-6 py-3 md:py-4">Company</th>
-                            <th className="px-2 md:px-6 py-3 md:py-4">Contact</th>
-                            <th className="px-2 md:px-6 py-3 md:py-4">Email</th>
-                            <th className="px-2 md:px-6 py-3 md:py-4">Category</th>
-                            <th className="px-2 md:px-6 py-3 md:py-4">Terms</th>
-                            <th className="px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
+                            <th className="w-[50%] px-2 md:px-6 py-3 md:py-4">Company</th>
+                            <th className="hidden md:table-cell px-2 md:px-6 py-3 md:py-4">Contact</th>
+                            <th className="hidden lg:table-cell px-2 md:px-6 py-3 md:py-4">Email</th>
+                            <th className="hidden lg:table-cell px-2 md:px-6 py-3 md:py-4">Category</th>
+                            <th className="hidden xl:table-cell px-2 md:px-6 py-3 md:py-4">Terms</th>
+                            <th className="w-[12%] px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -115,17 +115,19 @@ export default function SuppliersTable({
                             if (deleteConfirmId === supplier.id) {
                                 return (
                                     <tr key={supplier.id} className="bg-red-50">
-                                        <td colSpan={6} className="px-6 py-4">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </div>
-                                                    <p className="font-medium text-red-600">Delete {supplier.company_name}?</p>
+                                        <td colSpan={6} className="px-4 py-8 text-center">
+                                            <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center gap-4 justify-center">
+                                                <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                                                    <Trash2 className="w-6 h-6" />
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <Button onClick={onConfirmDelete} disabled={isDeleting} size="sm" className="bg-red-600 hover:bg-red-700 text-white">
-                                                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete'}
+                                                <div className="text-center sm:text-left">
+                                                    <p className="font-semibold text-red-800 text-lg">Delete supplier?</p>
+                                                    <p className="text-red-600 text-sm mt-1">This action cannot be undone. Are you sure you want to delete <span className="font-medium">{supplier.company_name}</span>?</p>
+                                                </div>
+                                                <div className="flex gap-2 mt-4 sm:mt-0">
+                                                    <Button onClick={onConfirmDelete} disabled={isDeleting} size="sm" className="bg-red-600 hover:bg-red-700 text-white font-medium">
+                                                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                                        Delete
                                                     </Button>
                                                     <Button onClick={onCancelDelete} variant="outline" size="sm">Cancel</Button>
                                                 </div>
@@ -137,33 +139,35 @@ export default function SuppliersTable({
                             
                             return (
                                 <tr key={supplier.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-2 md:px-6 py-3 md:py-5">
-                                        <div className="flex items-center gap-2 md:gap-3">
-                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                                                <Building2 className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
+                                    <td className="px-3 md:px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                                <Building2 className="w-5 h-5 text-slate-400" />
                                             </div>
-                                            <p className="font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors text-xs md:text-sm truncate max-w-[80px] md:max-w-none">{supplier.company_name}</p>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="font-semibold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors truncate text-sm">{supplier.company_name}</p>
+                                                <span className="text-xs text-slate-500">{getCategoryLabel(supplier.category)}</span>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="px-2 md:px-6 py-3 md:py-5">
-                                        <span className="text-xs md:text-sm text-slate-600 font-medium">{supplier.contact_name || '-'}</span>
+                                    <td className="px-3 md:px-6 py-4 hidden md:table-cell">
+                                        <span className="text-sm text-slate-700 font-medium">{supplier.contact_name || '-'}</span>
                                     </td>
-                                    <td className="px-2 md:px-6 py-3 md:py-5">
-                                        <span className="text-xs md:text-sm text-slate-500">{supplier.email || '-'}</span>
+                                    <td className="px-3 md:px-6 py-4 hidden lg:table-cell max-w-[200px]">
+                                        <span className="text-sm text-slate-600 truncate block">{supplier.email || '-'}</span>
                                     </td>
-                                    <td className="px-2 md:px-6 py-3 md:py-5">
-                                        <span className="text-xs md:text-sm text-slate-600 font-medium bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg">{getCategoryLabel(supplier.category)}</span>
+                                    <td className="px-3 md:px-6 py-4 hidden lg:table-cell">
+                                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                            {getPaymentTermsLabel(supplier.payment_terms)}
+                                        </span>
                                     </td>
-                                    <td className="px-2 md:px-6 py-3 md:py-5">
-                                        <span className="text-xs md:text-sm text-slate-600">{getPaymentTermsLabel(supplier.payment_terms)}</span>
-                                    </td>
-                                    <td className="px-2 md:px-6 py-3 md:py-5 text-right">
-                                        <div className="flex justify-end gap-1 md:gap-2">
-                                            <button onClick={() => onEdit(supplier)} className="p-1 md:p-2 text-slate-400 hover:text-primary transition-colors">
-                                                <Pencil className="w-3.5 h-3.5 md:w-5 md:h-5" />
+                                    <td className="px-3 md:px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <button onClick={(e) => { e.stopPropagation(); onEdit(supplier); }} className="p-2 text-slate-400 hover:text-[var(--color-cashcrow-primary)] hover:bg-slate-100 rounded-lg transition-all">
+                                                <Pencil className="w-4 h-4" />
                                             </button>
-                                            <button onClick={() => onDelete(supplier.id)} className="p-1 md:p-2 text-slate-400 hover:text-red-500 transition-colors">
-                                                <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
+                                            <button onClick={(e) => { e.stopPropagation(); onDelete(supplier.id); }} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -175,22 +179,28 @@ export default function SuppliersTable({
             </div>
 
             {totalPages > 1 && (
-                <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
-                    <p>Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, suppliers.length)} of {suppliers.length} suppliers</p>
-                    <div className="flex gap-2">
-                        <button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
-                            <ChevronLeft className="w-4 h-4" />
-                            Previous
-                        </button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                            <button key={page} onClick={() => onPageChange(page)} className={`px-3 py-1 border rounded transition-colors ${currentPage === page ? 'bg-[var(--color-cashcrow-primary)] text-white border-[var(--color-cashcrow-primary)]' : 'border-slate-200 hover:bg-slate-50'}`}>
-                                {page}
+                <div className="border-t border-slate-200 p-4 bg-slate-50">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-600">
+                        <span>Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, suppliers.length)} of {suppliers.length} suppliers</span>
+                        <div className="flex items-center gap-1">
+                            <button 
+                                onClick={() => onPageChange(currentPage - 1)} 
+                                disabled={currentPage === 1}
+                                className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1 text-slate-600 hover:text-slate-900 transition-all"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
                             </button>
-                        ))}
-                        <button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-1 border border-slate-200 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 flex items-center gap-1">
-                            Next
-                            <ChevronRight className="w-4 h-4" />
-                        </button>
+                            <span className="px-3 py-1 font-medium text-slate-900 bg-white border border-slate-200 rounded-lg shadow-sm">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button 
+                                onClick={() => onPageChange(currentPage + 1)} 
+                                disabled={currentPage === totalPages}
+                                className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1 text-slate-600 hover:text-slate-900 transition-all"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

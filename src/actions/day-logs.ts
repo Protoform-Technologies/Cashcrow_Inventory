@@ -305,6 +305,65 @@ export async function saveDayLogDraft(
     return { id: logId as string }
 }
 
+export async function getProductRecentLogs(productId: string) {
+    return getProductFullHistory(productId, 1, 5)
+}
+
+export async function getProductFullHistory(productId: string, page: number = 1, limit: number = 20) {
+    const supabase = await createServerSupabaseClient()
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    const { data, error, count } = await supabase
+        .from('day_log_items')
+        .select(`
+            *,
+            day_logs!day_log_id_fkey (
+                created_at
+            ),
+            products!part_id_fkey (
+                name,
+                sku
+            ),
+            profiles!taken_by_fkey (
+                first_name,
+                last_name
+            )
+        `, { 
+            count: 'exact',
+            head: false 
+        })
+        .eq('part_id', productId)
+        .order('day_logs.created_at', { ascending: false, referencedTable: 'day_logs' })
+        .range(from, to)
+
+    if (error) {
+        console.error('Error fetching product history:', error)
+        return { logs: [], total: 0 }
+    }
+
+    // Format for table
+    const logs = (data || []).map(item => ({
+        time: new Date(item.day_logs.created_at).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        }),
+        date: new Date(item.day_logs.created_at).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+        }),
+        partName: item.products?.name || item.products?.sku || 'Unknown',
+        quantity: item.qty,
+        type: item.type,
+        sign: (item.type === 'OUT' || item.type === 'SCRAP') ? '-' : '+',
+        takenBy: item.profiles ? `${item.profiles.first_name} ${item.profiles.last_name}`.trim() : 'Unknown',
+        purpose: item.purpose || ''
+    }))
+
+    return { logs, total: count || 0 }
+}
+
 export async function deleteDayLog(logId: string): Promise<{ success: boolean } | { error: string }> {
     // Use admin client to bypass RLS policies for deletion
     const supabase = getSupabaseAdmin()

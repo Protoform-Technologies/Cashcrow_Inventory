@@ -69,30 +69,30 @@ export default function AddSupplierForm({
 
             <form onSubmit={onSubmit} className="p-6">
                 {/* Section 1: General Information */}
-                <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-6">
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <section className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+                    <div className="p-6 border-b border-slate-100">
+                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                             General Information
                         </h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Company Name <span className="text-red-500">*</span>
                             </label>
                             <input
                                 name="company_name"
                                 value={formData.company_name}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 placeholder="e.g. Global Logistics Inc."
                                 required
                                 type="text"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Website
                             </label>
                             <div className="relative">
@@ -103,7 +103,7 @@ export default function AddSupplierForm({
                                     name="website"
                                     value={formData.website}
                                     onChange={handleChange}
-                                    className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-16 pr-4 py-3 transition-all"
+                                    className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-16 pr-4 py-3 transition-all"
                                     placeholder="www.company.com"
                                     type="text"
                                 />
@@ -113,49 +113,49 @@ export default function AddSupplierForm({
                 </section>
 
                 {/* Section 2: Contact Details */}
-                <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-6">
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <section className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+                    <div className="p-6 border-b border-slate-100">
+                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                             <User className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                             Contact Details
                         </h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Primary Contact Name
                             </label>
                             <input
                                 name="contact_name"
                                 value={formData.contact_name}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 placeholder="John Doe"
                                 type="text"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Email Address
                             </label>
                             <input
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 placeholder="john@company.com"
                                 type="email"
                             />
                         </div>
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Phone Number
                             </label>
                             <input
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 placeholder="+1 (555) 000-0000"
                                 type="tel"
                             />
@@ -164,16 +164,16 @@ export default function AddSupplierForm({
                 </section>
 
                 {/* Section 3: Operational Information */}
-                <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-6">
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <section className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+                    <div className="p-6 border-b border-slate-100">
+                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                             <Settings className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                             Operational Information
                         </h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Typical Lead Time
                             </label>
                             <div className="relative">
@@ -181,7 +181,7 @@ export default function AddSupplierForm({
                                     name="lead_time"
                                     value={formData.lead_time}
                                     onChange={handleChange}
-                                    className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-4 pr-12 py-3 transition-all"
+                                    className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-4 pr-12 py-3 transition-all"
                                     placeholder="7"
                                     type="number"
                                 />
@@ -191,14 +191,14 @@ export default function AddSupplierForm({
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Payment Terms <span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="payment_terms"
                                 value={formData.payment_terms}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 required
                             >
                                 <option disabled value="">Select Terms</option>
@@ -213,14 +213,14 @@ export default function AddSupplierForm({
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 Category <span className="text-red-500">*</span>
                             </label>
                             <select
                                 name="category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
                                 required
                             >
                                 <option disabled value="">Select Category</option>
@@ -236,11 +236,11 @@ export default function AddSupplierForm({
                 </section>
 
                 {/* Form Actions */}
-                <div className="flex items-center justify-end gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-end gap-4 pt-4 border-t border-slate-200">
                     <button 
                         type="button"
                         onClick={onCancel}
-                        className="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                        className="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
                     >
                         Cancel
                     </button>

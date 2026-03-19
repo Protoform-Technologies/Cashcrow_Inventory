@@ -4,18 +4,26 @@ import { useState, useRef } from "react"
 import { addProduct } from "@/actions/products"
 import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2 } from "lucide-react"
 
+interface Supplier {
+    id: string
+    company_name: string
+}
+
 interface AddProductFormProps {
+    suppliers: Supplier[]
     onSuccess?: () => void
     onCancel?: () => void
 }
 
-export default function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
+export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddProductFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
-    const [vendors, setVendors] = useState([{ name: '', fund: '', link: '' }])
+    const [selectedSupplierId, setSelectedSupplierId] = useState('')
+    const [showOtherVendor, setShowOtherVendor] = useState(false)
+    const [otherVendor, setOtherVendor] = useState({ name: '', fund: '', link: '' })
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -28,20 +36,13 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
         }
     }
 
-    const addVendor = () => {
-        setVendors([...vendors, { name: '', fund: '', link: '' }])
-    }
-
-    const removeVendor = (index: number) => {
-        const newVendors = [...vendors]
-        newVendors.splice(index, 1)
-        setVendors(newVendors)
-    }
-
-    const updateVendor = (index: number, field: keyof typeof vendors[0], value: string) => {
-        const newVendors = [...vendors]
-        newVendors[index][field] = value
-        setVendors(newVendors)
+    const handleSupplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value
+        setSelectedSupplierId(value)
+        setShowOtherVendor(value === 'others')
+        if (value !== 'others') {
+            setOtherVendor({ name: '', fund: '', link: '' })
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,8 +51,12 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
         setStatus(null)
 
         const formData = new FormData(e.currentTarget)
-        // Ensure vendors is submitted as JSON
-        formData.append('vendors', JSON.stringify(vendors.filter(v => v.name.trim() !== '')))
+        // Add selected supplier ID
+        if (selectedSupplierId && selectedSupplierId !== 'others') {
+            formData.append('supplier_id', selectedSupplierId)
+        } else if (showOtherVendor && otherVendor.name.trim()) {
+            formData.append('other_vendor', JSON.stringify(otherVendor))
+        }
 
         const result = await addProduct(formData)
 
@@ -61,7 +66,9 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
             setStatus({ type: 'success', message: 'Product added successfully!' })
             formRef.current?.reset()
             setImagePreview(null)
-            setVendors([{ name: '', fund: '', link: '' }])
+            setSelectedSupplierId('')
+            setShowOtherVendor(false)
+            setOtherVendor({ name: '', fund: '', link: '' })
             // Call onSuccess callback if provided
             if (onSuccess) {
                 onSuccess()
@@ -201,73 +208,76 @@ export default function AddProductForm({ onSuccess, onCancel }: AddProductFormPr
 
             {/* Section 4: Vendors */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Vendors Information</h3>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={addVendor}
-                        className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-lightgreen)] flex items-center gap-1 transition-colors"
-                    >
-                        <PlusCircle className="w-4 h-4" />
-                        Add Vendor
-                    </button>
+                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
+                    <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Supplier</h3>
                 </div>
-                <div className="p-6 space-y-6">
-                    {vendors.map((vendor, index) => (
-                        <div key={index} className="p-4 rounded-xl border border-slate-100 bg-slate-50 relative group">
-                            {vendors.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeVendor(index)}
-                                    className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 shadow-sm"
-                                    title="Remove Vendor"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            )}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                        Vendor Name
-                                    </label>
-                                    <input
-                                        value={vendor.name}
-                                        onChange={(e) => updateVendor(index, 'name', e.target.value)}
-                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                        placeholder="e.g. Thermo Fisher"
-                                        type="text"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                        Vendor Fund
-                                    </label>
-                                    <input
-                                        value={vendor.fund}
-                                        onChange={(e) => updateVendor(index, 'fund', e.target.value)}
-                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                        placeholder="e.g. Grant NIH-2026"
-                                        type="text"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                        Vendor Link
-                                    </label>
-                                    <input
-                                        value={vendor.link}
-                                        onChange={(e) => updateVendor(index, 'link', e.target.value)}
-                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                        placeholder="https://..."
-                                        type="url"
-                                    />
+                <div className="p-6">
+                    <div className="space-y-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                            Select Supplier
+                        </label>
+                        <select 
+                            name="supplier_id"
+                            value={selectedSupplierId}
+                            onChange={handleSupplierChange}
+                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
+                        >
+                            <option value="">Choose supplier (optional)</option>
+                            {suppliers.map((supplier) => (
+                                <option key={supplier.id} value={supplier.id}>
+                                    {supplier.company_name}
+                                </option>
+                            ))}
+                            <option value="others">➕ Others / New Supplier</option>
+                        </select>
+
+                        {showOtherVendor && (
+                            <div className="pt-4 border-t border-slate-200 mt-4 p-4 bg-slate-50 rounded-xl">
+                                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                    New Supplier Details
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
+                                            Supplier Name
+                                        </label>
+                                        <input
+                                            value={otherVendor.name}
+                                            onChange={(e) => setOtherVendor({...otherVendor, name: e.target.value})}
+                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                            placeholder="Supplier name"
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
+                                            Fund
+                                        </label>
+                                        <input
+                                            value={otherVendor.fund}
+                                            onChange={(e) => setOtherVendor({...otherVendor, fund: e.target.value})}
+                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                            placeholder="e.g. Grant Fund"
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
+                                            Website/Link
+                                        </label>
+                                        <input
+                                            value={otherVendor.link}
+                                            onChange={(e) => setOtherVendor({...otherVendor, link: e.target.value})}
+                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                            placeholder="https://..."
+                                            type="url"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        )}
+                    </div>
                 </div>
             </div>
 

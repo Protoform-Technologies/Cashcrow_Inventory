@@ -33,7 +33,7 @@ export default function DashboardLayout({ children, userName, userRole, title = 
                     userRole={userRole}
                     onMenuClick={() => setIsSidebarOpen(true)}
                 />
-                <div className="p-4 md:p-8 space-y-8 flex-1 w-full max-w-[1600px] overflow-hidden">
+<div className="p-2 sm:p-4 md:p-8 space-y-6 md:space-y-8 flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto min-h-0">
                     {children}
                 </div>
 

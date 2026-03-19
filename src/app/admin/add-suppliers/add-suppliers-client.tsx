@@ -26,7 +26,7 @@ interface AddSuppliersClientProps {
     suppliers: Supplier[]
 }
 
-const ITEMS_PER_PAGE = 5
+const ITEMS_PER_PAGE = 9
 
 interface FormData {
     company_name: string
@@ -93,7 +93,6 @@ export default function AddSuppliersClient({ userName, suppliers: initialSupplie
         if (result?.success) {
             setFormStatus({ type: 'success', message: 'Supplier added successfully!' })
             setFormData(initialFormData)
-            // Refresh the page to show new supplier
             window.location.reload()
         } else {
             setFormStatus({ type: 'error', message: result?.error || 'Failed to add supplier' })

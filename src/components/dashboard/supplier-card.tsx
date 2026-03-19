@@ -56,12 +56,12 @@ function getCategoryLabel(value: string) {
 
 function getCategoryColor(category: string) {
     const colors: Record<string, string> = {
-        'logistics': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        'manufacturing': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-        'it_services': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
-        'office_supplies': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
-        'electronics': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        'other': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+        'logistics': 'bg-blue-100 text-blue-700',
+        'manufacturing': 'bg-purple-100 text-purple-700',
+        'it_services': 'bg-cyan-100 text-cyan-700',
+        'office_supplies': 'bg-slate-100 text-slate-700',
+        'electronics': 'bg-amber-100 text-amber-700',
+        'other': 'bg-slate-100 text-slate-700'
     }
     return colors[category] || colors['other']
 }

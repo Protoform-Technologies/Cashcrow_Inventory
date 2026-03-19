@@ -28,9 +28,18 @@ interface Product {
     vendors?: Vendor[]
 }
 
+interface Supplier {
+    id: string
+    company_name: string
+    contact_name?: string
+    email?: string
+    phone?: string
+}
+
 interface AddProductClientProps {
     userName: string
     products: Product[]
+    suppliers: Supplier[]
 }
 
 const ITEMS_PER_PAGE = 5
@@ -41,7 +50,7 @@ function getStockStatus(quantity: number, minStockLevel: number) {
     return { status: 'In Stock', class: 'bg-emerald-100 text-emerald-700', trend: 'up' }
 }
 
-export default function AddProductClient({ userName, products }: AddProductClientProps) {
+export default function AddProductClient({ userName, products, suppliers }: AddProductClientProps) {
     const [showAddForm, setShowAddForm] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -136,7 +145,8 @@ export default function AddProductClient({ userName, products }: AddProductClien
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <AddProductForm onSuccess={handleProductAdded} onCancel={handleCancel} />
+                            <AddProductForm suppliers={suppliers} onSuccess={handleProductAdded} onCancel={handleCancel} />
+
                         </section>
                     )}
 
@@ -150,7 +160,7 @@ export default function AddProductClient({ userName, products }: AddProductClien
                                 </span>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse min-w-[650px] md:min-w-0">
+                                <table className="w-full text-left border-collapse min-w-0 table-fixed">
                                     <thead>
                                         <tr className="bg-slate-50/50 text-slate-500 text-[10px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
                                             <th className="px-2 md:px-6 py-3 md:py-4">Item</th>

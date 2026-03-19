@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { 
-    Search, 
-    PlusCircle, 
-    PackageOpen, 
-    ArrowLeft, 
+import {
+    Search,
+    PlusCircle,
+    PackageOpen,
+    ArrowLeft,
     ArrowRight,
     FileText,
     MapPin,
@@ -22,9 +22,16 @@ import {
     ChevronRight,
     TrendingUp,
     TrendingDown,
-    Minus
+    Minus,
+    Edit3,
+    Loader2,
+    RefreshCw
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
+import { deleteProduct, updateProduct } from '@/actions/products'
+import EditProductForm from '@/components/dashboard/edit-product-form'
+import { getProductRecentLogs } from '@/actions/day-logs'
+import { useRouter } from 'next/navigation'
 
 interface Product {
     id: string
@@ -52,12 +59,12 @@ interface PartsClientProps {
     userName: string
 }
 
-export default function PartsClient({ 
-    products: initialProducts, 
-    totalCount, 
-    currentPage, 
+export default function PartsClient({
+    products: initialProducts,
+    totalCount,
+    currentPage,
     totalPages,
-    userName 
+    userName
 }: PartsClientProps) {
     const [products] = useState<Product[]>(initialProducts)
     const [searchQuery, setSearchQuery] = useState('')
@@ -67,7 +74,7 @@ export default function PartsClient({
     const filteredProducts = useMemo(() => {
         if (!searchQuery) return products
         const query = searchQuery.toLowerCase()
-        return products.filter(product => 
+        return products.filter(product =>
             product.name?.toLowerCase().includes(query) ||
             product.sku?.toLowerCase().includes(query) ||
             product.category?.toLowerCase().includes(query) ||
@@ -77,100 +84,42 @@ export default function PartsClient({
     }, [products, searchQuery])
 
     // Get stock status
+// Fetch recent logs for selected product - consolidated
+
     const getStockStatus = (quantity: number, minLevel: number) => {
         if (quantity === 0) return { label: 'Out of Stock', color: 'red', bg: 'bg-red-100', text: 'text-red-700', ring: 'ring-red-200' }
         if (quantity <= minLevel) return { label: 'Low Stock', color: 'orange', bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' }
         return { label: 'In Stock', color: 'green', bg: 'bg-green-100', text: 'text-green-700', ring: 'ring-green-200' }
     }
 
-    // Generate PDF for product details
-    const generatePDF = (product: Product) => {
-        const doc = new jsPDF()
-        const stockStatus = getStockStatus(product.quantity || 0, product.min_stock_level || 0)
-        
-        // Header
-        doc.setFillColor(38, 81, 54) // Primary color
-        doc.rect(0, 0, 210, 40, 'F')
-        
-        doc.setTextColor(255, 255, 255)
-        doc.setFontSize(24)
-        doc.setFont('helvetica', 'bold')
-        doc.text('Part Details', 20, 25)
-        
-        // Reset text color
-        doc.setTextColor(0, 0, 0)
-        
-        // Product Name
-        doc.setFontSize(18)
-        doc.setFont('helvetica', 'bold')
-        doc.text(product.name || 'N/A', 20, 55)
-        
-        // SKU
-        doc.setFontSize(12)
-        doc.setFont('helvetica', 'normal')
-        doc.setTextColor(100, 100, 100)
-        doc.text(`SKU: ${product.sku || 'N/A'}`, 20, 65)
-        
-        // Details Section
-        doc.setTextColor(0, 0, 0)
-        doc.setFontSize(14)
-        doc.setFont('helvetica', 'bold')
-        doc.text('Product Information', 20, 85)
-        
-        doc.setFontSize(11)
-        doc.setFont('helvetica', 'normal')
-        
-        const details = [
-            ['Category:', product.category || 'N/A'],
-            ['Location:', `Shelf ${product.shelf_code || 'N/A'}, Box ${product.box_code || 'N/A'}`],
-            ['Current Stock:', `${product.quantity || 0} ${product.unit_of_measurement || 'units'}`],
-            ['Minimum Stock Level:', `${product.min_stock_level || 0} ${product.unit_of_measurement || 'units'}`],
-            ['Stock Status:', stockStatus.label],
-        ]
-        
-        let yPos = 95
-        details.forEach(([label, value]) => {
-            doc.setFont('helvetica', 'bold')
-            doc.text(label, 20, yPos)
-            doc.setFont('helvetica', 'normal')
-            doc.text(value, 70, yPos)
-            yPos += 8
-        })
-        
-        // Notes Section
-        if (product.notes) {
-            doc.setFontSize(14)
-            doc.setFont('helvetica', 'bold')
-            doc.text('Notes', 20, yPos + 10)
-            
-            doc.setFontSize(10)
-            doc.setFont('helvetica', 'normal')
-            const splitNotes = doc.splitTextToSize(product.notes, 170)
-            doc.text(splitNotes, 20, yPos + 20)
-            yPos += 20 + (splitNotes.length * 5)
+// States
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+    const [deleteError, setDeleteError] = useState('')
+    const [recentLogs, setRecentLogs] = useState<any[]>([])
+    const [loadingLogs, setLoadingLogs] = useState(false)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const router = useRouter()
+
+    // Consolidated refreshLogs function
+    const refreshLogs = async () => {
+        if (!selectedProduct) return
+        setLoadingLogs(true)
+        try {
+            const result = await getProductRecentLogs(selectedProduct.id)
+            setRecentLogs(Array.isArray(result) ? result : result.logs || [])
+        } catch (error) {
+            console.error('Error fetching logs:', error)
+            setRecentLogs([])
+        } finally {
+            setLoadingLogs(false)
         }
-        
-        // Supplier Info Section
-        if (product.vendors && product.vendors.length > 0) {
-            doc.setFontSize(14)
-            doc.setFont('helvetica', 'bold')
-            doc.text('Supplier Information', 20, yPos + 15)
-            
-            doc.setFontSize(11)
-            doc.setFont('helvetica', 'normal')
-            doc.text('Primary Vendor:', 20, yPos + 25)
-            doc.text(product.vendors[0]?.name || 'N/A', 70, yPos + 25)
-            doc.text('Avg. Lead Time: 5-7 Business Days', 20, yPos + 33)
-        }
-        
-        // Footer
-        doc.setFontSize(9)
-        doc.setTextColor(150, 150, 150)
-        doc.text(`Generated on ${new Date().toLocaleDateString()} by Cashcrow Lab Inventory`, 20, 280)
-        
-        // Save the PDF
-        doc.save(`${product.sku || 'product'}-details.pdf`)
     }
+
+    useEffect(() => {
+        refreshLogs()
+    }, [selectedProduct?.id, refreshKey])
 
     return (
         <div className="space-y-8">
@@ -221,13 +170,13 @@ export default function PartsClient({
                 ) : (
                     filteredProducts.map(product => {
                         const stockStatus = getStockStatus(product.quantity || 0, product.min_stock_level || 0)
-                        const stockPercentage = product.min_stock_level > 0 
+                        const stockPercentage = product.min_stock_level > 0
                             ? Math.min(100, ((product.quantity || 0) / product.min_stock_level) * 100)
                             : 100
 
                         return (
-                            <div 
-                                key={product.id} 
+                            <div
+                                key={product.id}
                                 className="bg-white rounded-xl border border-primary/5 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group cursor-pointer"
                                 onClick={() => setSelectedProduct(product)}
                             >
@@ -282,7 +231,7 @@ export default function PartsClient({
                                             </span>
                                         </div>
                                         <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                            <div 
+                                            <div
                                                 className={`h-full ${stockPercentage >= 100 ? 'bg-green-500' : stockPercentage >= 50 ? 'bg-orange-500' : 'bg-red-500'}`}
                                                 style={{ width: `${Math.min(100, stockPercentage)}%` }}
                                             />
@@ -292,12 +241,13 @@ export default function PartsClient({
 
                                 {/* Card Footer */}
                                 <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                                    <button 
+                                    <button
                                         className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline flex items-center gap-1"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            generatePDF(product)
-                                        }}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        // generatePDF(product) // TODO: implement PDF generation
+                                        console.log('PDF download for', product)
+                                    }}
                                     >
                                         <Download className="w-3.5 h-3.5" />
                                         Download PDF
@@ -317,7 +267,7 @@ export default function PartsClient({
             {filteredProducts.length > 0 && (
                 <div className="mt-auto p-4 border-t border-slate-200 flex items-center justify-between bg-white rounded-xl shadow-sm">
                     <p className="text-sm font-medium text-slate-500">
-                        Showing <span className="font-bold text-slate-800">{(currentPage - 1) * 6 + 1}</span> to <span className="font-bold text-slate-800">{Math.min(currentPage * 6, totalCount)}</span> of <span className="font-bold text-slate-800">{totalCount}</span> results
+                        Showing <span className="font-bold text-slate-800">{(currentPage - 1) * 9 + 1}</span> to <span className="font-bold text-slate-800">{Math.min(currentPage * 9, totalCount)}</span> of <span className="font-bold text-slate-800">{totalCount}</span> results
                     </p>
                     <div className="flex items-center gap-2">
                         <Link
@@ -351,17 +301,17 @@ export default function PartsClient({
             {selectedProduct && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                         onClick={() => setSelectedProduct(null)}
                     />
-                    
+
                     {/* Modal Content */}
-                    <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--color-cashcrow-bg-light)] dark:bg-[var(--color-cashcrow-bg-dark)] rounded-2xl shadow-2xl">
+                    <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[var(--color-cashcrow-bg-light)] rounded-2xl shadow-2xl">
                         {/* Close Button */}
-                        <button 
+                        <button
                             onClick={() => setSelectedProduct(null)}
-                            className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-600 dark:text-slate-300 transition-colors z-10"
+                            className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-slate-600 transition-colors z-10"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -373,17 +323,23 @@ export default function PartsClient({
                                 <ChevronRight className="w-4 h-4" />
                                 <span className="text-[var(--color-cashcrow-primary)] font-medium">{selectedProduct.name}</span>
                             </nav>
-                            <h2 className="text-3xl text-slate-900 dark:text-white tracking-tight font-bold">{selectedProduct.name}</h2>
+                            <h2 className="text-3xl text-slate-900 tracking-tight font-bold">{selectedProduct.name}</h2>
                             <p className="text-slate-500 font-mono text-sm mt-1">SKU: {selectedProduct.sku}</p>
-                            
+
                             {/* Action Buttons */}
                             <div className="flex items-center gap-3 mt-4">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
-                                    <FileText className="w-4 h-4" />
+                                <button onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowEditModal(true)
+                                }} className="flex items-center gap-2 px-4 py-2 bg-[var(--color-cashcrow-primary)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--color-cashcrow-lightgreen)] transition-colors shadow-sm">
+                                    <Edit3 className="w-4 h-4" />
                                     Edit Part
                                 </button>
-                                <button 
-                                    onClick={() => generatePDF(selectedProduct)}
+                                <button
+                                        onClick={() => {
+                                            // generatePDF(selectedProduct) // TODO: implement PDF generation
+                                            console.log('PDF download for', selectedProduct)
+                                        }}
                                     className="flex items-center gap-2 px-4 py-2 bg-[var(--color-cashcrow-primary)] text-white rounded-lg text-sm font-semibold hover:bg-[var(--color-cashcrow-primary)]/90 transition-colors shadow-sm"
                                 >
                                     <Download className="w-4 h-4" />
@@ -396,7 +352,7 @@ export default function PartsClient({
                         <div className="px-8 pb-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {/* Current Stock */}
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
+                                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
                                     <div className="flex justify-between items-start">
                                         <p className="text-slate-500 text-sm font-medium">Current Stock</p>
                                         {(() => {
@@ -409,19 +365,19 @@ export default function PartsClient({
                                         })()}
                                     </div>
                                     <div className="mt-2">
-                                        <h3 className="text-4xl font-extrabold text-slate-900 dark:text-white">{selectedProduct.quantity || 0}</h3>
+                                        <h3 className="text-4xl font-extrabold text-slate-900">{selectedProduct.quantity || 0}</h3>
                                         <p className="text-xs text-slate-500 mt-1">{selectedProduct.unit_of_measurement || 'Units'}</p>
                                     </div>
-                                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                                    <div className="pt-4 border-t border-slate-100">
                                         <p className="text-[10px] text-muted italic leading-tight">Stock calculated from ledger transactions.</p>
                                     </div>
                                 </div>
 
                                 {/* Location */}
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
+                                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
                                     <p className="text-slate-500 text-sm font-medium">Location</p>
                                     <div className="flex items-center gap-3 mt-2">
-                                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                                        <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
                                             Shelf {selectedProduct.shelf_code}, Box {selectedProduct.box_code}
                                         </h3>
                                     </div>
@@ -432,14 +388,14 @@ export default function PartsClient({
                                 </div>
 
                                 {/* Min Stock Level */}
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
+                                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
                                     <p className="text-slate-500 text-sm font-medium">Min. Stock Level</p>
                                     <div className="flex items-baseline gap-3 mt-2">
-                                        <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{selectedProduct.min_stock_level || 0}</h3>
+                                        <h3 className="text-3xl font-bold text-slate-900">{selectedProduct.min_stock_level || 0}</h3>
                                         <span className="text-slate-400 text-sm">Units</span>
                                     </div>
-                                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
-                                        <div 
+                                    <div className="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden">
+                                        <div
                                             className="bg-[var(--color-cashcrow-primary)] h-full"
                                             style={{ width: `${Math.min(100, ((selectedProduct.quantity || 0) / (selectedProduct.min_stock_level || 1)) * 100)}%` }}
                                         />
@@ -447,14 +403,14 @@ export default function PartsClient({
                                 </div>
 
                                 {/* Category */}
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
+                                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
                                     <p className="text-slate-500 text-sm font-medium">Category</p>
                                     <div className="mt-2">
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">{selectedProduct.category}</h3>
+                                        <h3 className="text-xl font-bold text-slate-900">{selectedProduct.category}</h3>
                                     </div>
                                     <div className="mt-4 flex flex-wrap gap-1">
-                                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Hardware</span>
-                                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase">Analog</span>
+                                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase">Hardware</span>
+                                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase">Analog</span>
                                     </div>
                                 </div>
                             </div>
@@ -463,80 +419,257 @@ export default function PartsClient({
                         {/* Quick Actions & Supplier Info */}
                         <div className="px-8 pb-8">
                             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                                {/* Quick Actions */}
-                                <div className="lg:col-span-3 bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm space-y-4">
-                                    <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <BarChart3 className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                                        Quick Actions
-                                    </h4>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <button className="w-full flex items-center justify-start gap-3 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium">
-                                            <QrCode className="w-5 h-5 text-slate-400" />
-                                            Print Label (QR)
-                                        </button>
-                                        <button className="w-full flex items-center justify-start gap-3 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium">
-                                            <BarChart3 className="w-5 h-5 text-slate-400" />
-                                            View Analytics
-                                        </button>
-                                        <button className="w-full flex items-center justify-start gap-3 px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm font-medium">
-                                            <Bell className="w-5 h-5 text-slate-400" />
-                                            Manage Alerts
-                                        </button>
+                                {/* Recent Daily Logs Table */}
+                                <div className="lg:col-span-3 bg-white p-6 rounded-xl border border-primary/5 shadow-sm space-y-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center justify-between">
+                                        <h4 className="font-bold text-slate-900 flex items-center gap-2 text-sm">
+                                            <FileText className="w-4 h-4 text-[var(--color-cashcrow-primary)]" />
+                                            Product Usage History
+                                        </h4>
+                                            <div className="flex items-center gap-2">
+                                                <Link href="/admin/daily-log" className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline">View All →</Link>
+                                                <button
+                                                    onClick={() => setRefreshKey(prev => prev + 1)}
+                                                    disabled={loadingLogs}
+                                                    className="p-1.5 text-slate-400 hover:text-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/5 rounded-lg transition-all disabled:opacity-50"
+                                                    title="Refresh logs"
+                                                >
+                                                    {loadingLogs ? (
+                                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                    ) : (
+                                                        <RefreshCw className="w-3.5 h-3.5" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs">
+                                            <thead>
+                                                <tr className="border-b border-slate-200">
+                                                    <th className="text-left pb-2 font-semibold text-slate-600">Time</th>
+                                                    <th className="text-left pb-2 font-semibold text-slate-600 pr-2">Part</th>
+                                                    <th className="text-right pb-2 font-semibold text-slate-600">Qty</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {loadingLogs ? (
+                                                    Array.from({length: 3}).map((_, i) => (
+                                                        <tr key={i} className="border-b border-slate-100">
+                                                            <td className="py-2">
+                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-12"></div>
+                                                            </td>
+                                                            <td className="py-2">
+                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-24"></div>
+                                                            </td>
+                                                            <td className="py-2 text-right">
+                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-8 mx-auto"></div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : recentLogs.length > 0 ? (
+                                                    recentLogs.map((log, index) => (
+                                                        <tr key={index} className={`border-b border-slate-100 hover:bg-slate-50 ${index === recentLogs.length - 1 ? '' : ''}`}>
+                                                            <td className="py-2 text-slate-500">{log.time}</td>
+                                                            <td className="py-2 truncate max-w-[120px]">{log.partName}</td>
+                                                            <td className="py-2 text-right font-bold text-green-600">{log.sign}{log.quantity}</td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={3} className="py-8 text-center text-slate-500 text-sm">
+                                                            {loadingLogs ? (
+                                                                'Loading activity...'
+                                                            ) : (
+                                                                'No recent daily log history for this part'
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2 text-center">Logs update in real-time</p>
                                 </div>
 
                                 {/* Supplier Info */}
-                                <div className="bg-[var(--color-cashcrow-primary)]/5 dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
-                                    <h4 className="font-bold text-[var(--color-cashcrow-primary)] dark:text-[var(--color-cashcrow-primary)] mb-3 flex items-center gap-2">
+                                <div className="bg-[var(--color-cashcrow-primary)]/5 p-6 rounded-xl border border-primary/10 shadow-sm">
+                                    <h4 className="font-bold text-[var(--color-cashcrow-primary)] mb-3 flex items-center gap-2">
                                         <Truck className="w-5 h-5" />
                                         Supplier Info
                                     </h4>
                                     <div className="space-y-3">
-                                        <div>
-                                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Primary Vendor</p>
-                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                {selectedProduct.vendors && selectedProduct.vendors.length > 0 
-                                                    ? selectedProduct.vendors[0]?.name || 'Not specified'
-                                                    : 'Not specified'}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Avg. Lead Time</p>
-                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">5-7 Business Days</p>
-                                        </div>
-                                        <button className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline">
-                                            Contact Supplier
-                                        </button>
+                                        {selectedProduct.vendors && selectedProduct.vendors.length > 0 ? (
+                                            selectedProduct.vendors.map((vendor, index) => (
+                                                <div key={index} className="space-y-1">
+                                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                                        Vendor {index + 1}
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-slate-700">{vendor.name}</p>
+                                                    {vendor.fund && (
+                                                        <p className="text-xs text-slate-600">Fund: {vendor.fund}</p>
+                                                    )}
+                                                    {vendor.link && (
+                                                        <a href={vendor.link} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline">
+                                                            {vendor.link}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-slate-500 italic">No supplier information</p>
+                                        )}
+                                        {selectedProduct.vendors && selectedProduct.vendors.length > 0 && (
+                                            <button className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline w-full text-left">
+                                                View All Suppliers →
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Edit Product Modal */}
+                        {showEditModal && selectedProduct && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                                {/* Backdrop */}
+                                <div
+                                    className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                                    onClick={() => setShowEditModal(false)}
+                                />
+
+                                {/* Modal Content */}
+                                <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border">
+                                    {/* Close Button */}
+                                    <button
+                                        onClick={() => setShowEditModal(false)}
+                                        className="absolute top-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors z-10"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+
+                                    <div className="p-8">
+                                        <EditProductForm
+                                            product={{...selectedProduct, image_url: selectedProduct?.image_url || undefined} as any}
+                                            onSuccess={() => {
+                                                setShowEditModal(false)
+                                                setSelectedProduct(null)
+                                                window.location.reload()
+                                            }}
+                                            onCancel={() => setShowEditModal(false)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Notes Section */}
                         {selectedProduct.notes && (
                             <div className="px-8 pb-8">
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/5 shadow-sm">
-                                    <h4 className="font-bold text-slate-900 dark:text-white mb-3">Notes</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">{selectedProduct.notes}</p>
+                                <div className="bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
+                                    <h4 className="font-bold text-slate-900 mb-3">Notes</h4>
+                                    <p className="text-sm text-slate-600">{selectedProduct.notes}</p>
                                 </div>
                             </div>
                         )}
 
                         {/* Danger Zone */}
                         <div className="px-8 pb-8">
-                            <div className="pt-8 border-t border-red-100 dark:border-red-900/30">
+                            <div className="pt-8 border-t border-red-100">
                                 <h4 className="text-red-600 font-bold flex items-center gap-2 mb-2">
                                     <AlertTriangle className="w-5 h-5" />
                                     Danger Zone
                                 </h4>
-                                <div className="dark:bg-red-900/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className=" p-4 rounded-xl border border-red-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div>
-                                        <p className="text-sm font-semibold text-red-900 dark:text-red-400">Archive Part</p>
-                                        <p className="text-xs text-red-700 dark:text-red-500/80">Archiving will prevent future transactions for this part.</p>
+                                        <p className="text-sm font-semibold text-red-900">Delete Part</p>
+                                        <p className="text-xs text-red-700">This action cannot be undone. Product data will be permanently removed.</p>
                                     </div>
-                                    <button className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hover:shadow-lg">
-                                        Archive Part
-                                    </button>
+                                    {deleteError ? (
+                                        <div className="bg-red-50 border border-red-200 p-4 rounded-lg space-y-2">
+                                            <p className="text-sm font-semibold text-red-800 flex items-center gap-2">
+                                                <AlertTriangle className="w-4 h-4" />
+                                                Delete Failed
+                                            </p>
+                                            <p className="text-sm text-red-700">{deleteError}</p>
+                                            <div className="flex gap-2 pt-2">
+                                                <button 
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation()
+                                                        if (selectedProduct) {
+                                                            setDeleteError('')
+                                                            setIsDeleting(true)
+                                                            const result = await deleteProduct(selectedProduct.id)
+                                                            if (result.success) {
+                                                                router.refresh()
+                                                                setSelectedProduct(null)
+                                                            } else {
+                                                                setDeleteError(result.error || 'Delete failed')
+                                                            }
+                                                            setIsDeleting(false)
+                                                        }
+                                                    }} 
+                                                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-md transition-colors flex items-center gap-1"
+                                                >
+                                                    {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Retry'}
+                                                </button>
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setDeleteError('')
+                                                        setDeleteConfirmId(null)
+                                                    }} 
+                                                    className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-bold rounded-md hover:bg-slate-200 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : deleteConfirmId === selectedProduct?.id ? (
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={async (e) => {
+                                                    e.stopPropagation()
+                                                    if (selectedProduct) {
+                                                        setIsDeleting(true)
+                                                        const result = await deleteProduct(selectedProduct.id)
+                                                        if (result.success) {
+                                                            router.refresh()
+                                                            setSelectedProduct(null)
+                                                        } else {
+                                                            setDeleteError(result.error || 'Delete failed')
+                                                        }
+                                                        setIsDeleting(false)
+                                                        setDeleteConfirmId(null)
+                                                    }
+                                                }} 
+                                                disabled={isDeleting}
+                                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm flex items-center gap-2"
+                                            >
+                                                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Delete'}
+                                            </button>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setDeleteConfirmId(null)
+                                                }} 
+                                                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setDeleteConfirmId(selectedProduct?.id || null)
+                                            }} 
+                                            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hover:shadow-lg"
+                                        >
+                                            Delete Part
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

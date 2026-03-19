@@ -7,7 +7,7 @@ import PartsClient from './parts-client'
 export default async function PartsPage(props: { searchParams: Promise<{ page?: string }> }) {
     const searchParams = await props.searchParams;
     const page = Number(searchParams.page) || 1
-    const limit = 6
+    const limit = 9
 
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()

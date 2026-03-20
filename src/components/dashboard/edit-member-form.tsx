@@ -78,9 +78,9 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="firstName" className="text-sm font-medium">First Name <span className="text-red-500">*</span></Label>
                     <Input
                         id="firstName"
                         name="firstName"
@@ -89,11 +89,11 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                         placeholder="e.g. Sarah"
                         required
                         disabled={isPending}
-                        className="h-11"
+                        className="h-12 text-base"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="lastName" className="text-sm font-medium">Last Name <span className="text-red-500">*</span></Label>
                     <Input
                         id="lastName"
                         name="lastName"
@@ -102,19 +102,19 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                         placeholder="e.g. Jenkins"
                         required
                         disabled={isPending}
-                        className="h-11"
+                        className="h-12 text-base"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>Email Address</Label>
+                    <Label className="text-sm font-medium">Email Address</Label>
                     <Input
                         value={member.email}
                         disabled
-                        className="h-11 bg-slate-50"
+                        className="h-12 text-base bg-slate-50"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="role" className="text-sm font-medium">Role <span className="text-red-500">*</span></Label>
                     <select
                         id="role"
                         name="role"
@@ -122,7 +122,7 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         required
                         disabled={isPending}
-                        className="w-full h-11 px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                        className="w-full h-12 px-4 py-2 text-base bg-slate-50 border border-slate-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
                     >
                         <option value="MEMBER">Member (Edit Access)</option>
                         <option value="ADMIN">Admin (Full Access)</option>
@@ -130,25 +130,28 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                 </div>
             </div>
 
-            <div className="flex justify-end pt-4 gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t bg-white/80 backdrop-blur-sm">
                 <Button 
                     type="button"
                     onClick={onCancel}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-6 rounded-lg transition-all"
+                    className="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-xl transition-all text-sm"
                 >
                     Cancel
                 </Button>
                 <Button 
                     type="submit" 
                     disabled={isPending}
-                    className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2 px-8 rounded-lg transition-all shadow-md flex items-center gap-2"
+                    className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg text-sm flex items-center justify-center gap-2"
                 >
                     {isPending ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Saving...
+                        </>
                     ) : (
                         <>
                             <span>Save Changes</span>
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-4 h-4" />
                         </>
                     )}
                 </Button>

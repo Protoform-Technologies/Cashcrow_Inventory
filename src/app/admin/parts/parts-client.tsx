@@ -28,6 +28,7 @@ import {
     RefreshCw
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
+import SupplierCard from '@/components/dashboard/supplier-card'
 import { deleteProduct, updateProduct } from '@/actions/products'
 import EditProductForm from '@/components/dashboard/edit-product-form'
 import { getProductRecentLogs } from '@/actions/day-logs'
@@ -500,30 +501,52 @@ export default function PartsClient({
                                         Supplier Info
                                     </h4>
                                     <div className="space-y-3">
-                                        {selectedProduct.vendors && selectedProduct.vendors.length > 0 ? (
-                                            selectedProduct.vendors.map((vendor, index) => (
-                                                <div key={index} className="space-y-1">
-                                                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                                                        Vendor {index + 1}
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-slate-700">{vendor.name}</p>
-                                                    {vendor.fund && (
-                                                        <p className="text-xs text-slate-600">Fund: {vendor.fund}</p>
-                                                    )}
-                                                    {vendor.link && (
-                                                        <a href={vendor.link} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline">
-                                                            {vendor.link}
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            ))
+import SupplierCard from '@/components/dashboard/supplier-card'
+...
+{selectedProduct.vendors && selectedProduct.vendors.length > 0 ? (
+                                        <div className="space-y-3">
+                                                {selectedProduct.vendors.slice(0, 4).map((vendor, index) => (
+                                                    <div key={index} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group">
+                                                        <div className="flex items-start gap-3 mb-2">
+                                                            <div className="w-8 h-8 bg-[var(--color-cashcrow-primary)]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                                                <span className="text-xs font-bold text-[var(--color-cashcrow-primary)]">
+                                                                    V{index + 1}
+                                                                </span>
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <h4 className="font-semibold text-slate-900 text-sm mb-1 truncate group-hover:text-[var(--color-cashcrow-primary)]">
+                                                                    {vendor.name || 'Unnamed Vendor'}
+                                                                </h4>
+                                                                {vendor.fund && (
+                                                                    <p className="text-xs text-slate-600 mb-1">Fund: {vendor.fund}</p>
+                                                                )}
+                                                                {vendor.link && (
+                                                                    <a 
+                                                                        href={vendor.link} 
+                                                                        target="_blank" 
+                                                                        rel="noopener noreferrer" 
+                                                                        className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline truncate block"
+                                                                    >
+                                                                        {vendor.link}
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         ) : (
                                             <p className="text-sm text-slate-500 italic">No supplier information</p>
                                         )}
-                                        {selectedProduct.vendors && selectedProduct.vendors.length > 0 && (
-                                            <button className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline w-full text-left">
-                                                View All Suppliers →
-                                            </button>
+                                        {selectedProduct.vendors && (
+                                            <p className="text-xs text-slate-500 mt-2">
+                                                Showing {Math.min(4, selectedProduct.vendors.length)} of {selectedProduct.vendors.length} vendors
+                                            </p>
+                                        )}
+                                        {selectedProduct.vendors && selectedProduct.vendors.length > 4 && (
+                                            <Link href={`/admin/suppliers?product=${selectedProduct.id}&name=${encodeURIComponent(selectedProduct.name)}`} className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline w-full text-left block mt-2">
+                                                View all {selectedProduct.vendors.length} suppliers →
+                                            </Link>
                                         )}
                                     </div>
                                 </div>

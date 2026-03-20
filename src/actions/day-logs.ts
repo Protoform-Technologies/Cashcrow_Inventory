@@ -334,7 +334,7 @@ export async function getProductFullHistory(productId: string, page: number = 1,
             head: false 
         })
         .eq('part_id', productId)
-        .order('day_logs.created_at', { ascending: false, referencedTable: 'day_logs' })
+.order('day_logs.created_at.desc')
         .range(from, to)
 
     if (error) {

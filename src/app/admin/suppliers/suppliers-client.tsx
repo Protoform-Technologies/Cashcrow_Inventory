@@ -1,3 +1,9 @@
+
+
+
+
+
+
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -44,19 +50,25 @@ export default function SuppliersClient({
 }: SuppliersClientProps) {
     const [suppliers] = useState<Supplier[]>(initialSuppliers)
     const [searchQuery, setSearchQuery] = useState('')
+// TODO: Remove product filter params once integrated
+    // const searchParams = useSearchParams()
+    // const productFilter = searchParams.get('product')
+    // const productName = searchParams.get('name') || ''
+    const productName = ''
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
 
     // Filter suppliers based on search query
     const filteredSuppliers = useMemo(() => {
-        if (!searchQuery) return suppliers
-        const query = searchQuery.toLowerCase()
+        let query = searchQuery.toLowerCase()
+        if (productName) query = productName.toLowerCase()
+        if (!query) return suppliers
         return suppliers.filter(supplier => 
             supplier.company_name?.toLowerCase().includes(query) ||
             supplier.contact_name?.toLowerCase().includes(query) ||
             supplier.email?.toLowerCase().includes(query) ||
             supplier.category?.toLowerCase().includes(query)
         )
-    }, [suppliers, searchQuery])
+    }, [suppliers, searchQuery, productName])
 
     // Calculate average lead time
     const averageLeadTime = useMemo(() => {
@@ -80,12 +92,17 @@ export default function SuppliersClient({
                     <div className="relative flex-1 sm:flex-none sm:w-64">
                         <input
                             type="text"
-                            placeholder="Search suppliers..."
+                            placeholder={`Search suppliers${productName ? ` for "${productName}"` : ''}...`}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-2 md:py-2 rounded-lg md:rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] text-sm"
                         />
                         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        {productName && (
+                            <p className="text-xs text-slate-500 mt-1 text-center">
+                                Filtering for: <span className="font-semibold text-[var(--color-cashcrow-primary)]">{productName}</span>
+                            </p>
+                        )}
                     </div>
                     <Link href="/admin/add-suppliers" className="shrink-0 flex items-center gap-1.5 md:gap-2 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-3 md:px-4 py-2 rounded-lg md:rounded-xl font-bold text-sm shadow-md transition-colors whitespace-nowrap">
                         <PlusCircle className="w-4 h-4" />

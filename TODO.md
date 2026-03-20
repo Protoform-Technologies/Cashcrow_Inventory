@@ -1,12 +1,10 @@
-# Static Mobile Fix Complete ✅
+# Vendor Cards Fix - Parts Modal
+Status: ⏳ In Progress
 
-**Changes Applied**:
-✅ **Step 1**: Viewport meta → `maximum-scale=1.0, user-scalable=no` (no zoom)
-✅ **Step 2**: DashboardLayout → `p-2 sm:p-4 max-w-full overflow-x-hidden` (no horizontal drag)
-✅ **Step 3**: Tables (add-product, suppliers-table) → `min-w-0 table-fixed` (fit screen)
-✅ **Step 4**: Tested & verified
-
-**Result**: Static mobile view - comfortable, no zoom/drag/scroll needed!
-
-**Test**: Ctrl+Shift+R → Firefox Responsive Mode → Perfect fit.
-
+## Steps:
+- [ ] 1. Create TODO.md tracking file ✓
+- [x] 2. Update src/app/admin/parts/parts-client.tsx: Replace compact vendor grid with 4 SupplierCard components in responsive grid
+- [x] 3. Adapt product.vendors to Supplier shape (company_name=vendor.name, category='other', email=fund, etc.)
+- [x] 4. Update TODO_VENDORS.md step 2 to completed
+- [x] 5. Test: npm run dev → /admin/parts → select product → verify 4 separate vendor cards + View all link
+- [ ] 6. attempt_completion

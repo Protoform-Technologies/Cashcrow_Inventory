@@ -189,3 +189,31 @@ export async function getProducts(page: number = 1, limit: number = 6) {
 
     return { products: data || [], count: count || 0 };
 }
+
+export async function searchProducts(query: string) {
+    const supabase = await createServerSupabaseClient()
+    
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .ilike('name', `%${query}%`)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    if (error) {
+        console.error("Search error:", error);
+        return [];
+    }
+
+    return data || [];
+
+
+
+
+
+
+
+    return data || [];
+}
+
+

@@ -5,54 +5,57 @@ import {
     History
 } from "lucide-react"
 
-const stats = [
-    {
-        label: "Total Parts",
-        value: "1,284",
-        change: "+12%",
-        trend: "up",
-        icon: (className: string) => <div className={`p-2 bg-blue-50 text-blue-600 rounded-xl ${className}`}><Package className="w-5 h-5" /></div>,
-        subtext: "Inventory tracking active"
-    },
-    {
-        label: "Low Stock",
-        value: "12",
-        status: "Attention",
-        trend: "warning",
-        icon: (className: string) => <div className={`p-2 bg-orange-50 text-orange-600 rounded-xl ${className}`}><AlertTriangle className="w-5 h-5" /></div>,
-        subtext: "Requires replenishment"
-    },
-    {
-        label: "Out of Stock",
-        value: "3",
-        status: "Critical",
-        trend: "danger",
-        icon: (className: string) => <div className={`p-2 bg-red-50 text-red-600 rounded-xl ${className}`}><AlertCircle className="w-5 h-5" /></div>,
-        subtext: "Impacts ongoing trials"
-    },
-    {
-        label: "Recent Logs",
-        value: "48",
-        status: "Today",
-        trend: "primary",
-        icon: (className: string) => <div className={`p-2 bg-[#265136]/10 text-[#265136] rounded-xl ${className}`}><History className="w-5 h-5" /></div>,
-        subtext: "Entries by 6 team members"
-    }
-]
+interface DashboardStats {
+    totalParts: number
+    lowStock: number
+    outOfStock: number
+    recentLogs: number
+}
 
+interface StatsGridProps {
+    stats?: DashboardStats
+}
 
-export default function StatsGrid() {
+export default function StatsGrid({ stats }: StatsGridProps) {
+    const statsConfig = [
+        {
+            label: "Total Parts",
+            value: stats?.totalParts.toLocaleString() || "0",
+            icon: (className: string) => <div className={`p-2 bg-blue-50 text-blue-600 rounded-xl ${className}`}><Package className="w-5 h-5" /></div>,
+            subtext: "Inventory tracking active"
+        },
+        {
+            label: "Low Stock",
+            value: stats?.lowStock.toString() || "0",
+            status: "Attention",
+            trend: "warning",
+            icon: (className: string) => <div className={`p-2 bg-orange-50 text-orange-600 rounded-xl ${className}`}><AlertTriangle className="w-5 h-5" /></div>,
+            subtext: "Requires replenishment"
+        },
+        {
+            label: "Out of Stock",
+            value: stats?.outOfStock.toString() || "0",
+            status: "Critical",
+            trend: "danger",
+            icon: (className: string) => <div className={`p-2 bg-red-50 text-red-600 rounded-xl ${className}`}><AlertCircle className="w-5 h-5" /></div>,
+            subtext: "Impacts ongoing trials"
+        },
+        {
+            label: "Recent Logs",
+            value: stats?.recentLogs.toString() || "0",
+            status: "Today",
+            trend: "primary",
+            icon: (className: string) => <div className={`p-2 bg-[#265136]/10 text-[#265136] rounded-xl ${className}`}><History className="w-5 h-5" /></div>,
+            subtext: "Entries for today"
+        }
+    ]
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
+            {statsConfig.map((stat, i) => (
                 <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex justify-between items-start mb-6">
                         {stat.icon("group-hover:scale-110 transition-transform")}
-                        {stat.change && (
-                            <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                                {stat.change}
-                            </span>
-                        )}
                         {stat.status && (
                             <span className={`text-[11px] font-black px-2 py-1 rounded-lg ${stat.trend === 'warning' ? 'bg-orange-50 text-orange-600' :
                                 stat.trend === 'danger' ? 'bg-red-50 text-red-600' :

@@ -28,7 +28,9 @@ export default async function PartsPage(props: { searchParams: Promise<{ page?: 
     }
 
     const fullName = `${profile.first_name} ${profile.last_name}`
-    const { products, count } = await getProducts(page, limit)
+    const resolvedSearchParams = searchParams as any
+    const query = resolvedSearchParams.q
+    const { products, count } = await getProducts(page, limit, query)
     const totalPages = Math.ceil(count / limit)
 
     return (

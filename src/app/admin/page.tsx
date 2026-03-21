@@ -1,12 +1,18 @@
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import DashboardLayout from '@/components/dashboard/layout'
 import StatsGrid from '@/components/dashboard/stats-grid'
 import InventoryTable from '@/components/dashboard/inventory-table'
 import DailyLogFeed from '@/components/dashboard/daily-log-feed'
 import { PlusCircle, HandMetal } from "lucide-react"
+import { getDashboardStats, getInventory, getRecentActivity } from '@/actions/dashboard'
 
-export default async function AdminPage() {
+export default async function AdminPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>
+}) {
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -24,6 +30,15 @@ export default async function AdminPage() {
     if (!profile || profile.role?.toUpperCase() !== 'ADMIN') {
         redirect('/')
     }
+
+    // Fetch dynamic data
+    const resolvedSearchParams = await searchParams as any
+    const page = parseInt(resolvedSearchParams.page || '1', 10)
+    const [stats, inventoryData, recentLogs] = await Promise.all([
+        getDashboardStats(),
+        getInventory(page, 5),
+        getRecentActivity(4)
+    ])
 
     const fullName = `${profile.first_name} ${profile.last_name}`
     const today = new Date().toLocaleDateString('en-US', {
@@ -52,25 +67,29 @@ export default async function AdminPage() {
                     </div>
                 </div>
 
-                <button className="w-full sm:w-auto bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-8 py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-[var(--color-cashcrow-primary)]/20 active:scale-95 group relative z-10">
+                <Link href="/admin/daily-log" className="w-full sm:w-auto bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-8 py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-[var(--color-cashcrow-primary)]/20 active:scale-95 group relative z-10">
                     <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                     Create Today&apos;s Log
-                </button>
+                </Link>
             </div>
 
             {/* Stats Grid */}
-            <StatsGrid />
+            <StatsGrid stats={stats} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Main Inventory Table */}
                 <div className="lg:col-span-2">
-                    <InventoryTable />
+                    <InventoryTable
+                        items={inventoryData.products}
+                        totalCount={inventoryData.count}
+                        currentPage={page}
+                    />
                 </div>
 
                 {/* Daily Log Feed */}
                 <div>
-                    <DailyLogFeed />
+                    <DailyLogFeed logs={recentLogs} />
                 </div>
             </div>
         </DashboardLayout>

@@ -92,14 +92,20 @@ export async function deleteSupplier(id: string) {
     return { success: true }
 }
 
-export async function getSuppliers(page: number = 1, limit: number = 100) {
+export async function getSuppliers(page: number = 1, limit: number = 100, query?: string) {
     const supabase = await createServerSupabaseClient()
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { data, count, error } = await supabase
+    let dbQuery = supabase
         .from('suppliers')
         .select('*', { count: 'exact' })
+
+    if (query) {
+        dbQuery = dbQuery.or(`company_name.ilike.%${query}%,contact_name.ilike.%${query}%,category.ilike.%${query}%`)
+    }
+
+    const { data, count, error } = await dbQuery
         .order('created_at', { ascending: false })
         .range(from, to);
 

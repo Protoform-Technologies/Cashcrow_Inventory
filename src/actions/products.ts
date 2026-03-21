@@ -171,14 +171,20 @@ export async function deleteProduct(id: string) {
     return { success: true }
 }
 
-export async function getProducts(page: number = 1, limit: number = 6) {
+export async function getProducts(page: number = 1, limit: number = 6, query?: string) {
     const supabase = await createServerSupabaseClient()
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { data, count, error } = await supabase
+    let dbQuery = supabase
         .from('products')
         .select('*', { count: 'exact' })
+
+    if (query) {
+        dbQuery = dbQuery.or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
+    }
+
+    const { data, count, error } = await dbQuery
         .order('created_at', { ascending: false })
         .range(from, to);
 

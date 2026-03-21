@@ -28,7 +28,9 @@ export default async function SuppliersPage(props: { searchParams: Promise<{ pag
     }
 
     const fullName = `${profile.first_name} ${profile.last_name}`
-    const { suppliers, count } = await getSuppliers(page, limit)
+    const resolvedSearchParams = searchParams as any
+    const query = resolvedSearchParams.q
+    const { suppliers, count } = await getSuppliers(page, limit, query)
     const totalPages = Math.ceil(count / limit)
 
     return (

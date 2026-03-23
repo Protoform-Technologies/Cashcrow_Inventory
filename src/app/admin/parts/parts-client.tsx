@@ -103,7 +103,7 @@ export default function PartsClient({
     const [refreshKey, setRefreshKey] = useState(0)
     const router = useRouter()
 
-    // Consolidated refreshLogs function
+// Consolidated refreshLogs function - ENHANCED to include full details
     const refreshLogs = async () => {
         if (!selectedProduct) return
         setLoadingLogs(true)
@@ -445,51 +445,35 @@ export default function PartsClient({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-xs">
-                                            <thead>
-                                                <tr className="border-b border-slate-200">
-                                                    <th className="text-left pb-2 font-semibold text-slate-600">Time</th>
-                                                    <th className="text-left pb-2 font-semibold text-slate-600 pr-2">Part</th>
-                                                    <th className="text-right pb-2 font-semibold text-slate-600">Qty</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {loadingLogs ? (
-                                                    Array.from({length: 3}).map((_, i) => (
-                                                        <tr key={i} className="border-b border-slate-100">
-                                                            <td className="py-2">
-                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-12"></div>
-                                                            </td>
-                                                            <td className="py-2">
-                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-24"></div>
-                                                            </td>
-                                                            <td className="py-2 text-right">
-                                                                <div className="h-4 bg-slate-200 rounded animate-pulse w-8 mx-auto"></div>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                ) : recentLogs.length > 0 ? (
-                                                    recentLogs.map((log, index) => (
-                                                        <tr key={index} className={`border-b border-slate-100 hover:bg-slate-50 ${index === recentLogs.length - 1 ? '' : ''}`}>
-                                                            <td className="py-2 text-slate-500">{log.time}</td>
-                                                            <td className="py-2 truncate max-w-[120px]">{log.partName}</td>
-                                                            <td className="py-2 text-right font-bold text-green-600">{log.sign}{log.quantity}</td>
-                                                        </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={3} className="py-8 text-center text-slate-500 text-sm">
-                                                            {loadingLogs ? (
-                                                                'Loading activity...'
-                                                            ) : (
-                                                                'No recent daily log history for this part'
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
+<div className="space-y-3">
+                                        {loadingLogs ? (
+                                            Array.from({length: 3}).map((_, i) => (
+                                                <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200 animate-pulse">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="h-4 bg-slate-200 rounded w-24"></div>
+                                                        <div className="h-6 bg-slate-200 rounded w-12"></div>
+                                                    </div>
+                                                    <div className="h-3 bg-slate-200 rounded w-32 mt-2"></div>
+                                                </div>
+                                            ))
+                                        ) : recentLogs.length > 0 ? (
+                                            recentLogs.map((log, index) => (
+                                                <div key={index} className="p-4 bg-white rounded-xl border border-slate-200 hover:shadow-sm hover:bg-slate-50 transition-all">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs text-slate-500 font-medium">{log.time}</span>
+                                                        <span className="font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs">
+                                                            {log.sign}{log.quantity}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-slate-900 mt-2 truncate">{log.partName}</p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="p-12 text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                                                <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                                                <p className="text-sm text-slate-500 font-medium">No recent activity</p>
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-[10px] text-slate-400 mt-2 text-center">Logs update in real-time</p>
                                 </div>
@@ -500,55 +484,52 @@ export default function PartsClient({
                                         <Truck className="w-5 h-5" />
                                         Supplier Info
                                     </h4>
-                                    <div className="space-y-3">
-import SupplierCard from '@/components/dashboard/supplier-card'
-...
-{selectedProduct.vendors && selectedProduct.vendors.length > 0 ? (
-                                        <div className="space-y-3">
-                                                {selectedProduct.vendors.slice(0, 4).map((vendor, index) => (
-                                                    <div key={index} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 group">
-                                                        <div className="flex items-start gap-3 mb-2">
-                                                            <div className="w-8 h-8 bg-[var(--color-cashcrow-primary)]/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                                                                <span className="text-xs font-bold text-[var(--color-cashcrow-primary)]">
-                                                                    V{index + 1}
-                                                                </span>
-                                                            </div>
-                                                            <div className="min-w-0 flex-1">
-                                                                <h4 className="font-semibold text-slate-900 text-sm mb-1 truncate group-hover:text-[var(--color-cashcrow-primary)]">
-                                                                    {vendor.name || 'Unnamed Vendor'}
-                                                                </h4>
-                                                                {vendor.fund && (
-                                                                    <p className="text-xs text-slate-600 mb-1">Fund: {vendor.fund}</p>
-                                                                )}
-                                                                {vendor.link && (
-                                                                    <a 
-                                                                        href={vendor.link} 
-                                                                        target="_blank" 
-                                                                        rel="noopener noreferrer" 
-                                                                        className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline truncate block"
-                                                                    >
-                                                                        {vendor.link}
-                                                                    </a>
-                                                                )}
-                                                            </div>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {selectedProduct.vendors && selectedProduct.vendors.length > 0 ? (
+                                            selectedProduct.vendors.slice(0, 4).map((vendor, index) => (
+                                                <div key={index} className="group relative bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer p-4 md:p-5">
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div className="w-10 h-10 rounded-lg bg-[var(--color-cashcrow-primary)]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--color-cashcrow-primary)]/20">
+                                                            <span className="text-sm font-bold text-[var(--color-cashcrow-primary)]">
+                                                                {vendor.fund ? (vendor.name || '').slice(0,2).toUpperCase() : '??'}
+                                                            </span>
                                                         </div>
+                                                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">
+                                                            ₹{vendor.fund || 'N/A'}
+                                                        </span>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <h4 className="font-bold text-slate-900 text-sm mb-2 truncate group-hover:text-[var(--color-cashcrow-primary)]">
+                                                            {vendor.name || 'Unnamed Vendor'}
+                                                        </h4>
+                                                        {vendor.link && (
+                                                            <a 
+                                                                href={vendor.link} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="text-xs font-medium text-slate-600 hover:text-[var(--color-cashcrow-primary)] hover:underline block truncate"
+                                                            >
+                                                                {vendor.link}
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))
                                         ) : (
-                                            <p className="text-sm text-slate-500 italic">No supplier information</p>
-                                        )}
-                                        {selectedProduct.vendors && (
-                                            <p className="text-xs text-slate-500 mt-2">
-                                                Showing {Math.min(4, selectedProduct.vendors.length)} of {selectedProduct.vendors.length} vendors
-                                            </p>
-                                        )}
-                                        {selectedProduct.vendors && selectedProduct.vendors.length > 4 && (
-                                            <Link href={`/admin/suppliers?product=${selectedProduct.id}&name=${encodeURIComponent(selectedProduct.name)}`} className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline w-full text-left block mt-2">
-                                                View all {selectedProduct.vendors.length} suppliers →
-                                            </Link>
+                                            <div className="col-span-full p-12 text-center bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                                                <Truck className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                                                <h4 className="text-lg font-bold text-slate-800 mb-2">No Suppliers</h4>
+                                                <p className="text-slate-500 text-sm">Add suppliers via Edit Product</p>
+                                            </div>
                                         )}
                                     </div>
+                                    {selectedProduct.vendors && selectedProduct.vendors.length > 4 && (
+                                        <div className="col-span-full mt-4 pt-4 border-t border-slate-200">
+                                            <Link href={`/admin/suppliers?product=${selectedProduct.id}&name=${encodeURIComponent(selectedProduct.name)}`} className="text-[var(--color-cashcrow-primary)] text-xs font-bold hover:underline w-full text-left block">
+                                                View all {selectedProduct.vendors.length} suppliers →
+                                            </Link>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

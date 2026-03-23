@@ -24,6 +24,8 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
     const [selectedSupplierId, setSelectedSupplierId] = useState('')
     const [showOtherVendor, setShowOtherVendor] = useState(false)
     const [otherVendor, setOtherVendor] = useState({ name: '', fund: '', link: '' })
+    const [supplierFund, setSupplierFund] = useState('')
+    const [supplierLink, setSupplierLink] = useState('')
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -51,11 +53,25 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
         setStatus(null)
 
         const formData = new FormData(e.currentTarget)
-        // Add selected supplier ID
+        
+        let vendors: any[] = []
         if (selectedSupplierId && selectedSupplierId !== 'others') {
-            formData.append('supplier_id', selectedSupplierId)
+            const supplier = suppliers.find(s => s.id === selectedSupplierId)
+            if (supplier) {
+                vendors = [{
+                    name: supplier.company_name,
+                    fund: supplierFund || undefined,
+                    link: supplierLink || undefined
+                }]
+            }
+            formData.append('vendors', JSON.stringify(vendors))
         } else if (showOtherVendor && otherVendor.name.trim()) {
-            formData.append('other_vendor', JSON.stringify(otherVendor))
+            vendors = [{
+                name: otherVendor.name,
+                fund: otherVendor.fund || undefined,
+                link: otherVendor.link || undefined
+            }]
+            formData.append('vendors', JSON.stringify(vendors))
         }
 
         const result = await addProduct(formData)
@@ -69,7 +85,8 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
             setSelectedSupplierId('')
             setShowOtherVendor(false)
             setOtherVendor({ name: '', fund: '', link: '' })
-            // Call onSuccess callback if provided
+            setSupplierFund('')
+            setSupplierLink('')
             if (onSuccess) {
                 onSuccess()
             }
@@ -87,6 +104,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                 </div>
             )}
 
+            {/* Product Photo */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">image</span>
@@ -120,7 +138,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                 </div>
             </div>
 
-            {/* Section 1: General Info */}
+            {/* General Info */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">info</span>
@@ -160,7 +178,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
-                {/* Section 2: Storage Location */}
+                {/* Storage Location */}
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">location_on</span>
@@ -182,7 +200,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                     </div>
                 </div>
 
-                {/* Section 3: Inventory Details */}
+                {/* Inventory Details */}
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">inventory</span>
@@ -206,7 +224,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                 </div>
             </div>
 
-            {/* Section 4: Vendors */}
+            {/* Suppliers/Vendors Section - ORIGINAL DESIGN */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                     <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
@@ -232,6 +250,40 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                             <option value="others">➕ Others / New Supplier</option>
                         </select>
 
+                        {selectedSupplierId && selectedSupplierId !== 'others' && (
+                            <div className="pt-4 border-t border-slate-200 p-4 bg-slate-50 rounded-xl">
+                                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                    Supplier Details (Optional)
+                                </h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
+                                            MRP/Fund
+                                        </label>
+                                        <input
+                                            value={supplierFund}
+                                            onChange={(e) => setSupplierFund(e.target.value)}
+                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                            placeholder="e.g. Grant NIH-2026 or MRP 2500"
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
+                                            Website/Link
+                                        </label>
+                                        <input
+                                            value={supplierLink}
+                                            onChange={(e) => setSupplierLink(e.target.value)}
+                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                            placeholder="https://..."
+                                            type="url"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {showOtherVendor && (
                             <div className="pt-4 border-t border-slate-200 mt-4 p-4 bg-slate-50 rounded-xl">
                                 <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
@@ -252,13 +304,13 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            Fund
+                                            MRP/Fund
                                         </label>
                                         <input
                                             value={otherVendor.fund}
                                             onChange={(e) => setOtherVendor({...otherVendor, fund: e.target.value})}
                                             className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="e.g. Grant Fund"
+                                            placeholder="e.g. Grant NIH-2026 or MRP 2500"
                                             type="text"
                                         />
                                     </div>
@@ -281,7 +333,7 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
                 </div>
             </div>
 
-            {/* Section 5: Notes */}
+            {/* Additional Notes */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">notes</span>

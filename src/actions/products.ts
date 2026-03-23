@@ -44,7 +44,7 @@ export async function addProduct(formData: FormData) {
     const min_stock_level = parseInt(formData.get('min_stock_level') as string || '0', 10);
     const notes = formData.get('notes') as string;
 
-    let vendors = [];
+    let vendors: any[] = [];
     try {
         const vendorsStr = formData.get('vendors') as string;
         if (vendorsStr) vendors = JSON.parse(vendorsStr);
@@ -118,7 +118,7 @@ export async function updateProduct(id: string, formData: FormData) {
     const min_stock_level = parseInt(formData.get('min_stock_level') as string || '0', 10);
     const notes = formData.get('notes') as string;
 
-    let vendors = [];
+    let vendors: any[] = [];
     try {
         const vendorsStr = formData.get('vendors') as string;
         if (vendorsStr) vendors = JSON.parse(vendorsStr);

@@ -54,7 +54,7 @@ export default function SuppliersClient({
     // const searchParams = useSearchParams()
     // const productFilter = searchParams.get('product')
     // const productName = searchParams.get('name') || ''
-    const productName = ''
+    const productName: string = ''
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
 
     // Filter suppliers based on search query
@@ -111,6 +111,13 @@ export default function SuppliersClient({
                     </Link>
                 </div>
             </div>
+
+            {/* Summary Cards - Moved Above */}
+            <SupplierStats 
+                totalCount={totalCount}
+                activePartners={activeSuppliers}
+                averageLeadTime={averageLeadTime}
+            />
 
             {/* Supplier Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -176,13 +183,6 @@ export default function SuppliersClient({
                     </div>
                 </div>
             )}
-
-            {/* Summary Cards */}
-            <SupplierStats 
-                totalCount={totalCount}
-                activePartners={activeSuppliers}
-                averageLeadTime={averageLeadTime}
-            />
 
             {/* Supplier Detail Modal */}
             {selectedSupplier && (

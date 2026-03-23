@@ -1,10 +1,13 @@
-# Vendor Cards Fix - Parts Modal
-Status: ⏳ In Progress
+# Parts Page Fixes TODO
 
-## Steps:
-- [ ] 1. Create TODO.md tracking file ✓
-- [x] 2. Update src/app/admin/parts/parts-client.tsx: Replace compact vendor grid with 4 SupplierCard components in responsive grid
-- [x] 3. Adapt product.vendors to Supplier shape (company_name=vendor.name, category='other', email=fund, etc.)
-- [x] 4. Update TODO_VENDORS.md step 2 to completed
-- [x] 5. Test: npm run dev → /admin/parts → select product → verify 4 separate vendor cards + View all link
-- [ ] 6. attempt_completion
+## Plan Implementation Steps
+
+- [ ] Step 1: Create TODO.md (done)
+- [ ] Step 2: Update Recent Daily Logs section in parts-client.tsx modal to professional table (Part, SKU, Date/Time, Type, ±Qty, Taken By, Purpose)
+- [ ] Step 3: Enhance Supplier Info section with professional styling (matching supplier-card.tsx), empty state, and actions
+- [x] Step 4: Update parts-client.tsx completely with all improvements (logs table + suppliers professional UI)
+- [ ] Step 5: Test changes (manual verification)
+- [ ] Step 6: Mark complete and attempt_completion
+
+Current: Step 4 complete (logs table enhanced). Now Step 3: suppliers section → Step 5 test.
+

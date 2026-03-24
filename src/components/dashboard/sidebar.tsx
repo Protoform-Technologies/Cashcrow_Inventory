@@ -10,7 +10,9 @@ import {
     LogOut,
     Beaker,
     UserPlus,
-    BarChart3   // ✅ Added icon for Reports
+    BarChart3,
+    Truck,
+    List
 } from "lucide-react"
 
 import Link from "next/link"
@@ -20,16 +22,20 @@ import { logout } from "@/actions/auth"
 const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
     { name: 'Parts', icon: Package, href: '/admin/parts' },
+    { name: 'Suppliers', icon: List, href: '/admin/suppliers' },
+    { name: 'Add Suppliers', icon: Truck, href: '/admin/add-suppliers' },
     { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
-    { name: 'Daily Log', icon: History, href: '#' },
 
-    // ✅ ADD THIS (Reports Tab)
+    // ✅ FIXED (use correct route from team)
+    { name: 'Daily Log', icon: History, href: '/admin/daily-log' },
+
+    // ✅ KEEP YOUR FEATURE
     { name: 'Reports', icon: BarChart3, href: '/reports' },
 ]
 
 const accountItems = [
-    { name: 'User Profile', icon: UserCircle, href: '#' },
+    { name: 'User Profile', icon: UserCircle, href: '/profile' },
     { name: 'Settings', icon: Settings, href: '#' },
 ]
 

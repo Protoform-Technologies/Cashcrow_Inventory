@@ -1,13 +1,17 @@
 'use client'
 
-import { Mail, User, Shield, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { addMember } from "@/actions/members"
 
-export default function AddMemberForm() {
+interface AddMemberFormProps {
+    onSuccess?: () => void
+}
+
+export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | null>(null)
     const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -34,7 +38,11 @@ export default function AddMemberForm() {
                 setError(result.error)
             } else if (result?.success) {
                 setSuccessMsg(result.success)
-                    ; (e.target as HTMLFormElement).reset()
+                ;(e.target as HTMLFormElement).reset()
+                // Call onSuccess callback if provided
+                if (onSuccess) {
+                    onSuccess()
+                }
             }
         })
     }
@@ -97,7 +105,7 @@ export default function AddMemberForm() {
                         required
                         disabled={isPending}
                         defaultValue=""
-                        className="w-full h-11 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700 dark:text-slate-300"
+                        className="w-full h-11 px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
                     >
                         <option value="" disabled>Select a role</option>
                         <option value="MEMBER">Member (Edit Access)</option>
@@ -121,3 +129,4 @@ export default function AddMemberForm() {
         </form>
     )
 }
+

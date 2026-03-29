@@ -137,3 +137,18 @@ export async function updateMember(id: string, formData: FormData) {
 
     return { success: true }
 }
+
+export async function getMembers() {
+    const adminClient = getSupabaseAdmin()
+    const { data: members, error } = await adminClient
+        .from('profiles')
+        .select('id, first_name, last_name, email, role, is_active')
+        .order('first_name', { ascending: true })
+
+    if (error) {
+        console.error('Failed to fetch members data:', error.message)
+        return []
+    }
+
+    return members || []
+}

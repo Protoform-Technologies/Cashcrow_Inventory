@@ -1,5 +1,4 @@
-import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
-import { redirect } from 'next/navigation'
+import { getAdminProfileOrRedirect } from '@/actions/auth'
 import DashboardLayout from '@/components/dashboard/layout'
 import { getProducts } from '@/actions/products'
 import PartsClient from './parts-client'
@@ -9,24 +8,7 @@ export default async function PartsPage(props: { searchParams: Promise<{ page?: 
     const page = Number(searchParams.page) || 1
     const limit = 9
 
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        redirect('/')
-    }
-
-    const adminClient = getSupabaseAdmin()
-    const { data: profile } = await adminClient
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile || profile.role?.toUpperCase() !== 'ADMIN') {
-        redirect('/')
-    }
-
+    const profile = await getAdminProfileOrRedirect()
     const fullName = `${profile.first_name} ${profile.last_name}`
     const resolvedSearchParams = searchParams as any
     const query = resolvedSearchParams.q

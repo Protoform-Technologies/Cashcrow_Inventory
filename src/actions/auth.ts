@@ -106,3 +106,25 @@ export async function updatePassword(password: string) {
 
     return { success: true }
 }
+
+export async function getAdminProfileOrRedirect() {
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/')
+    }
+
+    const adminClient = getSupabaseAdmin()
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+    if (!profile || profile.role?.toUpperCase() !== 'ADMIN') {
+        redirect('/')
+    }
+
+    return profile
+}

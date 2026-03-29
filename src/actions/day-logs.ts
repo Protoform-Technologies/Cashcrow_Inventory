@@ -318,23 +318,20 @@ export async function getProductFullHistory(productId: string, page: number = 1,
         .from('day_log_items')
         .select(`
             *,
-            day_logs!day_log_id_fkey (
-                created_at
+            day_logs!day_log_items_day_log_id_fkey (
+                created_at,
+                created_by
             ),
-            products!part_id_fkey (
+            products!day_log_items_part_id_fkey (
                 name,
                 sku
-            ),
-            profiles!taken_by_fkey (
-                first_name,
-                last_name
             )
         `, { 
             count: 'exact',
             head: false 
         })
         .eq('part_id', productId)
-        .order('created_at', { foreignTable: 'day_logs', ascending: false })
+        .order('created_at', { ascending: false })
         .range(from, to)
 
     if (error) {
@@ -342,24 +339,46 @@ export async function getProductFullHistory(productId: string, page: number = 1,
         return { logs: [], total: 0 }
     }
 
+    const userIds = Array.from(new Set((data || []).map(item => item.taken_by || (item.day_logs && item.day_logs.created_by)).filter(Boolean)))
+    let profileMap: Record<string, any> = {}
+    if (userIds.length > 0) {
+        const adminClient = getSupabaseAdmin()
+        const { data: profiles } = await adminClient
+            .from('profiles')
+            .select('id, first_name, last_name')
+            .in('id', userIds)
+        
+        if (profiles) {
+            profileMap = profiles.reduce((acc: any, p: any) => {
+                acc[p.id] = p
+                return acc
+            }, {})
+        }
+    }
+
     // Format for table
-    const logs = (data || []).map(item => ({
-        time: new Date(item.day_logs.created_at).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false 
-        }),
-        date: new Date(item.day_logs.created_at).toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
-        }),
-        partName: item.products?.name || item.products?.sku || 'Unknown',
-        quantity: item.qty,
-        type: item.type,
-        sign: (item.type === 'OUT' || item.type === 'SCRAP') ? '-' : '+',
-        takenBy: item.profiles ? `${item.profiles.first_name} ${item.profiles.last_name}`.trim() : 'Unknown',
-        purpose: item.purpose || ''
-    }))
+    const logs = (data || []).map(item => {
+        const takenByUserId = item.taken_by || (item.day_logs ? item.day_logs.created_by : null);
+        const profile = takenByUserId ? profileMap[takenByUserId as string] : null;
+
+        return {
+            time: item.day_logs ? new Date(item.day_logs.created_at).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            }) : 'Unknown',
+            date: item.day_logs ? new Date(item.day_logs.created_at).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            }) : 'Unknown',
+            partName: item.products?.name || item.products?.sku || 'Unknown',
+            quantity: item.qty,
+            type: item.type,
+            sign: (item.type === 'OUT' || item.type === 'SCRAP') ? '-' : '+',
+            takenBy: profile ? `${profile.first_name} ${profile.last_name}`.trim() : 'Unknown',
+            purpose: item.purpose || ''
+        }
+    })
 
     return { logs, total: count || 0 }
 }
@@ -417,3 +436,82 @@ export async function deleteDayLog(logId: string): Promise<{ success: boolean } 
     return { success: true }
 }
 
+export async function getSubmittedLogsWithDetails() {
+    const adminClient = getSupabaseAdmin()
+
+    // Fetch all submitted day logs using admin client
+    const { data: submittedLogs, error: logsError } = await adminClient
+        .from('day_logs')
+        .select('*')
+        .eq('status', 'SUBMITTED')
+        .order('created_at', { ascending: false })
+
+    if (logsError) {
+        console.warn('Could not fetch submitted logs:', logsError.message)
+        return []
+    }
+
+    if (!submittedLogs || submittedLogs.length === 0) return []
+
+    // Fetch user profiles separately for the logs
+    const logCreatorIds = submittedLogs.map((log: any) => log.created_by).filter(Boolean)
+    const profileMap: Record<string, any> = {}
+    
+    if (logCreatorIds.length > 0) {
+        const { data: profiles } = await adminClient
+            .from('profiles')
+            .select('id, first_name, last_name, email')
+            .in('id', logCreatorIds)
+        
+        if (profiles) {
+            profiles.forEach((profile: any) => { profileMap[profile.id] = profile })
+        }
+    }
+
+    // Now loop over the logs and fetch the items (could optimize with an 'in' query)
+    const logsWithItems: any[] = []
+    
+    for (const log of submittedLogs) {
+        const { data: items } = await adminClient
+            .from('day_log_items')
+            .select('*')
+            .eq('day_log_id', log.id)
+            
+        const itemsWithProducts: any[] = []
+        if (items) {
+            for (const item of items) {
+                const { data: product } = await adminClient
+                    .from('products')
+                    .select('name, sku, quantity')
+                    .eq('id', item.part_id)
+                    .single()
+                
+                let takenByName = null
+                if (item.taken_by) {
+                    const { data: tkProfile } = await adminClient
+                        .from('profiles')
+                        .select('first_name, last_name')
+                        .eq('id', item.taken_by)
+                        .single()
+                    if (tkProfile) {
+                        takenByName = `${tkProfile.first_name} ${tkProfile.last_name}`
+                    }
+                }
+                
+                itemsWithProducts.push({ 
+                    ...item, 
+                    products: product,
+                    taken_by_name: takenByName
+                })
+            }
+        }
+        
+        logsWithItems.push({
+            ...log,
+            day_log_items: itemsWithProducts,
+            profiles: profileMap[log.created_by] || { first_name: 'Unknown', last_name: '', email: '' }
+        })
+    }
+
+    return logsWithItems
+}

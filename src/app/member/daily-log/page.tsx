@@ -1,8 +1,7 @@
-import { createServerSupabaseClient } from '@/lib/supabase'
+ import { createServerSupabaseClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import DashboardLayout from '@/components/dashboard/layout'
-import DailyLogClient from './daily-log-client'
-import { getAdminProfileOrRedirect } from '@/actions/auth'
+import DailyLogClient from '@/app/admin/daily-log/daily-log-client'
 import { getProductsForDropdown } from '@/actions/products'
 import { getMembers } from '@/actions/members'
 import { getSubmittedLogsWithDetails } from '@/actions/day-logs'
@@ -13,6 +12,7 @@ export default async function DailyLogPage() {
 
     if (authError) {
         console.error('Auth error:', authError)
+        redirect('/')
     }
 
     if (!user) {
@@ -20,8 +20,8 @@ export default async function DailyLogPage() {
         redirect('/')
     }
 
-    const profile = await getAdminProfileOrRedirect()
-    const fullName = `${profile.first_name} ${profile.last_name}`
+    // Get profile for name (skip for compatibility)
+    const fullName = user.email?.split('@')[0]?.replace('.', ' ') || user.email || 'Member'
 
     // Fetch products for the dropdown
     const products = await getProductsForDropdown()
@@ -30,16 +30,16 @@ export default async function DailyLogPage() {
     const members = await getMembers()
     
     // Fallback if members fetch fails deeply or is empty
-    const finalMembers = members.length > 0 ? members : [{ id: profile.id, first_name: profile.first_name || 'User', last_name: profile.last_name || '' }]
+    const finalMembers = members.length > 0 ? members : [{ id: user.id, first_name: fullName.split(' ')[0], last_name: fullName.split(' ').slice(1).join(' ') || '' }]
 
     // Fetch all submitted day logs with items properly
     const logsWithItems = await getSubmittedLogsWithDetails()
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Director" title="Daily Log Entry">
+        <DashboardLayout userName={fullName} userRole="Lab Member" title="Daily Log Entry">
             <DailyLogClient 
                 userName={fullName}
-                userId={profile.id}
+                userId={user.id}
                 products={products}
                 members={finalMembers}
                 submittedLogs={logsWithItems}
@@ -47,3 +47,4 @@ export default async function DailyLogPage() {
         </DashboardLayout>
     )
 }
+

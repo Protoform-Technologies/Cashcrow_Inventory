@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -225,62 +225,66 @@ export default function DailyLogClient({ userName, userId, products, members, su
     }
 
     return (
-        <div className="space-y-6 md:space-y-8 p-4 md:p-8 max-w-7xl mx-auto">
-            <header className="mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="p-6 md:p-8 space-y-6 md:space-y-8">
+            <header className="px-4 md:px-8 py-4 md:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Daily Log Entry</h2>
-                        <p className="text-slate-500 text-sm md:text-base mt-1">Convert whiteboard notes into digital ledger transactions.</p>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Daily Log Entry</h2>
+                        <p className="text-slate-500 text-sm">Convert whiteboard notes into digital ledger transactions.</p>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
                         <Button 
                             onClick={handleSaveDraft}
                             variant="outline"
-                            size="sm"
-                            className="flex items-center gap-2"
+                            className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all text-xs md:text-sm font-semibold border border-slate-200"
                         >
-                            <FileText className="w-4 h-4" />
-                            Save Draft
+                            <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span className="hidden sm:inline">Save as Draft</span>
+                            <span className="sm:hidden">Draft</span>
                         </Button>
                         <Button 
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)]"
+                            className="flex items-center justify-center gap-2 px-4 md:px-6 py-2 md:py-2.5 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white rounded-xl transition-all text-xs md:text-sm font-semibold shadow-lg"
                         >
-                            <Send className="w-4 h-4" />
-                            {isSubmitting ? 'Submitting...' : 'Submit Log'}
+                            <Send className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            {isSubmitting ? 'Submitting...' : 'Submit'}
                         </Button>
                     </div>
                 </div>
             </header>
 
-            <DayLogForm
-                entries={entries}
-                products={products}
-                members={members}
-                onAddRow={addNewRow}
-                onRemoveRow={removeEntry}
-                onUpdateEntry={updateEntry}
-            />
-
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Notes</label>
-                <textarea 
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl transition-all px-4 py-3 resize-none"
-                    placeholder="Additional notes for this log entry..."
-                    rows={3}
-                    value={globalNotes}
-                    onChange={(e) => setGlobalNotes(e.target.value)}
+            <div className="px-3 md:px-8 pb-8 max-w-7xl mx-auto space-y-4 md:space-y-6">
+                <DayLogForm
+                    entries={entries}
+                    products={products}
+                    members={members}
+                    onAddRow={addNewRow}
+                    onRemoveRow={removeEntry}
+                    onUpdateEntry={updateEntry}
                 />
-            </div>
 
-            <div className="flex items-start gap-4 p-6 bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl border border-slate-200">
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white flex items-center justify-center border">
-                    <Search className="w-6 h-6 text-slate-400" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 shadow-sm md:col-span-2 flex flex-col gap-2 md:gap-3">
+                        <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider">Notes</label>
+                        <textarea 
+                            className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl text-xs md:text-sm transition-all px-3 md:px-4 py-2 md:py-3 resize-none"
+                            placeholder="Add notes..."
+                            rows={2}
+                            value={globalNotes}
+                            onChange={(e) => setGlobalNotes(e.target.value)}
+                        ></textarea>
+                    </div>
                 </div>
-                <div>
-                    <h4 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-2">Pro Tip</h4>
-                    <p className="text-base text-slate-500 leading-relaxed">Use Tab key to quickly move between product fields. Ctrl+Enter to submit.</p>
+
+                <div className="flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-slate-200/50 border border-slate-300">
+                    <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-widest">Tip</h4>
+                        <p className="text-xs md:text-sm text-slate-500">Use Tab to jump between fields.</p>
+                    </div>
                 </div>
             </div>
 

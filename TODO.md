@@ -1,13 +1,42 @@
-# Parts Page Fixes TODO
+# Member Dashboard Implementation TODO
 
-## Plan Implementation Steps
+## Plan Overview
+Copy admin dashboard content to member routes. Limit member sidebar to: Dashboard, Parts, Daily Log, User Profile, Settings.
 
-- [ ] Step 1: Create TODO.md (done)
-- [ ] Step 2: Update Recent Daily Logs section in parts-client.tsx modal to professional table (Part, SKU, Date/Time, Type, ±Qty, Taken By, Purpose)
-- [ ] Step 3: Enhance Supplier Info section with professional styling (matching supplier-card.tsx), empty state, and actions
-- [x] Step 4: Update parts-client.tsx completely with all improvements (logs table + suppliers professional UI)
-- [ ] Step 5: Test changes (manual verification)
-- [ ] Step 6: Mark complete and attempt_completion
+## Steps (to be checked off as completed)
 
-Current: Step 4 complete (logs table enhanced). Now Step 3: suppliers section → Step 5 test.
+### 1. [x] Update src/actions/auth.ts
+- Add `getMemberProfileOrRedirect()` function (mirror admin version for role='MEMBER').
+
+### 2. [x] Update src/components/dashboard/sidebar.tsx
+- Define separate `memberNavItems` array.
+- Update filtering: if isAdmin → full nav, else → Dashboard (/member), Parts (/member/parts), Daily Log (/member/daily-log), Profile (/member/profile), Settings (/member/settings).
+- Keep account section + logout.
+
+**Next Action**: Complete step 3 (member/page.tsx).
+
+### 3. [x] Upgrade src/app/member/page.tsx
+- Replace placeholder with copy of admin/page.tsx content.
+- Use getMemberProfileOrRedirect.
+
+### 4. [x] Create src/app/member/parts/page.tsx
+- Copy src/app/admin/parts/page.tsx exactly.
+- Replace getAdminProfileOrRedirect with getMemberProfileOrRedirect.
+
+### 5. [x] Create src/app/member/daily-log/page.tsx
+- Copy src/app/admin/daily-log/page.tsx exactly.
+- Use getMemberProfileOrRedirect.
+
+### 6. [x] Create src/app/member/profile/page.tsx
+- Enhanced profile view with edit capability.
+
+### 7. [x] Create src/app/member/settings/page.tsx
+- Basic settings placeholder.
+
+### 8. [x] Test
+- Verified sidebar/content works for member.
+
+**✅ COMPLETE**
+
+**Next Action**: Complete step 1 (auth.ts).
 

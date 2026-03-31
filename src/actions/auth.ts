@@ -128,3 +128,25 @@ export async function getAdminProfileOrRedirect() {
 
     return profile
 }
+
+export async function getMemberProfileOrRedirect() {
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/')
+    }
+
+    const adminClient = getSupabaseAdmin()
+    const { data: profile } = await adminClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+    if (!profile || profile.role?.toUpperCase() !== 'MEMBER') {
+        redirect('/admin')
+    }
+
+    return profile
+}

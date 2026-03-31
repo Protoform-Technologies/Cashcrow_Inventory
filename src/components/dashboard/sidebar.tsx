@@ -19,19 +19,21 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logout } from "@/actions/auth"
 
-const navItems = [
+const adminNavItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
     { name: 'Parts', icon: Package, href: '/admin/parts' },
     { name: 'Suppliers', icon: List, href: '/admin/suppliers' },
     { name: 'Add Suppliers', icon: Truck, href: '/admin/add-suppliers' },
     { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
-
-    // ✅ FIXED (use correct route from team)
     { name: 'Daily Log', icon: History, href: '/admin/daily-log' },
-
-    // ✅ KEEP YOUR FEATURE
     { name: 'Reports', icon: BarChart3, href: '/reports' },
+]
+
+const memberMainNavItems = [
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/member' },
+    { name: 'Parts', icon: Package, href: '/member/parts' },
+    { name: 'Daily Log', icon: History, href: '/member/daily-log' },
 ]
 
 const accountItems = [
@@ -75,37 +77,31 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
             {/* NAVIGATION */}
             <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto overflow-x-hidden">
 
-                {navItems
-                    .filter(item => isAdmin || item.name === 'Dashboard')
-                    .map((item) => {
+{(isAdmin ? adminNavItems : memberMainNavItems)
+    .map((item) => {
+        const href = item.name === 'Dashboard' ? dashboardHref : item.href
+        const isActive = pathname === href
 
-                        const href =
-                            item.name === 'Dashboard'
-                                ? dashboardHref
-                                : item.href
-
-                        const isActive = pathname === href
-
-                        return (
-                            <Link
-                                key={item.name}
-                                href={href}
-                                onClick={() => setIsOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${isActive
-                                    ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
-                                    : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
-                                    }`}
-                            >
-                                <item.icon
-                                    className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive
-                                        ? "text-white"
-                                        : "text-[#d0e8d6]/70 group-hover:text-white"
-                                        }`}
-                                />
-                                {item.name}
-                            </Link>
-                        )
-                    })}
+        return (
+            <Link
+                key={item.name}
+                href={href}
+                onClick={() => setIsOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${isActive
+                    ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
+                    : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
+                    }`}
+            >
+                <item.icon
+                    className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive
+                        ? "text-white"
+                        : "text-[#d0e8d6]/70 group-hover:text-white"
+                        }`}
+                />
+                {item.name}
+            </Link>
+        )
+    })}
 
                 {/* ACCOUNT SECTION */}
                 <div className="pt-8 pb-2 px-4">

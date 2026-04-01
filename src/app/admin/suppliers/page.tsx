@@ -16,7 +16,12 @@ export default async function SuppliersPage(props: { searchParams: Promise<{ pag
     const totalPages = Math.ceil(count / limit)
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Admin" title="Suppliers">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Admin" 
+            avatarUrl={profile.avatar_url}
+            title="Suppliers"
+        >
             <SuppliersClient 
                 suppliers={suppliers || []} 
                 totalCount={count || 0}

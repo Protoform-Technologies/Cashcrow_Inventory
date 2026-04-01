@@ -38,7 +38,6 @@ const memberMainNavItems = [
 
 const accountItems = [
     { name: 'User Profile', icon: UserCircle, href: '/profile' },
-    { name: 'Settings', icon: Settings, href: '#' },
 ]
 
 interface SidebarProps {
@@ -110,17 +109,21 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
                     </p>
                 </div>
 
-                {accountItems.map((item) => (
-                    <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 text-[#d0e8d6] hover:bg-white/5 hover:text-white rounded-xl font-medium transition-all group"
-                    >
-                        <item.icon className="w-5 h-5 text-[#d0e8d6]/70 group-hover:text-white transition-transform group-hover:scale-110" />
-                        {item.name}
-                    </Link>
-                ))}
+                <Link
+                    href={isAdmin ? "/admin/profile" : "/member/profile"}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${
+                      pathname.includes("/profile")
+                        ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
+                        : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
+                    }`}
+                >
+                    <UserCircle className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
+                      pathname.includes("/profile") ? "text-white" : "text-[#d0e8d6]/70 group-hover:text-white"
+                    }`} />
+                    User Profile
+                </Link>
+
             </nav>
 
             {/* LOGOUT */}

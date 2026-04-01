@@ -32,7 +32,12 @@ export default async function MemberPage({
     })
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Member" title="Member Dashboard">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Member" 
+            avatarUrl={profile.avatar_url}
+            title="Member Dashboard"
+        >
 
             {/* Hero Section */}
             <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0">

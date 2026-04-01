@@ -38,6 +38,7 @@ interface Supplier {
 
 interface AddProductClientProps {
     userName: string
+    avatarUrl?: string
     products: Product[]
     suppliers: Supplier[]
 }
@@ -50,7 +51,7 @@ function getStockStatus(quantity: number, minStockLevel: number) {
     return { status: 'In Stock', class: 'bg-emerald-100 text-emerald-700', trend: 'up' }
 }
 
-export default function AddProductClient({ userName, products, suppliers }: AddProductClientProps) {
+export default function AddProductClient({ userName, avatarUrl, products, suppliers }: AddProductClientProps) {
     const [showAddForm, setShowAddForm] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -115,7 +116,7 @@ export default function AddProductClient({ userName, products, suppliers }: AddP
     }
 
     return (
-        <DashboardLayout userName={userName} userRole="Lab Admin" title="Add New Product">
+        <DashboardLayout userName={userName} userRole="Lab Admin" avatarUrl={avatarUrl} title="Add New Product">
             <div className="w-full">
                 {/* Title and Button Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-2">

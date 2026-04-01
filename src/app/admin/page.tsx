@@ -32,7 +32,12 @@ export default async function AdminPage({
     })
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Director" title="Admin Dashboard">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Director" 
+            avatarUrl={profile.avatar_url}
+            title="Admin Dashboard"
+        >
 
             {/* Hero Section */}
             <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0">

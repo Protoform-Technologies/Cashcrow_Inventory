@@ -12,7 +12,7 @@ interface ReportsHeaderProps {
 export default function ReportsHeader({ reportData }: ReportsHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const currentMonth = parseInt(searchParams.get("month") || new Date().getMonth().toString());
   const currentYear = parseInt(searchParams.get("year") || new Date().getFullYear().toString());
 
@@ -31,7 +31,7 @@ export default function ReportsHeader({ reportData }: ReportsHeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-slate-100 sticky top-0 z-20 px-4 md:px-8 py-4 md:py-6 transition-all shadow-sm">
+    <header className="bg-white border-b border-slate-100 sticky top-0 z-0 px-4 md:px-8 py-4 md:py-6 transition-all shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="text-center md:text-left">
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
@@ -42,8 +42,8 @@ export default function ReportsHeader({ reportData }: ReportsHeaderProps) {
         <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3">
           <div className="flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 gap-2 text-sm group w-full sm:w-auto">
             <Calendar className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
-            <select 
-              value={currentMonth} 
+            <select
+              value={currentMonth}
               onChange={(e) => handleDateChange(parseInt(e.target.value), currentYear)}
               className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer text-xs"
             >
@@ -51,8 +51,8 @@ export default function ReportsHeader({ reportData }: ReportsHeaderProps) {
                 <option key={m} value={i}>{m}</option>
               ))}
             </select>
-            <select 
-              value={currentYear} 
+            <select
+              value={currentYear}
               onChange={(e) => handleDateChange(currentMonth, parseInt(e.target.value))}
               className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer text-xs"
             >

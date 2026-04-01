@@ -16,7 +16,12 @@ export default async function PartsPage(props: { searchParams: Promise<{ page?: 
     const totalPages = Math.ceil(count / limit)
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Member" title="Inventory Parts">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Member" 
+            avatarUrl={profile.avatar_url}
+            title="Inventory Parts"
+        >
             <PartsClient 
                 products={products || []} 
                 totalCount={count || 0}

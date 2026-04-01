@@ -36,7 +36,12 @@ export default async function DailyLogPage() {
     const logsWithItems = await getSubmittedLogsWithDetails()
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Director" title="Daily Log Entry">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Director" 
+            avatarUrl={profile.avatar_url}
+            title="Daily Log Entry"
+        >
             <DailyLogClient 
                 userName={fullName}
                 userId={profile.id}

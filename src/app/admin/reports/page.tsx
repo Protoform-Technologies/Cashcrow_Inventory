@@ -35,7 +35,12 @@ export default async function ReportsPage({
   };
 
   return (
-    <DashboardLayout userName={fullName} userRole="Lab Director" title="Reports & Analytics">
+    <DashboardLayout 
+      userName={fullName} 
+      userRole="Lab Director" 
+      avatarUrl={profile.avatar_url}
+      title="Reports & Analytics"
+    >
       {/* Reports Header and Actions */}
       <ReportsHeader reportData={exportData} />
 

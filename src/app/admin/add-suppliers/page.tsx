@@ -44,7 +44,12 @@ export default async function AddSuppliersPage() {
         .order('created_at', { ascending: false })
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Admin" title="Add Suppliers">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Admin" 
+            avatarUrl={profile.avatar_url}
+            title="Add Suppliers"
+        >
             <AddSuppliersClient userName={fullName} suppliers={suppliers || []} />
         </DashboardLayout>
     )

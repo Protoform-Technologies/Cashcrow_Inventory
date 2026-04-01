@@ -8,7 +8,12 @@ export default async function SettingsPage() {
     const fullName = `${profile.first_name} ${profile.last_name}`
 
     return (
-        <DashboardLayout userName={fullName} userRole="Lab Member" title="Settings">
+        <DashboardLayout 
+            userName={fullName} 
+            userRole="Lab Member" 
+            avatarUrl={profile.avatar_url}
+            title="Settings"
+        >
             <div className="space-y-8 max-w-2xl">
                 {/* Header */}
                 <div className="flex items-center gap-4 p-8 bg-gradient-to-r from-slate-50 to-white rounded-3xl border border-slate-200 shadow-sm">

@@ -8,10 +8,11 @@ interface DashboardLayoutProps {
     children: React.ReactNode
     userName: string
     userRole: string
+    avatarUrl?: string
     title?: string
 }
 
-export default function DashboardLayout({ children, userName, userRole, title = "Dashboard" }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, userName, userRole, avatarUrl, title = "Dashboard" }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
@@ -31,6 +32,7 @@ export default function DashboardLayout({ children, userName, userRole, title = 
                     title={title}
                     userName={userName}
                     userRole={userRole}
+                    avatarUrl={avatarUrl}
                     onMenuClick={() => setIsSidebarOpen(true)}
                 />
 <div className="p-2 sm:p-4 md:p-8 space-y-6 md:space-y-8 flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto min-h-0">

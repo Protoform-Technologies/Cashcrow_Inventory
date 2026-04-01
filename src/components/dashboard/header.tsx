@@ -12,10 +12,11 @@ interface HeaderProps {
     title: string
     userName: string
     userRole: string
+    avatarUrl?: string
     onMenuClick: () => void
 }
 
-export default function Header({ title, userName, userRole, onMenuClick }: HeaderProps) {
+export default function Header({ title, userName, userRole, avatarUrl, onMenuClick }: HeaderProps) {
 
     const router = useRouter()
 
@@ -178,8 +179,16 @@ export default function Header({ title, userName, userRole, onMenuClick }: Heade
                         <p className="text-xs text-gray-500">{userRole}</p>
                     </div>
 
-                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center font-bold">
-                        {initials}
+                    <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center font-bold overflow-hidden border border-slate-100">
+                        {avatarUrl ? (
+                            <img 
+                                src={avatarUrl} 
+                                alt={userName} 
+                                className="w-full h-full object-cover" 
+                            />
+                        ) : (
+                            initials
+                        )}
                     </div>
                 </div>
 

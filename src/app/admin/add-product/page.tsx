@@ -12,5 +12,5 @@ export default async function AddProductPage() {
     const { products } = await getProducts(1, 100) // Get first 100 products
     const { suppliers } = await getSuppliers(1, 100)
 
-    return <AddProductClient userName={fullName} products={products || []} suppliers={suppliers || []} />
+    return <AddProductClient userName={fullName} avatarUrl={profile.avatar_url} products={products || []} suppliers={suppliers || []} />
 }

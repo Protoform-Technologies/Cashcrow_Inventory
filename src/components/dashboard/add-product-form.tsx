@@ -21,11 +21,13 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
+const [purchaseMode, setPurchaseMode] = useState<'online' | 'offline' | ''>('')
     const [selectedSupplierId, setSelectedSupplierId] = useState('')
     const [showOtherVendor, setShowOtherVendor] = useState(false)
     const [otherVendor, setOtherVendor] = useState({ name: '', fund: '', link: '' })
-    const [supplierFund, setSupplierFund] = useState('')
-    const [supplierLink, setSupplierLink] = useState('')
+    const [shopName, setShopName] = useState('')
+    const [mrp, setMrp] = useState('')
+    const [websiteLink, setWebsiteLink] = useState('')
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -55,22 +57,42 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
         const formData = new FormData(e.currentTarget)
         
         let vendors: any[] = []
-        if (selectedSupplierId && selectedSupplierId !== 'others') {
-            const supplier = suppliers.find(s => s.id === selectedSupplierId)
-            if (supplier) {
+        if (purchaseMode === 'online') {
+            if (selectedSupplierId && selectedSupplierId !== 'others') {
+                const supplier = suppliers.find(s => s.id === selectedSupplierId)
+                if (supplier) {
+                    vendors = [{
+                        name: supplier.company_name,
+                        fund: mrp || undefined,
+                        link: websiteLink || undefined
+                    }]
+                }
+            } else if (showOtherVendor && otherVendor.name.trim()) {
                 vendors = [{
-                    name: supplier.company_name,
-                    fund: supplierFund || undefined,
-                    link: supplierLink || undefined
+                    name: otherVendor.name,
+                    fund: mrp || undefined,
+                    link: websiteLink || undefined
                 }]
             }
-            formData.append('vendors', JSON.stringify(vendors))
-        } else if (showOtherVendor && otherVendor.name.trim()) {
-            vendors = [{
-                name: otherVendor.name,
-                fund: otherVendor.fund || undefined,
-                link: otherVendor.link || undefined
-            }]
+        } else if (purchaseMode === 'offline') {
+            if (selectedSupplierId && selectedSupplierId !== 'others') {
+                const supplier = suppliers.find(s => s.id === selectedSupplierId)
+                if (supplier) {
+                    vendors = [{
+                        name: supplier.company_name,
+                        fund: mrp,
+                        mode: 'offline'
+                    }]
+                }
+            } else if (showOtherVendor && otherVendor.name.trim()) {
+                vendors = [{
+                    name: otherVendor.name,
+                    fund: mrp,
+                    mode: 'offline'
+                }]
+            }
+        }
+        if (vendors.length > 0) {
             formData.append('vendors', JSON.stringify(vendors))
         }
 
@@ -85,8 +107,6 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
             setSelectedSupplierId('')
             setShowOtherVendor(false)
             setOtherVendor({ name: '', fund: '', link: '' })
-            setSupplierFund('')
-            setSupplierLink('')
             if (onSuccess) {
                 onSuccess()
             }
@@ -225,113 +245,177 @@ export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddPr
             </div>
 
             {/* Suppliers/Vendors Section - ORIGINAL DESIGN */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Supplier</h3>
-                </div>
-                <div className="p-6">
-                    <div className="space-y-4">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                            Select Supplier
-                        </label>
-                        <select 
-                            name="supplier_id"
-                            value={selectedSupplierId}
-                            onChange={handleSupplierChange}
-                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
-                        >
-                            <option value="">Choose supplier (optional)</option>
-                            {suppliers.map((supplier) => (
-                                <option key={supplier.id} value={supplier.id}>
-                                    {supplier.company_name}
-                                </option>
-                            ))}
-                            <option value="others">➕ Others / New Supplier</option>
-                        </select>
-
-                        {selectedSupplierId && selectedSupplierId !== 'others' && (
-                            <div className="pt-4 border-t border-slate-200 p-4 bg-slate-50 rounded-xl">
-                                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                                    Supplier Details (Optional)
-                                </h4>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            MRP/Fund
-                                        </label>
-                                        <input
-                                            value={supplierFund}
-                                            onChange={(e) => setSupplierFund(e.target.value)}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="e.g. Grant NIH-2026 or MRP 2500"
-                                            type="text"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            Website/Link
-                                        </label>
-                                        <input
-                                            value={supplierLink}
-                                            onChange={(e) => setSupplierLink(e.target.value)}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="https://..."
-                                            type="url"
-                                        />
-                                    </div>
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
+                    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
+                        <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Purchase Details</h3>
+                    </div>
+                    <div className="p-6">
+                        <div className="space-y-4">
+                            <div className="space-y-4">
+                                {/* Mode Selector */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                        Mode of Purchase <span className="text-red-500">*</span>
+                                    </label>
+                                    <select 
+                                        value={purchaseMode}
+                                        onChange={(e) => {
+                                            setPurchaseMode(e.target.value as 'online' | 'offline')
+                                            setSelectedSupplierId('')
+                                            setShopName('')
+                                            setWebsiteLink('')
+                                            setMrp('')
+                                            setShowOtherVendor(false)
+                                        }}
+                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
+                                        required
+                                    >
+                                        <option value="">Select mode</option>
+                                        <option value="online">Online Supplier</option>
+                                        <option value="offline">Offline/Local Shop</option>
+                                    </select>
                                 </div>
-                            </div>
-                        )}
 
-                        {showOtherVendor && (
-                            <div className="pt-4 border-t border-slate-200 mt-4 p-4 bg-slate-50 rounded-xl">
-                                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                                    New Supplier Details
-                                </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            Supplier Name
-                                        </label>
-                                        <input
-                                            value={otherVendor.name}
-                                            onChange={(e) => setOtherVendor({...otherVendor, name: e.target.value})}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="Supplier name"
-                                            type="text"
-                                        />
+                                {/* Conditional Fields based on Mode */}
+                                {purchaseMode === 'online' && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                Online Supplier <span className="text-red-500">*</span>
+                                            </label>
+                                            <select 
+                                                value={selectedSupplierId}
+                                                onChange={handleSupplierChange}
+                                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
+                                                required
+                                            >
+                                                <option value="">Choose supplier</option>
+                                                {suppliers.map((supplier) => (
+                                                    <option key={supplier.id} value={supplier.id}>
+                                                        {supplier.company_name}
+                                                    </option>
+                                                ))}
+                                                <option value="others">➕ New Online Vendor</option>
+                                            </select>
+                                        </div>
+
+                                        {showOtherVendor && (
+                                            <div className="p-4 bg-slate-50 rounded-xl border">
+                                                <h5 className="text-sm font-semibold mb-3 text-slate-700">Other Online Vendor</h5>
+                                                <input
+                                                    value={otherVendor.name}
+                                                    onChange={(e) => setOtherVendor(prev => ({...prev, name: e.target.value}))}
+                                                    className="w-full p-3 border rounded-lg"
+                                                    placeholder="Vendor name"
+                                                    required={!selectedSupplierId}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                MRP/Fund <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
+                                                <input
+                                                    value={mrp}
+                                                    onChange={(e) => setMrp(e.target.value)}
+                                                    className="w-full pl-8 pr-4 py-2.5 rounded-lg border-slate-200 focus:ring-2 text-sm"
+                                                    placeholder="2500"
+                                                    type="number"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                Website (Optional)
+                                            </label>
+                                            <input
+                                                value={websiteLink}
+                                                onChange={(e) => setWebsiteLink(e.target.value)}
+                                                className="w-full rounded-lg border-slate-200 focus:ring-2 px-4 py-2.5 text-sm"
+                                                placeholder="https://supplier.com"
+                                                type="url"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            MRP/Fund
-                                        </label>
-                                        <input
-                                            value={otherVendor.fund}
-                                            onChange={(e) => setOtherVendor({...otherVendor, fund: e.target.value})}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="e.g. Grant NIH-2026 or MRP 2500"
-                                            type="text"
-                                        />
+                                )}
+
+{purchaseMode === 'offline' && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                Offline Supplier <span className="text-red-500">*</span>
+                                            </label>
+                                            <select 
+                                                value={selectedSupplierId}
+                                                onChange={handleSupplierChange}
+                                                className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
+                                                required
+                                            >
+                                                <option value="">Choose supplier</option>
+                                                {suppliers.map((supplier) => (
+                                                    <option key={supplier.id} value={supplier.id}>
+                                                        {supplier.company_name}
+                                                    </option>
+                                                ))}
+                                                <option value="others">➕ New Offline Shop</option>
+                                            </select>
+                                        </div>
+
+                                        {showOtherVendor && (
+                                            <div className="space-y-4 p-4 bg-slate-50 rounded-xl border">
+                                                <h5 className="text-sm font-semibold text-slate-700">New Offline Shop</h5>
+                                                <input
+                                                    value={otherVendor.name}
+                                                    onChange={(e) => setOtherVendor(prev => ({...prev, name: e.target.value}))}
+                                                    className="w-full p-3 border rounded-lg"
+                                                    placeholder="Enter shop name"
+                                                    required={!selectedSupplierId}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Separate shop name input for offline */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                Shop Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                value={shopName}
+                                                onChange={(e) => setShopName(e.target.value)}
+                                                className="w-full rounded-lg border-slate-200 focus:ring-2 px-4 py-2.5 text-sm"
+                                                placeholder="Enter shop name"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
+                                                MRP/Fund <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
+                                                <input
+                                                    value={mrp}
+                                                    onChange={(e) => setMrp(e.target.value)}
+                                                    className="w-full pl-8 pr-4 py-2.5 rounded-lg border-slate-200 focus:ring-2 text-sm transition-all outline-none"
+                                                    placeholder="2500"
+                                                    type="number"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                            Website/Link
-                                        </label>
-                                        <input
-                                            value={otherVendor.link}
-                                            onChange={(e) => setOtherVendor({...otherVendor, link: e.target.value})}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
-                                            placeholder="https://..."
-                                            type="url"
-                                        />
-                                    </div>
-                                </div>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
-            </div>
 
             {/* Additional Notes */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">

@@ -30,6 +30,10 @@ interface Supplier {
     lead_time: number
     payment_terms: string
     category: string
+    gst_no: string | null
+    bank_account: string | null
+    ifsc: string | null
+    branch: string | null
     created_at: string
 }
 
@@ -262,6 +266,58 @@ const router = useRouter()
                         </div>
                     </div>
                 </div>
+
+                {/* Billing Information */}
+                {supplier.gst_no || supplier.bank_account || supplier.ifsc || supplier.branch ? (
+                    <div className="px-4 md:px-8 pb-4 md:pb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                                <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-4">
+                                    <CreditCard className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
+                                    <span>Billing Details</span>
+                                </h4>
+                                <div className="space-y-3">
+                                    {supplier.gst_no && (
+                                        <div>
+                                            <span className="text-xs text-slate-500">GST No</span>
+                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.gst_no}</p>
+                                        </div>
+                                    )}
+                                    {supplier.bank_account && (
+                                        <div>
+                                            <span className="text-xs text-slate-500">Bank Account</span>
+                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.bank_account}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
+                                <div className="space-y-3">
+                                    {supplier.ifsc && (
+                                        <div>
+                                            <span className="text-xs text-slate-500">IFSC</span>
+                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.ifsc}</p>
+                                        </div>
+                                    )}
+                                    {supplier.branch && (
+                                        <div>
+                                            <span className="text-xs text-slate-500">Branch</span>
+                                            <p className="text-sm font-semibold text-slate-900">{supplier.branch}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="px-4 md:px-8 pb-4 md:pb-8">
+                        <div className="bg-slate-50 p-8 rounded-xl text-center border-2 border-dashed border-slate-200">
+                            <CreditCard className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                            <h4 className="text-slate-500 font-medium mb-1">No billing information</h4>
+                            <p className="text-sm text-slate-400">Add billing details via edit supplier</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Danger Zone */}
                 <div className="px-4 md:px-8 pb-4 md:pb-8">

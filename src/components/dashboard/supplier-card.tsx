@@ -20,6 +20,10 @@ interface Supplier {
     lead_time: number
     payment_terms: string
     category: string
+    gst_no: string | null
+    bank_account: string | null
+    ifsc: string | null
+    branch: string | null
     created_at: string
 }
 
@@ -148,6 +152,28 @@ export function generateSupplierPDF(supplier: Supplier) {
         doc.text(value, 70, yPos)
         yPos += 8
     })
+
+    // Billing Information
+    if (supplier.gst_no || supplier.bank_account || supplier.ifsc || supplier.branch) {
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.text('Billing Information', 20, yPos + 10)
+        
+        const billingDetails = []
+        if (supplier.gst_no) billingDetails.push(['GST No:', supplier.gst_no])
+        if (supplier.bank_account) billingDetails.push(['Bank Account:', supplier.bank_account])
+        if (supplier.ifsc) billingDetails.push(['IFSC:', supplier.ifsc])
+        if (supplier.branch) billingDetails.push(['Branch:', supplier.branch])
+        
+        yPos += 20
+        billingDetails.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold')
+            doc.text(label, 20, yPos)
+            doc.setFont('helvetica', 'normal')
+            doc.text(value, 70, yPos)
+            yPos += 8
+        })
+    }
     
     // Footer
     doc.setFontSize(9)

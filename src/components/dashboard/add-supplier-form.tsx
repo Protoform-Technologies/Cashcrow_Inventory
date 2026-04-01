@@ -4,6 +4,7 @@ import {
     Building2, 
     User,
     Settings,
+    CreditCard,
     Save,
     X,
     Loader2,
@@ -22,6 +23,10 @@ interface SupplierFormData {
     lead_time: string
     payment_terms: string
     category: string
+    gst_no: string
+    bank_account: string
+    ifsc: string
+    branch: string
 }
 
 interface AddSupplierFormProps {
@@ -231,6 +236,71 @@ export default function AddSupplierForm({
                                 <option value="electronics">Electronics</option>
                                 <option value="other">Other</option>
                             </select>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Section 4: Billing Information */}
+                <section className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+                    <div className="p-6 border-b border-slate-100">
+                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <CreditCard className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
+                            Billing Information
+                        </h2>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                GST Number
+                            </label>
+                            <input
+                                name="gst_no"
+                                value={formData.gst_no || ''}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                placeholder="e.g. 27AAACH7167R1Z5"
+                                type="text"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                Bank Account
+                            </label>
+                            <input
+                                name="bank_account"
+                                value={formData.bank_account || ''}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                placeholder="e.g. 123456789012"
+                                type="text"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                IFSC Code
+                            </label>
+                            <input
+                                name="ifsc"
+                                value={formData.ifsc || ''}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                placeholder="e.g. SBIN0001234"
+                                type="text"
+                                maxLength={11}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                Bank Branch
+                            </label>
+                            <input
+                                name="branch"
+                                value={formData.branch || ''}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                placeholder="e.g. Main Branch, Mumbai"
+                                type="text"
+                            />
                         </div>
                     </div>
                 </section>

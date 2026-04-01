@@ -30,6 +30,10 @@ interface Supplier {
     lead_time: number
     payment_terms: string
     category: string
+    gst_no: string | null
+    bank_account: string | null
+    ifsc: string | null
+    branch: string | null
     created_at: string
 }
 

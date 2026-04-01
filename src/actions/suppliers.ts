@@ -14,6 +14,10 @@ export async function addSupplier(formData: FormData) {
     const lead_time = parseInt(formData.get('lead_time') as string || '7', 10)
     const payment_terms = formData.get('payment_terms') as string
     const category = formData.get('category') as string
+    const gst_no = formData.get('gst_no') as string
+    const bank_account = formData.get('bank_account') as string
+    const ifsc = formData.get('ifsc') as string
+    const branch = formData.get('branch') as string
 
     const { error: insertError } = await supabase
         .from('suppliers')
@@ -25,7 +29,11 @@ export async function addSupplier(formData: FormData) {
             phone: phone || null,
             lead_time,
             payment_terms,
-            category
+            category,
+            gst_no: gst_no || null,
+            bank_account: bank_account || null,
+            ifsc: ifsc || null,
+            branch: branch || null
         })
 
     if (insertError) {
@@ -49,6 +57,10 @@ export async function updateSupplier(id: string, formData: FormData) {
     const lead_time = parseInt(formData.get('lead_time') as string || '7', 10)
     const payment_terms = formData.get('payment_terms') as string
     const category = formData.get('category') as string
+    const gst_no = formData.get('gst_no') as string
+    const bank_account = formData.get('bank_account') as string
+    const ifsc = formData.get('ifsc') as string
+    const branch = formData.get('branch') as string
 
     const { error: updateError } = await supabase
         .from('suppliers')
@@ -60,7 +72,11 @@ export async function updateSupplier(id: string, formData: FormData) {
             phone: phone || null,
             lead_time,
             payment_terms,
-            category
+            category,
+            gst_no: gst_no || null,
+            bank_account: bank_account || null,
+            ifsc: ifsc || null,
+            branch: branch || null
         })
         .eq('id', id)
 

@@ -18,6 +18,10 @@ interface Supplier {
     lead_time: number
     payment_terms: string
     category: string
+    gst_no: string | null
+    bank_account: string | null
+    ifsc: string | null
+    branch: string | null
     created_at: string
 }
 
@@ -37,6 +41,10 @@ interface FormData {
     lead_time: string
     payment_terms: string
     category: string
+    gst_no: string
+    bank_account: string
+    ifsc: string
+    branch: string
 }
 
 const initialFormData: FormData = {
@@ -47,7 +55,11 @@ const initialFormData: FormData = {
     phone: '',
     lead_time: '',
     payment_terms: '',
-    category: ''
+    category: '',
+    gst_no: '',
+    bank_account: '',
+    ifsc: '',
+    branch: ''
 }
 
 export default function AddSuppliersClient({ userName, suppliers: initialSuppliers }: AddSuppliersClientProps) {
@@ -85,6 +97,10 @@ export default function AddSuppliersClient({ userName, suppliers: initialSupplie
         formDataObj.append('lead_time', formData.lead_time || '7')
         formDataObj.append('payment_terms', formData.payment_terms)
         formDataObj.append('category', formData.category)
+        formDataObj.append('gst_no', formData.gst_no)
+        formDataObj.append('bank_account', formData.bank_account)
+        formDataObj.append('ifsc', formData.ifsc)
+        formDataObj.append('branch', formData.branch)
 
         const result = await addSupplier(formDataObj)
         

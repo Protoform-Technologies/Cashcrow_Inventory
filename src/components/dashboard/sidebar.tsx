@@ -27,7 +27,7 @@ const adminNavItems = [
     { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
     { name: 'Daily Log', icon: History, href: '/admin/daily-log' },
-    { name: 'Reports', icon: BarChart3, href: '/reports' },
+    { name: 'Reports', icon: BarChart3, href: '/admin/reports' },
 ]
 
 const memberMainNavItems = [
@@ -77,31 +77,31 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
             {/* NAVIGATION */}
             <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto overflow-x-hidden">
 
-{(isAdmin ? adminNavItems : memberMainNavItems)
-    .map((item) => {
-        const href = item.name === 'Dashboard' ? dashboardHref : item.href
-        const isActive = pathname === href
+                {(isAdmin ? adminNavItems : memberMainNavItems)
+                    .map((item) => {
+                        const href = item.name === 'Dashboard' ? dashboardHref : item.href
+                        const isActive = pathname === href
 
-        return (
-            <Link
-                key={item.name}
-                href={href}
-                onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${isActive
-                    ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
-                    : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
-                    }`}
-            >
-                <item.icon
-                    className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive
-                        ? "text-white"
-                        : "text-[#d0e8d6]/70 group-hover:text-white"
-                        }`}
-                />
-                {item.name}
-            </Link>
-        )
-    })}
+                        return (
+                            <Link
+                                key={item.name}
+                                href={href}
+                                onClick={() => setIsOpen(false)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${isActive
+                                    ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
+                                    : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
+                                    }`}
+                            >
+                                <item.icon
+                                    className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive
+                                        ? "text-white"
+                                        : "text-[#d0e8d6]/70 group-hover:text-white"
+                                        }`}
+                                />
+                                {item.name}
+                            </Link>
+                        )
+                    })}
 
                 {/* ACCOUNT SECTION */}
                 <div className="pt-8 pb-2 px-4">

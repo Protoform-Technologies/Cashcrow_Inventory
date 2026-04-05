@@ -12,7 +12,8 @@ import {
     UserPlus,
     BarChart3,
     Truck,
-    List
+    List,
+    FileText
 } from "lucide-react"
 
 import Link from "next/link"
@@ -23,6 +24,7 @@ const adminNavItems = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
     { name: 'Parts', icon: Package, href: '/admin/parts' },
     { name: 'Suppliers', icon: List, href: '/admin/suppliers' },
+    { name: 'Quotes', icon: FileText, href: '/admin/quotes' },
     { name: 'Add Suppliers', icon: Truck, href: '/admin/add-suppliers' },
     { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },

@@ -39,23 +39,35 @@ export async function middleware(request: NextRequest) {
     const isMemberRoute = request.nextUrl.pathname.startsWith('/member')
 
     if (user) {
+        // If user is logged in, use their metadata role if available
+        const role = user.app_metadata?.role?.toUpperCase() || null
 
         // If user is logged in and tries to access login page, redirect to dashboard
         if (isLoginPage) {
+            if (role === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url))
+            if (role === 'MEMBER') return NextResponse.redirect(new URL('/member', request.url))
+
+            // Fallback to DB query ONLY if metadata is missing
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', user.id)
                 .single()
 
-            const role = profile?.role?.toUpperCase()
-            if (role === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url))
-            if (role === 'MEMBER') return NextResponse.redirect(new URL('/member', request.url))
+            const dbRole = profile?.role?.toUpperCase()
+            if (dbRole === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url))
+            if (dbRole === 'MEMBER') return NextResponse.redirect(new URL('/member', request.url))
         }
 
-        // Basic role check (can be enhanced further if needed)
-        // If they are logged in but on the wrong dashboard, we could handle that here
+        // Additional role-based route protection
+        if (isAdminRoute && role !== 'ADMIN' && role !== null) {
+            return NextResponse.redirect(new URL('/member', request.url))
+        }
+        if (isMemberRoute && role === 'ADMIN') {
+            return NextResponse.redirect(new URL('/admin', request.url))
+        }
     } else {
+
         // If user is NOT logged in and tries to access protected routes, redirect to login
         if (isAdminRoute || isMemberRoute) {
             return NextResponse.redirect(new URL('/', request.url))

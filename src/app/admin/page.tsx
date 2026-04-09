@@ -1,11 +1,16 @@
 import { getAdminProfileOrRedirect } from '@/actions/auth'
-import Link from 'next/link'
 import DashboardLayout from '@/components/shared/dashboard/layout'
 import StatsGrid from '@/components/shared/dashboard/stats-grid'
 import InventoryTable from '@/components/shared/inventory/inventory-table'
 import DailyLogFeed from '@/components/shared/dashboard/daily-log-feed'
-import { PlusCircle, HandMetal } from "lucide-react"
-import { getDashboardStats, getInventory, getRecentActivity } from '@/actions/dashboard'
+import WelcomeBanner from '@/components/shared/dashboard/welcome-banner'
+import { getDashboardStats, getInventory, getRecentActivity, isTodayLogFilled } from '@/actions/dashboard'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Admin Dashboard | Cashcrow',
+    description: 'Manage inventory, track stock levels, and monitor laboratory activities from the central admin command center.',
+}
 
 export default async function AdminPage({
     searchParams,
@@ -17,10 +22,13 @@ export default async function AdminPage({
     // Fetch dynamic data
     const resolvedSearchParams = await searchParams as any
     const page = parseInt(resolvedSearchParams.page || '1', 10)
-    const [stats, inventoryData, recentLogs] = await Promise.all([
+
+    // Concurrently fetch all dashboard data
+    const [stats, inventoryData, recentLogs, logSubmitted] = await Promise.all([
         getDashboardStats(),
         getInventory(page, 5),
-        getRecentActivity(4)
+        getRecentActivity(4),
+        isTodayLogFilled(profile.id)
     ])
 
     const fullName = `${profile.first_name} ${profile.last_name}`
@@ -32,34 +40,21 @@ export default async function AdminPage({
     })
 
     return (
-        <DashboardLayout 
-            userName={fullName} 
-            userRole="Lab Director" 
+        <DashboardLayout
+            userName={fullName}
+            userRole="Lab Director"
             avatarUrl={profile.avatar_url}
             title="Admin Dashboard"
         >
 
-            {/* Hero Section */}
-            <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-cashcrow-primary)] opacity-[0.02] rounded-full -mr-16 -mt-16"></div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 relative z-10 text-center sm:text-left">
-                    <div className="w-16 h-16 rounded-2xl bg-[var(--color-cashcrow-primary)]/10 flex items-center justify-center text-[var(--color-cashcrow-primary)] shadow-inner border border-[var(--color-cashcrow-primary)]/5 shrink-0">
-                        <HandMetal className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Welcome back, {profile.first_name}</h2>
-                        <p className="text-slate-500 text-sm md:text-base font-semibold tracking-wide flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
-                            Inventory overview for <span className="text-[var(--color-cashcrow-primary)]">{today}</span>
-                        </p>
-                    </div>
-                </div>
-
-                <Link href="/admin/daily-log" className="w-full sm:w-auto bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-8 py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl shadow-[var(--color-cashcrow-primary)]/20 active:scale-95 group relative z-10">
-                    <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                    Create Today&apos;s Log
-                </Link>
-            </div>
+            {/* Conditional Welcome Banner */}
+            <WelcomeBanner
+                firstName={profile.first_name}
+                today={today}
+                role="ADMIN"
+                logPath="/admin/daily-log"
+                isLogSubmitted={logSubmitted}
+            />
 
             {/* Stats Grid */}
             <StatsGrid stats={stats} />
@@ -76,7 +71,7 @@ export default async function AdminPage({
                 </div>
 
                 {/* Daily Log Feed */}
-                <div>
+                <div className="lg:col-span-1">
                     <DailyLogFeed logs={recentLogs} />
                 </div>
             </div>

@@ -54,7 +54,7 @@ export default function DailyLogFeed({ logs }: DailyLogFeedProps) {
                     )}
                 </div>
 
-                <Link href="/admin/daily-log" className="block w-full text-center py-3 bg-[var(--color-cashcrow-primary)] text-white text-[11px] font-black rounded-xl hover:bg-[var(--color-cashcrow-lightgreen)] transition-all uppercase tracking-[0.2em] shadow-lg shadow-[var(--color-cashcrow-primary)]/10 active:scale-95 mt-6">
+                <Link href="/admin/daily-log" className="block w-full text-center py-3 bg-[var(--color-cashcrow-primary)] text-white text-[11px] font-black rounded-xl hover:bg-[var(--color-cashcrow-lightgreen)] transition-all uppercase tracking-[0.2em] shadow-lg shadow-[var(--color-cashcrow-primary)]/10 active:scale-95 mt-2">
                     Load Full Log History
                 </Link>
             </div>

@@ -25,32 +25,45 @@ export async function login(formData: FormData) {
     }
 
     const userId = data.user?.id
-
     if (!userId) {
         return { error: 'Authentication failed. Please try again.' }
     }
 
-    // 2. Fetch user profile and role using Admin Client to bypass RLS recursion
-    const adminClient = getSupabaseAdmin()
-    const { data: profile, error: profileError } = await adminClient
-        .from('profiles')
-        .select('role, is_active')
-        .eq('id', userId)
-        .single()
+    // 2. Optimized Role Retrieval
+    // Check if role is already in app_metadata (Cached)
+    let role = data.user?.app_metadata?.role?.toUpperCase()
+    let isActive = data.user?.app_metadata?.is_active
 
-    if (profileError) {
-        console.error('Profile fetch error:', profileError.message)
-        return { error: 'Could not fetch user profile. Please contact support.' }
+    if (!role) {
+        // Fallback to fetching user profile and role using Admin Client
+        const adminClient = getSupabaseAdmin()
+        const { data: profile, error: profileError } = await adminClient
+            .from('profiles')
+            .select('role, is_active')
+            .eq('id', userId)
+            .single()
+
+        if (profileError) {
+            console.error('Profile fetch error:', profileError.message)
+            return { error: 'Could not fetch user profile. Please contact support.' }
+        }
+
+        role = profile.role?.toUpperCase()
+        isActive = profile.is_active
+
+        // 3. Cache the role in app_metadata for future speed
+        // This will make all future logins and middleware checks instant
+        await adminClient.auth.admin.updateUserById(userId, {
+            app_metadata: { role, is_active: isActive }
+        })
     }
 
-    // 3. Check if account is active or needs password setup
-    if (profile.is_active === false) {
+    // 4. Check if account is active or needs password setup
+    if (isActive === false) {
         redirect('/reset-password')
     }
 
-    // 4. Redirect based on role
-    const role = profile.role?.toUpperCase()
-
+    // 5. Redirect based on role
     if (role === 'ADMIN') {
         redirect('/admin')
     } else if (role === 'MEMBER') {

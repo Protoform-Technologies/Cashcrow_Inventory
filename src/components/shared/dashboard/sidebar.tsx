@@ -16,6 +16,7 @@ import {
     FileText
 } from "lucide-react"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { logout } from "@/actions/auth"
@@ -61,22 +62,21 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
         <aside className={`w-64 border-r flex flex-col fixed h-full z-50 bg-[#265136] border-white/10 text-white transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
 
             {/* LOGO */}
-            <div className="p-6 relative">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-inner">
-                        <Beaker className="w-6 h-6 text-[#d0e8d6]" />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="font-bold text-xl tracking-tight">Cashcrow</span>
-                        <span className="text-[10px] uppercase tracking-widest text-[#d0e8d6]/60 font-black">
-                            Lab Inventory
-                        </span>
-                    </div>
+            <div className="p-4 flex items-center justify-center border-b border-white/5 mx-2">
+                <div className="relative w-full h-16">
+                    <Image
+                        src="/Cashcrow_Logo_Branding.png"
+                        alt="Cashcrow Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                        sizes="(max-width: 768px) 100vw, 240px"
+                    />
                 </div>
             </div>
 
             {/* NAVIGATION */}
-            <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto overflow-x-hidden">
+            <nav className="flex-1 px-4 space-y-1 overflow-y-auto overflow-x-hidden">
 
                 {(isAdmin ? adminNavItems : memberMainNavItems)
                     .map((item) => {
@@ -114,15 +114,13 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
                 <Link
                     href={isAdmin ? "/admin/profile" : "/member/profile"}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${
-                      pathname.includes("/profile")
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all group duration-200 ${pathname.includes("/profile")
                         ? "bg-white/10 text-white shadow-sm ring-1 ring-white/20"
                         : "text-[#d0e8d6] hover:bg-white/5 hover:text-white"
-                    }`}
+                        }`}
                 >
-                    <UserCircle className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
-                      pathname.includes("/profile") ? "text-white" : "text-[#d0e8d6]/70 group-hover:text-white"
-                    }`} />
+                    <UserCircle className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${pathname.includes("/profile") ? "text-white" : "text-[#d0e8d6]/70 group-hover:text-white"
+                        }`} />
                     User Profile
                 </Link>
 

@@ -1,5 +1,5 @@
 import { getMemberProfileOrRedirect } from '@/actions/auth'
-import DashboardLayout from '@/components/dashboard/layout'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 import { getProducts } from '@/actions/products'
 import PartsClient from '@/app/admin/parts/parts-client'
 

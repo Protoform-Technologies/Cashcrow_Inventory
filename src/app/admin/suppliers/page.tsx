@@ -1,5 +1,5 @@
 import { getAdminProfileOrRedirect } from '@/actions/auth'
-import DashboardLayout from '@/components/dashboard/layout'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 import { getSuppliers } from '@/actions/suppliers'
 import SuppliersClient from './suppliers-client'
 

@@ -10,8 +10,8 @@ import {
     ArrowRight
 } from 'lucide-react'
 import { Product } from '@/types/product'
-import ProductCard from '@/components/dashboard/product-card'
-import ProductDetailModal from '@/components/dashboard/product-detail-modal'
+import ProductCard from '@/components/shared/inventory/product-card'
+import ProductDetailModal from '@/components/shared/inventory/product-detail-modal'
 
 interface PartsClientProps {
     products: Product[]

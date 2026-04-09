@@ -71,7 +71,7 @@ export async function sendResetPasswordEmail(email: string) {
 
     // Construct the reset URL dynamically based on the environment
     const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const redirectTo = `${origin}/auth/callback?next=/reset-password`
+    const redirectTo = `${origin}/api/auth/callback?next=/reset-password`
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
@@ -149,4 +149,10 @@ export async function getMemberProfileOrRedirect() {
     }
 
     return profile
+}
+
+export async function handleAuthCallback(code: string) {
+    const supabase = await createServerSupabaseClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    return { error }
 }

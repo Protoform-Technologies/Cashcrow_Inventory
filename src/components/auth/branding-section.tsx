@@ -22,6 +22,7 @@ export default function BrandingSection() {
                         fill
                         className="object-contain"
                         priority
+                        sizes="(max-width: 1024px) 0vw, 50vw"
                     />
                 </div>
                 <span className="text-[var(--color-cashcrow-accent)] text-xl font-medium uppercase tracking-[0.2em]">Protoform Technologies</span>

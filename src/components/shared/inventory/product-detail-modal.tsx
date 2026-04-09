@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import { Product } from '@/types/product'
 import { deleteProduct } from '@/actions/products'
 import { getProductRecentLogs } from '@/actions/day-logs'
-import EditProductForm from '@/components/dashboard/edit-product-form'
+import EditProductForm from '@/components/admin/inventory/edit-product-form'
 import { getStockStatus } from './product-card'
 
 interface ProductDetailModalProps {

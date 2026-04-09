@@ -49,6 +49,7 @@ export default function AuthSection() {
                             fill
                             className="object-contain"
                             priority
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                     </div>
                     <span className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-bold">Protoform Technologies</span>
@@ -109,13 +110,6 @@ export default function AuthSection() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 px-1">
-                        <Checkbox id="remember" name="remember" disabled={isPending} />
-                        <label className="text-sm font-medium text-[var(--color-cashcrow-textmuted)] cursor-pointer" htmlFor="remember">
-                            Remember this device for 30 days
-                        </label>
-                    </div>
-
                     <Button type="submit" className="w-full relative py-6" disabled={isPending}>
                         {isPending ? (
                             <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -128,22 +122,10 @@ export default function AuthSection() {
                     </Button>
                 </form>
 
-                <div className="mt-10 flex flex-col items-center gap-6">
-
-                    <p className="text-sm text-[var(--color-cashcrow-textmuted)] text-center">
-                        Don&apos;t have an account? <a className="text-[var(--color-cashcrow-primary)] font-bold hover:underline" href="#">Contact your administrator</a>
-                    </p>
-                </div>
-
                 <footer className="mt-16 text-center">
                     <p className="text-[11px] uppercase tracking-widest text-[var(--color-cashcrow-textmuted)]/50 font-bold">
                         Powered by Protoform Technologies
                     </p>
-                    <div className="mt-4 flex justify-center gap-6 text-xs text-[var(--color-cashcrow-textmuted)]/40">
-                        <a className="hover:text-[var(--color-cashcrow-primary)] transition-colors" href="#">Privacy Policy</a>
-                        <a className="hover:text-[var(--color-cashcrow-primary)] transition-colors" href="#">Terms of Service</a>
-                        <a className="hover:text-[var(--color-cashcrow-primary)] transition-colors" href="#">System Status</a>
-                    </div>
                 </footer>
             </div >
         </div >

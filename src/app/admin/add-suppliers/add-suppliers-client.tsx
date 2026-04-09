@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { PlusCircle, X } from 'lucide-react'
 import { addSupplier, deleteSupplier } from '@/actions/suppliers'
-import EditSupplierForm from '@/components/dashboard/edit-supplier-form'
-import AddSupplierForm from '@/components/dashboard/add-supplier-form'
-import SuppliersTable from '@/components/dashboard/suppliers-table'
+import EditSupplierForm from '@/components/admin/suppliers/edit-supplier-form'
+import AddSupplierForm from '@/components/admin/suppliers/add-supplier-form'
+import SuppliersTable from '@/components/admin/suppliers/suppliers-table'
 import { Button } from '@/components/ui/button'
 
 interface Supplier {

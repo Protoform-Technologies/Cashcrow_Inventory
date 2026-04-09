@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
-import DashboardLayout from '@/components/dashboard/layout'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 import DailyLogClient from './daily-log-client'
 import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'

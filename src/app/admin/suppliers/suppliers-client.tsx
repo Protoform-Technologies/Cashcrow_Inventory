@@ -16,9 +16,9 @@ import {
     ArrowRight,
     ChevronRight
 } from 'lucide-react'
-import SupplierCard from '@/components/dashboard/supplier-card'
-import SupplierDetailModal from '@/components/dashboard/supplier-detail-modal'
-import SupplierStats from '@/components/dashboard/supplier-stats'
+import SupplierCard from '@/components/shared/suppliers/supplier-card'
+import SupplierDetailModal from '@/components/shared/suppliers/supplier-detail-modal'
+import SupplierStats from '@/components/admin/suppliers/supplier-stats'
 
 interface Supplier {
     id: string

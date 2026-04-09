@@ -4,9 +4,9 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Search, Send, FileText } from "lucide-react"
 import { saveDayLogDraft, submitDayLog, deleteDayLog } from "@/actions/day-logs"
-import DayLogForm from "@/components/dashboard/day-log-form"
-import SubmittedLogsTable from "@/components/dashboard/submitted-logs-table"
-import LogDetailModal from "@/components/dashboard/log-detail-modal"
+import DayLogForm from "@/components/shared/day-logs/day-log-form"
+import SubmittedLogsTable from "@/components/shared/day-logs/submitted-logs-table"
+import LogDetailModal from "@/components/shared/day-logs/log-detail-modal"
 
 interface Product {
     id: string

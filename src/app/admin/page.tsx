@@ -1,9 +1,9 @@
 import { getAdminProfileOrRedirect } from '@/actions/auth'
 import Link from 'next/link'
-import DashboardLayout from '@/components/dashboard/layout'
-import StatsGrid from '@/components/dashboard/stats-grid'
-import InventoryTable from '@/components/dashboard/inventory-table'
-import DailyLogFeed from '@/components/dashboard/daily-log-feed'
+import DashboardLayout from '@/components/shared/dashboard/layout'
+import StatsGrid from '@/components/shared/dashboard/stats-grid'
+import InventoryTable from '@/components/shared/inventory/inventory-table'
+import DailyLogFeed from '@/components/shared/dashboard/daily-log-feed'
 import { PlusCircle, HandMetal } from "lucide-react"
 import { getDashboardStats, getInventory, getRecentActivity } from '@/actions/dashboard'
 

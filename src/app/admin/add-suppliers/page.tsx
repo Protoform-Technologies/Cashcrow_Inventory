@@ -1,6 +1,6 @@
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
-import DashboardLayout from '@/components/dashboard/layout'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 import AddSuppliersClient from './add-suppliers-client'
 
 interface Supplier {

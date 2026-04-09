@@ -1,5 +1,5 @@
 import { getMemberProfileOrRedirect } from '@/actions/auth'
-import DashboardLayout from '@/components/dashboard/layout'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 import { Button } from '@/components/ui/button'
 import { Settings, Shield, Bell, Palette, LogOut, UserCog } from 'lucide-react'
 

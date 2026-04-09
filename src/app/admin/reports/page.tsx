@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardLayout from "@/components/dashboard/layout";
+import DashboardLayout from "@/components/shared/dashboard/layout";
 import { getAdminProfileOrRedirect } from "@/actions/auth";
 import ReportsHeader from "@/components/reports/reports-header";
 import ReportStats from "@/components/reports/report-stats";

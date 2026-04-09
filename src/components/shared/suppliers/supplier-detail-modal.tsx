@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { deleteSupplier, updateSupplier } from '@/actions/suppliers'
 import { useRouter } from 'next/navigation'
-import EditSupplierForm from '@/components/dashboard/edit-supplier-form'
+import EditSupplierForm from '@/components/admin/suppliers/edit-supplier-form'
 import { generateSupplierPDF } from './supplier-card'
 
 

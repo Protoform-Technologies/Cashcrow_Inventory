@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import DashboardLayout from '@/components/dashboard/layout'
-import AddMemberForm from '@/components/dashboard/add-member-form'
-import MembersList from '@/components/dashboard/members-list'
+import DashboardLayout from '@/components/shared/dashboard/layout'
+import AddMemberForm from '@/components/admin/members/add-member-form'
+import MembersList from '@/components/admin/members/members-list'
 import { PlusCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 

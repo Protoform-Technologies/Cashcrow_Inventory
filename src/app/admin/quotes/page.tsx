@@ -2,8 +2,8 @@ import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'
 import { getSuppliers } from '@/actions/suppliers'
 import { getRecentQuotes } from '@/actions/quotes'
-import RequestQuoteForm from '@/components/dashboard/request-quote-form'
-import DashboardLayout from '@/components/dashboard/layout'
+import RequestQuoteForm from '@/components/member/requests/request-quote-form'
+import DashboardLayout from '@/components/shared/dashboard/layout'
 
 export default async function RequestQuotePage() {
     const profile = await getAdminProfileOrRedirect()

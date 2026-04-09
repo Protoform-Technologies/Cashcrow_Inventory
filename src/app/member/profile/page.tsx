@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardLayout from "@/components/dashboard/layout";
+import DashboardLayout from "@/components/shared/dashboard/layout";
 import { getMemberProfileOrRedirect } from "@/actions/auth";
 import ProfileHeader from "@/components/profile/profile-header";
 import AccountInfo from "@/components/profile/account-info";

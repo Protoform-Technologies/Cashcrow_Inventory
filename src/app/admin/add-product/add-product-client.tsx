@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import DashboardLayout from '@/components/dashboard/layout'
-import AddProductForm from '@/components/dashboard/add-product-form'
-import EditProductForm from '@/components/dashboard/edit-product-form'
+import DashboardLayout from '@/components/shared/dashboard/layout'
+import AddProductForm from '@/components/admin/inventory/add-product-form'
+import EditProductForm from '@/components/admin/inventory/edit-product-form'
 import { deleteProduct } from '@/actions/products'
 import { ChevronRight, Package, PlusCircle, X, Pencil, Trash2, Loader2, ChevronLeft } from "lucide-react"
 import { Button } from '@/components/ui/button'

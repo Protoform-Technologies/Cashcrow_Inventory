@@ -18,11 +18,12 @@ interface Profile {
 
 interface AddMembersClientProps {
     userName: string
+    userId: string
     avatarUrl?: string
     members: Profile[]
 }
 
-export default function AddMembersClient({ userName, avatarUrl, members }: AddMembersClientProps) {
+export default function AddMembersClient({ userName, userId, avatarUrl, members }: AddMembersClientProps) {
     const [showAddForm, setShowAddForm] = useState(false)
     const [localMembers, setLocalMembers] = useState<Profile[]>(members)
 
@@ -42,7 +43,7 @@ export default function AddMembersClient({ userName, avatarUrl, members }: AddMe
     }
 
     return (
-        <DashboardLayout userName={userName} userRole="Lab Director" avatarUrl={avatarUrl} title="Add Members">
+        <DashboardLayout userName={userName} userRole="Admin" userId={userId} avatarUrl={avatarUrl} title="Add Members">
             {/* Title and Button Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-2">
                 <div>

@@ -2,6 +2,7 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
+import { createNotification } from './notifications'
 
 export async function addProduct(formData: FormData) {
     const supabase = await createServerSupabaseClient()
@@ -73,6 +74,19 @@ export async function addProduct(formData: FormData) {
 
     revalidatePath('/admin/parts')
     revalidatePath('/admin')
+
+    // 🔔 CREATE NOTIFICATION
+    try {
+        await createNotification({
+            title: 'New Product Added',
+            message: `${name} has been added to the inventory.`,
+            type: 'PRODUCT_ADDED',
+            link: `/admin/parts?q=${encodeURIComponent(name)}`,
+            target_role: 'ALL'
+        });
+    } catch (e) {
+        console.error("Notification trigger error:", e);
+    }
 
     return { success: true }
 }
@@ -147,6 +161,21 @@ export async function updateProduct(id: string, formData: FormData) {
 
     revalidatePath('/admin/parts')
     revalidatePath('/admin')
+
+    // 🔔 OUT OF STOCK NOTIFICATION
+    if (quantity === 0) {
+        try {
+            await createNotification({
+                title: 'Item Out of Stock',
+                message: `ALERT: ${name} is now out of stock.`,
+                type: 'OUT_OF_STOCK',
+                link: `/admin/parts?q=${encodeURIComponent(name)}`,
+                target_role: 'ALL'
+            });
+        } catch (e) {
+            console.error("Notification trigger error:", e);
+        }
+    }
 
     return { success: true }
 }

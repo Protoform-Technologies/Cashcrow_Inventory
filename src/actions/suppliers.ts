@@ -2,6 +2,7 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
+import { createNotification } from './notifications'
 
 export async function addSupplier(formData: FormData) {
     const supabase = await createServerSupabaseClient()
@@ -35,13 +36,25 @@ export async function addSupplier(formData: FormData) {
             ifsc: ifsc || null,
             branch: branch || null
         })
-
     if (insertError) {
         console.error("Insert error:", insertError)
         return { error: insertError.message || 'Failed to add supplier.' }
     }
-
+    
     revalidatePath('/admin/add-suppliers')
+
+    // 🔔 CREATE NOTIFICATION
+    try {
+        await createNotification({
+            title: 'New Supplier Added',
+            message: `${company_name} has been added to our supplier list.`,
+            type: 'SUPPLIER_ADDED',
+            link: `/admin/suppliers?q=${encodeURIComponent(company_name)}`,
+            target_role: 'ADMIN' // Only admins receive this as requested
+        });
+    } catch (e) {
+        console.error("Notification trigger error:", e);
+    }
 
     return { success: true }
 }

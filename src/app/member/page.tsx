@@ -42,7 +42,8 @@ export default async function MemberPage({
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Lab Member" 
+            userRole="Member" 
+            userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Member Dashboard"
         >

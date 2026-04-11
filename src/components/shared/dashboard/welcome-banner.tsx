@@ -11,14 +11,14 @@ interface WelcomeBannerProps {
     isLogSubmitted: boolean
 }
 
-export default function WelcomeBanner({ 
-    firstName, 
-    today, 
-    role, 
+export default function WelcomeBanner({
+    firstName,
+    today,
+    role,
     logPath,
-    isLogSubmitted 
+    isLogSubmitted
 }: WelcomeBannerProps) {
-    
+
     // If log is already submitted, hide the banner as requested
     if (isLogSubmitted) return null
 
@@ -29,8 +29,8 @@ export default function WelcomeBanner({
     const hoverBgClass = isPrimary ? 'hover:bg-[var(--color-cashcrow-lightgreen)]' : 'hover:bg-[var(--color-cashcrow-primary)]'
 
     return (
-        <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0 mt-2">
-            <div className={`absolute top-0 right-0 w-32 h-32 opacity-[0.02] rounded-full -mr-16 -mt-16`} style={{ backgroundColor: colorClass }}></div>
+        <div className="flex flex-col md:flex-row items-center justify-between bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden gap-6 md:gap-0">
+            <div className={`absolute top-0 right-0 w-32 h-16 opacity-[0.02] rounded-full -mr-16 -mt-16`} style={{ backgroundColor: colorClass }}></div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 relative z-10 text-center sm:text-left">
                 <div className={`w-16 h-16 rounded-2xl ${bgOpacityClass} flex items-center justify-center shadow-inner border border-black/5 shrink-0`} style={{ color: colorClass }}>
@@ -44,8 +44,8 @@ export default function WelcomeBanner({
                 </div>
             </div>
 
-            <Link 
-                href={logPath} 
+            <Link
+                href={logPath}
                 className={`w-full sm:w-auto text-white px-8 py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95 group relative z-10 ${hoverBgClass} ${shadowClass}`}
                 style={{ backgroundColor: colorClass }}
             >

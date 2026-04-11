@@ -8,11 +8,12 @@ interface DashboardLayoutProps {
     children: React.ReactNode
     userName: string
     userRole: string
+    userId: string
     avatarUrl?: string
     title?: string
 }
 
-export default function DashboardLayout({ children, userName, userRole, avatarUrl, title = "Dashboard" }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, userName, userRole, userId, avatarUrl, title = "Dashboard" }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     return (
@@ -27,11 +28,12 @@ export default function DashboardLayout({ children, userName, userRole, avatarUr
 
             <Sidebar role={userRole} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-            <main className="flex-1 lg:ml-64 min-h-screen flex flex-col">
+            <main className="flex-1 lg:ml-64 min-h-screen flex flex-col max-w-full overflow-x-hidden">
                 <Header
                     title={title}
                     userName={userName}
                     userRole={userRole}
+                    userId={userId}
                     avatarUrl={avatarUrl}
                     onMenuClick={() => setIsSidebarOpen(true)}
                 />
@@ -41,7 +43,7 @@ export default function DashboardLayout({ children, userName, userRole, avatarUr
 
                 <footer className="px-8 py-6 border-t border-slate-200 text-center">
                     <p className="text-[10px] uppercase tracking-[0.2em] md:tracking-[0.25em] text-slate-400 font-bold">
-                        Powered by Protoform Technologies • Cashcrow Lab Inventory v1.0
+                        Powered by Protoform Technologies • Cashcrow Inventory v1.0
                     </p>
                 </footer>
             </main>

@@ -10,7 +10,8 @@ export default async function SettingsPage() {
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Lab Member" 
+            userRole="Member" 
+            userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Settings"
         >

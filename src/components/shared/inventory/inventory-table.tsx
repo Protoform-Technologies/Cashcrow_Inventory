@@ -131,8 +131,8 @@ export default function InventoryTable({ items, totalCount, currentPage }: Inven
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-between pt-2">
-                    <p className="text-[12px] text-slate-500 font-bold lowercase tracking-wide">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                    <p className="text-[12px] text-slate-500 font-bold lowercase tracking-wide text-center sm:text-left">
                         Showing <span className="text-[var(--color-cashcrow-primary)] font-black">{(currentPage - 1) * limit + 1}</span> to <span className="text-[var(--color-cashcrow-primary)] font-black">{Math.min(currentPage * limit, totalCount)}</span> of <span className="font-black">{totalCount}</span> items
                     </p>
                     <div className="flex gap-4">

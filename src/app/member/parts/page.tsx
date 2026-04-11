@@ -18,7 +18,8 @@ export default async function PartsPage(props: { searchParams: Promise<{ page?: 
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Lab Member" 
+            userRole="Member" 
+            userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Inventory Parts"
         >

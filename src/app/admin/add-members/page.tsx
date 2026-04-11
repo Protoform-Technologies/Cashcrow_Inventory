@@ -9,6 +9,6 @@ export default async function AddMembersPage() {
     // Fetch all members to display in the UI
     const members = await getMembers()
 
-    return <AddMembersClient userName={fullName} avatarUrl={profile.avatar_url} members={members} />
+    return <AddMembersClient userName={fullName} userId={profile.id} avatarUrl={profile.avatar_url} members={members} />
 }
 

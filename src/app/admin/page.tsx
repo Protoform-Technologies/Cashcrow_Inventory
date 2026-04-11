@@ -42,7 +42,7 @@ export default async function AdminPage({
     return (
         <DashboardLayout
             userName={fullName}
-            userRole="Admin"
+            userRole={profile.role}
             userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Admin Dashboard"
@@ -68,6 +68,8 @@ export default async function AdminPage({
                         items={inventoryData.products}
                         totalCount={inventoryData.count}
                         currentPage={page}
+                        basePath="/admin/parts"
+                        isDashboard={true}
                     />
                 </div>
 

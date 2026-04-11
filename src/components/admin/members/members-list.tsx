@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { deleteMember } from "@/actions/members"
+import { deleteMember } from "@/actions/members.actions"
 import EditMemberForm from "./edit-member-form"
 import { Pencil, Trash2, Loader2, Search, UserCircle, Mail, Shield, CheckCircle2, Clock, X, ChevronLeft, ChevronRight } from "lucide-react"
 

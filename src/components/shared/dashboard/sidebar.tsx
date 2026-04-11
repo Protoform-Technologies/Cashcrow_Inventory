@@ -62,7 +62,7 @@ export default function Sidebar({ role, isOpen, setIsOpen }: SidebarProps) {
         <aside className={`w-64 border-r flex flex-col fixed h-full z-[60] bg-[#265136] border-white/10 text-white transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
 
             {/* LOGO */}
-            <div className="pt-3 pb-4 px-6 flex items-center justify-center border-b border-white/5 mx-2">
+            <div className="pt-0 pb-4 px-6 flex items-center justify-center border-b border-white/5 mx-2 mt-2">
                 <div className="relative w-full h-24">
                     <Image
                         src="/Cashcrow_Logo_Branding.png"

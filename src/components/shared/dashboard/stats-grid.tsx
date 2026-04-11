@@ -51,13 +51,13 @@ export default function StatsGrid({ stats }: StatsGridProps) {
     ]
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {statsConfig.map((stat, i) => (
-                <div key={i} className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
-                    <div className="flex justify-between items-start mb-4 md:mb-6">
+                <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
+                    <div className="flex justify-between items-start mb-6">
                         {stat.icon("group-hover:scale-110 transition-transform")}
                         {stat.status && (
-                            <span className={`text-[10px] md:text-[11px] font-black px-2 py-1 rounded-lg ${stat.trend === 'warning' ? 'bg-orange-50 text-orange-600' :
+                            <span className={`text-[11px] font-black px-2 py-1 rounded-lg ${stat.trend === 'warning' ? 'bg-orange-50 text-orange-600' :
                                 stat.trend === 'danger' ? 'bg-red-50 text-red-600' :
                                     'bg-[#265136]/10 text-[#265136]'
                                 }`}>
@@ -65,9 +65,9 @@ export default function StatsGrid({ stats }: StatsGridProps) {
                             </span>
                         )}
                     </div>
-                    <p className="text-slate-500 text-[12px] md:text-sm font-semibold tracking-tight">{stat.label}</p>
-                    <h3 className="text-2xl md:text-3xl font-black mt-1 text-slate-900">{stat.value}</h3>
-                    <p className="text-[10px] md:text-[11px] text-slate-400 mt-2 font-medium">{stat.subtext}</p>
+                    <p className="text-slate-500 text-sm font-semibold tracking-tight">{stat.label}</p>
+                    <h3 className="text-3xl font-black mt-1 text-slate-900">{stat.value}</h3>
+                    <p className="text-[11px] text-slate-400 mt-2 font-medium">{stat.subtext}</p>
                 </div>
             ))}
         </div>

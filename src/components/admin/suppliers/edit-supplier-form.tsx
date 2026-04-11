@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react"
-import { updateSupplier } from "@/actions/suppliers"
+import { updateSupplier } from "@/actions/suppliers.actions"
 import { CheckCircle2, AlertCircle, Loader2, Building2, User, Settings, CreditCard } from "lucide-react"
 
 interface Supplier {

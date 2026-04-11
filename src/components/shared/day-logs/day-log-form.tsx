@@ -2,7 +2,7 @@
 
 import { Trash2, PlusCircle } from 'lucide-react'
 
-interface Product {
+interface Part {
     id: string
     name: string
     sku: string
@@ -20,9 +20,9 @@ type TransactionType = 'IN' | 'OUT' | 'RETURN' | 'ADJUST' | 'SCRAP'
 
 interface LogEntry {
     id: string
-    productId: string
-    productName: string
-    productSku: string
+    partId: string
+    partName: string
+    partSku: string
     quantity: number
     transactionType: TransactionType
     takenBy: string
@@ -32,7 +32,7 @@ interface LogEntry {
 
 interface DayLogFormProps {
     entries: LogEntry[]
-    products: Product[]
+    parts: Part[]
     members: Member[]
     onAddRow: () => void
     onRemoveRow: (id: string) => void
@@ -41,7 +41,7 @@ interface DayLogFormProps {
 
 export default function DayLogForm({ 
     entries, 
-    products, 
+    parts, 
     members, 
     onAddRow, 
     onRemoveRow, 
@@ -67,18 +67,18 @@ export default function DayLogForm({
                                 <td className="px-2 md:px-4 py-2 md:py-3">
                                     <select
                                         className="w-full bg-slate-100 border-transparent focus:border-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-lg text-xs md:text-sm transition-all px-2 md:px-3 py-1.5 md:py-2 appearance-none"
-                                        value={entry.productId}
+                                        value={entry.partId}
                                         onChange={(e) => {
-                                            const product = products.find(p => p.id === e.target.value)
-                                            onUpdateEntry(entry.id, 'productId', e.target.value)
-                                            onUpdateEntry(entry.id, 'productName', product ? product.name : '')
-                                            onUpdateEntry(entry.id, 'productSku', product ? product.sku : '')
+                                            const part = parts.find(p => p.id === e.target.value)
+                                            onUpdateEntry(entry.id, 'partId', e.target.value)
+                                            onUpdateEntry(entry.id, 'partName', part ? part.name : '')
+                                            onUpdateEntry(entry.id, 'partSku', part ? part.sku : '')
                                         }}
                                     >
-                                        <option value="">Select product...</option>
-                                        {products.map(product => (
-                                            <option key={product.id} value={product.id}>
-{product.name}
+                                        <option value="">Select part...</option>
+                                        {parts.map(part => (
+                                            <option key={part.id} value={part.id}>
+{part.name}
                                             </option>
                                         ))}
                                     </select>

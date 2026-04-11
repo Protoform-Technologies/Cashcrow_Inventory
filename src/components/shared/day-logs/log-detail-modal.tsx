@@ -11,7 +11,7 @@ interface DayLogItem {
     purpose: string
     notes: string
     created_at: string
-    products: {
+    parts: {
         name: string
         sku: string
         quantity: number
@@ -122,10 +122,10 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                                     {log.day_log_items?.map((item, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50/50">
                                             <td className="px-4 py-3">
-                                                <p className="text-sm font-semibold text-slate-900">{item.products?.name}</p>
+                                                <p className="text-sm font-semibold text-slate-900">{item.parts?.name}</p>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono">{item.products?.sku}</code>
+                                                <code className="text-xs bg-slate-100 px-2 py-1 rounded font-mono">{item.parts?.sku}</code>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-1 text-[10px] font-bold rounded ${getTransactionColor(item.type)}`}>

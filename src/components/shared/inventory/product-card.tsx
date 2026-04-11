@@ -19,8 +19,8 @@ export function getStockStatus(quantity: number, minLevel: number): StockStatus 
 
 interface ProductCardProps {
     product: Product
-    onClick: () => void
-    onDownloadPdf?: () => void
+    onClick?: () => void
+    onDownloadPdf?: (e: React.MouseEvent) => void
 }
 
 export default function ProductCard({ product, onClick, onDownloadPdf }: ProductCardProps) {
@@ -99,7 +99,7 @@ export default function ProductCard({ product, onClick, onDownloadPdf }: Product
                     className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline flex items-center gap-1"
                     onClick={(e) => {
                         e.stopPropagation()
-                        if (onDownloadPdf) onDownloadPdf()
+                        if (onDownloadPdf) onDownloadPdf(e)
                     }}
                 >
                     <Download className="w-3.5 h-3.5" />

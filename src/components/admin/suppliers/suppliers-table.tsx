@@ -8,7 +8,7 @@ import {
     Trash2,
     Loader2
 } from 'lucide-react'
-import { deleteSupplier } from '@/actions/suppliers'
+import { deleteSupplier } from '@/actions/suppliers.actions'
 import { Button } from '@/components/ui/button'
 
 interface Supplier {

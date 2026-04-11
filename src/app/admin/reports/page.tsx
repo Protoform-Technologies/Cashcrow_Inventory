@@ -37,7 +37,7 @@ export default async function ReportsPage({
   return (
     <DashboardLayout 
       userName={fullName} 
-      userRole="Admin" 
+      userRole={profile.role} 
       userId={profile.id}
       avatarUrl={profile.avatar_url}
       title="Reports & Analytics"

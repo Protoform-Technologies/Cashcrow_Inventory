@@ -11,7 +11,7 @@ interface DayLogItem {
     purpose: string
     notes: string
     created_at: string
-    products: {
+    parts: {
         name: string
         sku: string
         quantity: number
@@ -35,9 +35,9 @@ interface SubmittedLog {
 
 interface SubmittedLogsTableProps {
     logs: SubmittedLog[]
-    onView: (log: SubmittedLog) => void
-    onDelete: (logId: string) => void
-    isDeleting: boolean
+    onView?: (log: SubmittedLog) => void
+    onDelete?: (logId: string) => void
+    isDeleting?: boolean
 }
 
 function getTransactionColor(type: string) {
@@ -123,21 +123,25 @@ const LogCard = ({ log, onView, onDelete, isDeleting }: { log: SubmittedLog } & 
 
             {/* Actions */}
             <div className="px-5 pb-5 pt-3 flex gap-2">
-                <button 
-                    onClick={() => onView(log)}
-                    className="flex-1 p-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 hover:border-primary hover:shadow-sm"
-                >
-                    <Eye className="w-4 h-4" />
-                    View
-                </button>
-                <button 
-                    onClick={() => onDelete(log.id)}
-                    disabled={isDeleting}
-                    className="flex-1 p-3 bg-red-50 border border-red-200 rounded-xl text-sm font-medium text-red-700 hover:bg-red-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    Delete
-                </button>
+                {onView && (
+                    <button 
+                        onClick={() => onView(log)}
+                        className="flex-1 p-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2 hover:border-primary hover:shadow-sm"
+                    >
+                        <Eye className="w-4 h-4" />
+                        View
+                    </button>
+                )}
+                {onDelete && (
+                    <button 
+                        onClick={() => onDelete(log.id)}
+                        disabled={isDeleting}
+                        className="flex-1 p-3 bg-red-50 border border-red-200 rounded-xl text-sm font-medium text-red-700 hover:bg-red-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        Delete
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -213,21 +217,25 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button 
-                                                    onClick={() => onView(log)}
-                                                    className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors rounded"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </button>
-                                                <button 
-                                                    onClick={() => onDelete(log.id)}
-                                                    disabled={isDeleting}
-                                                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors rounded"
-                                                    title="Delete Log"
-                                                >
-                                                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                                </button>
+                                                {onView && (
+                                                    <button 
+                                                        onClick={() => onView(log)}
+                                                        className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors rounded"
+                                                        title="View Details"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {onDelete && (
+                                                    <button 
+                                                        onClick={() => onDelete(log.id)}
+                                                        disabled={isDeleting}
+                                                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors rounded"
+                                                        title="Delete Log"
+                                                    >
+                                                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>

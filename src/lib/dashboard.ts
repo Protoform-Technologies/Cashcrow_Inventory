@@ -1,10 +1,11 @@
+import { cache } from 'react'
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 
 /**
  * Core dashboard data service
  */
 
-export async function fetchDashboardStats() {
+export const fetchDashboardStats = cache(async () => {
     const supabase = await createServerSupabaseClient()
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -37,9 +38,9 @@ export async function fetchDashboardStats() {
         outOfStock: outOfStock || 0,
         recentLogs: recentLogsCount || 0
     }
-}
+})
 
-export async function fetchInventoryData(page: number = 1, limit: number = 8, query?: string) {
+export const fetchInventoryData = cache(async (page: number = 1, limit: number = 8, query?: string) => {
     const supabase = await createServerSupabaseClient()
     const from = (page - 1) * limit
     const to = from + limit - 1
@@ -74,9 +75,9 @@ export async function fetchInventoryData(page: number = 1, limit: number = 8, qu
     })
 
     return { products, count: count || 0 }
-}
+})
 
-export async function fetchRecentActivityFeed(limit: number = 5) {
+export const fetchRecentActivityFeed = cache(async (limit: number = 5) => {
     const supabase = await createServerSupabaseClient()
 
     const { data: items, error } = await supabase
@@ -156,9 +157,9 @@ export async function fetchRecentActivityFeed(limit: number = 5) {
             color
         }
     })
-}
+})
 
-export async function checkTodayLogSubmission(userId: string) {
+export const checkTodayLogSubmission = cache(async (userId: string) => {
     const supabase = await createServerSupabaseClient()
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -172,9 +173,9 @@ export async function checkTodayLogSubmission(userId: string) {
         .limit(1)
 
     return !!data && data.length > 0
-}
+})
 
-export async function searchGlobalInventory(query: string) {
+export const searchGlobalInventory = cache(async (query: string) => {
     if (!query) return []
     const supabase = await createServerSupabaseClient()
 
@@ -209,4 +210,4 @@ export async function searchGlobalInventory(query: string) {
     ]
 
     return results
-}
+})

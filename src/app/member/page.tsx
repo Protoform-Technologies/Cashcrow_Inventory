@@ -42,7 +42,7 @@ export default async function MemberPage({
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Member" 
+            userRole={profile.role} 
             userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Member Dashboard"
@@ -68,6 +68,8 @@ export default async function MemberPage({
                         items={inventoryData.products}
                         totalCount={inventoryData.count}
                         currentPage={page}
+                        basePath="/member/parts"
+                        isDashboard={true}
                     />
                 </div>
 

@@ -369,7 +369,8 @@ export async function getProductFullHistory(productId: string, page: number = 1,
             }) : 'Unknown',
             date: item.day_logs ? new Date(item.day_logs.created_at).toLocaleDateString('en-US', { 
                 month: 'short', 
-                day: 'numeric' 
+                day: 'numeric',
+                year: 'numeric'
             }) : 'Unknown',
             partName: item.products?.name || item.products?.sku || 'Unknown',
             quantity: item.qty,

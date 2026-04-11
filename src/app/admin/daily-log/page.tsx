@@ -38,7 +38,7 @@ export default async function DailyLogPage() {
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Admin" 
+            userRole={profile.role} 
             userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Daily Log Entry"

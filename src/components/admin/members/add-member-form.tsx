@@ -5,7 +5,7 @@ import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { addMember } from "@/actions/members"
+import { addMember } from "@/actions/members.actions"
 
 interface AddMemberFormProps {
     onSuccess?: () => void

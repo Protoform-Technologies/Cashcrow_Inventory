@@ -19,7 +19,7 @@ export default async function AdminProfilePage() {
   return (
     <DashboardLayout 
       userName={fullName} 
-      userRole="Admin" 
+      userRole={profile.role} 
       userId={profile.id}
       avatarUrl={profile.avatar_url}
       title="User Profile"

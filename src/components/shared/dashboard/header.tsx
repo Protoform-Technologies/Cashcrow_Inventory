@@ -79,9 +79,9 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
         setNotifications(prev => prev.filter(n => n.id !== id))
     }
 
-    const displayedRole = userRole.toLowerCase().includes('director') || userRole.toLowerCase() === 'admin' 
-        ? 'Admin' 
-        : 'Member';
+    const isAdmin = userRole.toLowerCase().includes('director') || userRole.toLowerCase().includes('admin');
+    const displayedRole = isAdmin ? 'Admin' : 'Member';
+    const roleColor = isAdmin ? 'text-emerald-600' : 'text-blue-600';
 
     // 👤 INITIALS
     const initials = userName
@@ -133,11 +133,13 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
         setShowDropdown(false)
         setQuery('')
 
-        const path = item.type === 'product'
-            ? '/admin/parts'
-            : '/admin/suppliers'
-
-        router.push(`${path}?q=${item.name}`)
+        const rolePath = isAdmin ? 'admin' : 'member';
+        
+        if (item.type === 'product') {
+            router.push(`/${rolePath}/parts/${item.id}`)
+        } else {
+            router.push(`/${rolePath}/suppliers?q=${encodeURIComponent(item.name)}`)
+        }
     }
 
     return (
@@ -305,7 +307,7 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
                 <div className="flex items-center gap-2">
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-bold">{userName}</p>
-                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">{displayedRole}</p>
+                        <p className={`text-[10px] ${roleColor} font-bold uppercase tracking-wider`}>{displayedRole}</p>
                     </div>
 
                     <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center font-bold overflow-hidden border border-slate-100">

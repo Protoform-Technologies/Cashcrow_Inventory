@@ -17,7 +17,7 @@ export default async function PartsPage({
     const resolvedParams = await searchParams
     const page = parseInt(resolvedParams.page || '1', 10)
     const query = resolvedParams.q || ''
-    const limit = 9
+    const limit = 6
 
     const profile = await getAdminProfileOrRedirect()
     const fullName = `${profile.first_name} ${profile.last_name}`

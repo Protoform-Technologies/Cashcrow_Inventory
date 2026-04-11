@@ -11,7 +11,7 @@ import {
     CheckCircle,
     AlertCircle
 } from 'lucide-react'
-import { addSupplier } from '@/actions/suppliers.actions'
+import { addSupplier } from '@/actions/suppliers'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 
@@ -242,6 +242,17 @@ export default function AddSupplierForm() {
                             name="branch"
                             className="w-full rounded-xl border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 px-4 py-3 transition-all outline-none"
                             placeholder="Branch Name"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">
+                            GPay ID / Payment Mobile
+                        </label>
+                        <input
+                            name="payment_id"
+                            className="w-full rounded-xl border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 px-4 py-3 transition-all outline-none"
+                            placeholder="e.g. UPI ID or number"
                             type="text"
                         />
                     </div>

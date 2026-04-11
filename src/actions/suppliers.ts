@@ -19,6 +19,7 @@ export async function addSupplier(formData: FormData) {
     const bank_account = formData.get('bank_account') as string
     const ifsc = formData.get('ifsc') as string
     const branch = formData.get('branch') as string
+    const payment_id = formData.get('payment_id') as string
 
     const { error: insertError } = await supabase
         .from('suppliers')
@@ -34,14 +35,15 @@ export async function addSupplier(formData: FormData) {
             gst_no: gst_no || null,
             bank_account: bank_account || null,
             ifsc: ifsc || null,
-            branch: branch || null
+            branch: branch || null,
+            payment_id: payment_id || null
         })
     if (insertError) {
         console.error("Insert error:", insertError)
         return { error: insertError.message || 'Failed to add supplier.' }
     }
     
-    revalidatePath('/admin/add-suppliers')
+    revalidatePath('/admin/suppliers')
 
     // 🔔 CREATE NOTIFICATION
     try {
@@ -74,6 +76,7 @@ export async function updateSupplier(id: string, formData: FormData) {
     const bank_account = formData.get('bank_account') as string
     const ifsc = formData.get('ifsc') as string
     const branch = formData.get('branch') as string
+    const payment_id = formData.get('payment_id') as string
 
     const { error: updateError } = await supabase
         .from('suppliers')
@@ -89,7 +92,8 @@ export async function updateSupplier(id: string, formData: FormData) {
             gst_no: gst_no || null,
             bank_account: bank_account || null,
             ifsc: ifsc || null,
-            branch: branch || null
+            branch: branch || null,
+            payment_id: payment_id || null
         })
         .eq('id', id)
 
@@ -98,7 +102,7 @@ export async function updateSupplier(id: string, formData: FormData) {
         return { error: updateError.message || 'Failed to update supplier.' }
     }
 
-    revalidatePath('/admin/add-suppliers')
+    revalidatePath('/admin/suppliers')
 
     return { success: true }
 }
@@ -116,7 +120,7 @@ export async function deleteSupplier(id: string) {
         return { error: 'Failed to delete supplier.' }
     }
 
-    revalidatePath('/admin/add-suppliers')
+    revalidatePath('/admin/suppliers')
 
     return { success: true }
 }

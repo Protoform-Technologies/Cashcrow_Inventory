@@ -86,7 +86,11 @@ export default function ProductCard({ product, onClick, onDownloadPdf }: Product
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                         <div
-                            className={`h-full ${stockPercentage >= 100 ? 'bg-green-500' : stockPercentage >= 50 ? 'bg-orange-500' : 'bg-red-500'}`}
+                            className={`h-full transition-all duration-500 ${
+                                stockStatus.color === 'green' ? 'bg-emerald-500' : 
+                                stockStatus.color === 'orange' ? 'bg-orange-500' : 
+                                'bg-red-500'
+                            }`}
                             style={{ width: `${Math.min(100, stockPercentage)}%` }}
                         />
                     </div>
@@ -96,14 +100,19 @@ export default function ProductCard({ product, onClick, onDownloadPdf }: Product
             {/* Card Footer */}
             <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between mt-auto">
                 <button
-                    className="text-xs font-bold text-[var(--color-cashcrow-primary)] hover:underline flex items-center gap-1"
+                    className={`text-xs font-bold flex items-center gap-1 transition-colors ${
+                        product.data_sheet_url 
+                            ? 'text-[var(--color-cashcrow-primary)] hover:underline' 
+                            : 'text-slate-300 cursor-not-allowed'
+                    }`}
                     onClick={(e) => {
                         e.stopPropagation()
                         if (onDownloadPdf) onDownloadPdf(e)
                     }}
+                    title={product.data_sheet_url ? 'Download technical data sheet' : 'No data sheet available'}
                 >
-                    <Download className="w-3.5 h-3.5" />
-                    Download PDF
+                    <Download className={`w-3.5 h-3.5 ${product.data_sheet_url ? '' : 'text-slate-300'}`} />
+                    {product.data_sheet_url ? 'Data Sheet' : 'No data sheet'}
                 </button>
                 <span className="text-xs text-slate-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                     View Details

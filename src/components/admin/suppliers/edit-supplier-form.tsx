@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react"
-import { updateSupplier } from "@/actions/suppliers.actions"
+import { updateSupplier } from "@/actions/suppliers"
 import { CheckCircle2, AlertCircle, Loader2, Building2, User, Settings, CreditCard } from "lucide-react"
 
 interface Supplier {
@@ -18,6 +18,7 @@ interface Supplier {
     bank_account?: string | null
     ifsc?: string | null
     branch?: string | null
+    payment_id?: string | null
 }
 
 interface EditSupplierFormProps {
@@ -43,7 +44,8 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
         gst_no: supplier.gst_no || '',
         bank_account: supplier.bank_account || '',
         ifsc: supplier.ifsc || '',
-        branch: supplier.branch || ''
+        branch: supplier.branch || '',
+        payment_id: supplier.payment_id || ''
     })
 
     useEffect(() => {
@@ -59,7 +61,8 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
             gst_no: supplier.gst_no || '',
             bank_account: supplier.bank_account || '',
             ifsc: supplier.ifsc || '',
-            branch: supplier.branch || ''
+            branch: supplier.branch || '',
+            payment_id: supplier.payment_id || ''
         })
     }, [supplier])
 
@@ -82,10 +85,7 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
         formDataObj.append('lead_time', formData.lead_time || '7')
         formDataObj.append('payment_terms', formData.payment_terms)
         formDataObj.append('category', formData.category)
-        formDataObj.append('gst_no', formData.gst_no)
-        formDataObj.append('bank_account', formData.bank_account)
-        formDataObj.append('ifsc', formData.ifsc)
-        formDataObj.append('branch', formData.branch)
+        formDataObj.append('payment_id', formData.payment_id)
         formDataObj.append('gst_no', formData.gst_no)
         formDataObj.append('bank_account', formData.bank_account)
         formDataObj.append('ifsc', formData.ifsc)
@@ -342,21 +342,34 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
                                 type="text"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                GPay ID / Payment Mobile
+                            </label>
+                            <input
+                                name="payment_id"
+                                value={formData.payment_id || ''}
+                                onChange={handleChange}
+                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
+                                placeholder="e.g. UPI ID or Number"
+                                type="text"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center justify-end gap-3 mt-10">
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     className="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
                     onClick={onCancel}
                 >
                     Cancel
                 </button>
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     disabled={isLoading}
                     className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70"
                 >

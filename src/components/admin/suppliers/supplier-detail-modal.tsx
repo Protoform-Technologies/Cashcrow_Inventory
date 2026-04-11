@@ -11,12 +11,16 @@ import {
     Phone,
     Globe,
     CreditCard,
-    AlertTriangle
-
+    AlertTriangle,
+    Copy,
+    Check,
+    Loader2,
+    User,
+    Clock
 } from 'lucide-react'
-import { deleteSupplier } from '@/actions/suppliers.actions'
+import { deleteSupplier } from '@/actions/suppliers'
 import { useRouter } from 'next/navigation'
-import EditSupplierForm from '@/components/dashboard/edit-supplier-form'
+import EditSupplierForm from './edit-supplier-form'
 import { generateSupplierPDF } from './supplier-card'
 
 
@@ -34,6 +38,7 @@ interface Supplier {
     bank_account: string | null
     ifsc: string | null
     branch: string | null
+    payment_id: string | null
     created_at: string
 }
 
@@ -90,9 +95,32 @@ function getInitials(name: string): string {
 }
 
 export default function SupplierDetailModal({ supplier, onClose }: SupplierDetailModalProps) {
-const router = useRouter()
+    const router = useRouter()
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [copiedField, setCopiedField] = useState<string | null>(null)
+
+    const copyToClipboard = (text: string, field: string) => {
+        navigator.clipboard.writeText(text)
+        setCopiedField(field)
+        setTimeout(() => setCopiedField(null), 2000)
+    }
+
+    const CopyButton = ({ text, field }: { text: string, field: string }) => (
+        <button
+            onClick={() => copyToClipboard(text, field)}
+            className="p-1 hover:bg-slate-100 rounded transition-colors"
+            title="Copy to clipboard"
+        >
+            {copiedField === field ? (
+                <Check className="w-3.5 h-3.5 text-green-500" />
+            ) : (
+                <Copy className="w-3.5 h-3.5 text-slate-400" />
+            )}
+        </button>
+    )
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4">
@@ -115,11 +143,6 @@ const router = useRouter()
 
                 {/* Breadcrumbs & Title */}
                 <div className="p-4 md:p-8 pb-4">
-                    <nav className="flex items-center gap-2 text-xs md:text-sm text-slate-500 mb-2">
-                        <Link href="/admin/suppliers" className="hover:text-[var(--color-cashcrow-primary)] transition-colors">Suppliers</Link>
-                        <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
-                        <span className="text-[var(--color-cashcrow-primary)] font-medium truncate max-w-[150px]">{supplier.company_name}</span>
-                    </nav>
                     <div className="flex items-start gap-3 md:gap-4">
                         <div className="w-12 h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl bg-[var(--color-cashcrow-primary)]/10 flex items-center justify-center shrink-0">
                             <span className="text-[var(--color-cashcrow-primary)] font-bold text-lg md:text-xl">
@@ -127,7 +150,7 @@ const router = useRouter()
                             </span>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <h2 className="text-xl md:text-3xl text-slate-900 tracking-tight font-bold truncate">{supplier.company_name}</h2>
+                            <h2 className="text-xl md:text-3xl text-slate-900 tracking-tight font-bold break-words leading-tight">{supplier.company_name}</h2>
                             <span className={`inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-xs font-bold mt-1 md:mt-2 ${getCategoryColor(supplier.category)}`}>
                                 {getCategoryLabel(supplier.category)}
                             </span>
@@ -157,7 +180,7 @@ const router = useRouter()
                             <span className="sm:hidden">PDF</span>
                         </button>
                         {supplier.email ? (
-                            <a 
+                            <a
                                 href={`mailto:${supplier.email}`}
                                 className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors" target="_blank" rel="noopener noreferrer"
 
@@ -167,7 +190,7 @@ const router = useRouter()
                                 <span className="sm:hidden">Email</span>
                             </a>
                         ) : supplier.phone ? (
-                            <a 
+                            <a
                                 href={`tel:${supplier.phone}`}
                                 className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors" target="_blank" rel="noopener noreferrer"
 
@@ -187,20 +210,28 @@ const router = useRouter()
 
                 {/* Stats Grid */}
                 <div className="px-4 md:px-8 pb-4 md:pb-8">
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
                         {/* Contact Person */}
                         <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <p className="text-slate-500 text-xs md:text-sm font-medium">Contact Person</p>
-                            <div className="mt-1 md:mt-2">
-                                <h3 className="text-sm md:text-xl font-bold text-slate-900 truncate">{supplier.contact_name || 'Not specified'}</h3>
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
+                                <User className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                                <span className="text-sm md:text-base">Contact Person</span>
+                            </h4>
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                                <p className="text-sm md:text-lg font-semibold text-slate-900 break-words">
+                                    {supplier.contact_name || 'Not specified'}
+                                </p>
                             </div>
                         </div>
 
                         {/* Email */}
                         <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <p className="text-slate-500 text-xs md:text-sm font-medium">Email</p>
-                            <div className="mt-1 md:mt-2">
-                                <a href={`mailto:${supplier.email}`} className="text-[var(--color-cashcrow-primary)] text-xs md:text-sm font-semibold hover:underline truncate block">
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
+                                <Mail className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                                <span className="text-sm md:text-base">Email</span>
+                            </h4>
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                                <a href={`mailto:${supplier.email}`} className="text-[var(--color-cashcrow-primary)] text-sm md:text-lg font-semibold hover:underline break-all block">
                                     {supplier.email || 'N/A'}
                                 </a>
                             </div>
@@ -208,9 +239,12 @@ const router = useRouter()
 
                         {/* Phone */}
                         <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <p className="text-slate-500 text-xs md:text-sm font-medium">Phone</p>
-                            <div className="mt-1 md:mt-2">
-                                <a href={`tel:${supplier.phone}`} className="text-xs md:text-sm font-semibold text-slate-700 truncate block">
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
+                                <Phone className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                                <span className="text-sm md:text-base">Phone</span>
+                            </h4>
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                                <a href={`tel:${supplier.phone}`} className="text-sm md:text-lg font-semibold text-slate-700 break-all block">
                                     {supplier.phone || 'N/A'}
                                 </a>
                             </div>
@@ -218,10 +252,15 @@ const router = useRouter()
 
                         {/* Lead Time */}
                         <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
-                            <p className="text-slate-500 text-xs md:text-sm font-medium">Lead Time</p>
-                            <div className="flex items-baseline gap-1 md:gap-2 mt-1 md:mt-2">
-                                <h3 className="text-xl md:text-3xl font-bold text-slate-900">{supplier.lead_time}</h3>
-                                <span className="text-slate-400 text-xs md:text-sm">Days</span>
+                            <h4 className="font-bold text-slate-900 flex items-center gap-2 mb-2 md:mb-4">
+                                <Clock className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
+                                <span className="text-sm md:text-base">Lead Time</span>
+                            </h4>
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                                <div className="flex items-baseline gap-1 md:gap-2">
+                                    <h3 className="text-sm md:text-lg font-bold text-slate-900">{supplier.lead_time}</h3>
+                                    <span className="text-slate-400 text-xs md:text-sm">Days</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -255,7 +294,7 @@ const router = useRouter()
                                         href={supplier.website.startsWith('http') ? supplier.website : `https://${supplier.website}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-[var(--color-cashcrow-primary)] text-xs md:text-sm font-semibold hover:underline truncate block"
+                                        className="text-[var(--color-cashcrow-primary)] text-xs md:text-sm font-semibold hover:underline break-all block"
                                     >
                                         {supplier.website}
                                     </a>
@@ -280,23 +319,41 @@ const router = useRouter()
                                     {supplier.gst_no && (
                                         <div>
                                             <span className="text-xs text-slate-500">GST No</span>
-                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.gst_no}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-mono text-sm font-semibold text-slate-900">{supplier.gst_no}</p>
+                                                <CopyButton text={supplier.gst_no} field="gst_no" />
+                                            </div>
                                         </div>
                                     )}
-                                    {supplier.bank_account && (
+                                    {supplier.payment_id && (
                                         <div>
-                                            <span className="text-xs text-slate-500">Bank Account</span>
-                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.bank_account}</p>
+                                            <span className="text-xs text-slate-500">GPay ID / Payment Mobile</span>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-mono text-sm font-semibold text-slate-900">{supplier.payment_id}</p>
+                                                <CopyButton text={supplier.payment_id} field="payment_id" />
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             </div>
                             <div className="bg-white p-3 md:p-6 rounded-lg md:rounded-xl border border-primary/5 shadow-sm">
                                 <div className="space-y-3">
+                                    {supplier.bank_account && (
+                                        <div>
+                                            <span className="text-xs text-slate-500">Bank Account</span>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-mono text-sm font-semibold text-slate-900">{supplier.bank_account}</p>
+                                                <CopyButton text={supplier.bank_account} field="bank_account" />
+                                            </div>
+                                        </div>
+                                    )}
                                     {supplier.ifsc && (
                                         <div>
                                             <span className="text-xs text-slate-500">IFSC</span>
-                                            <p className="font-mono text-sm font-semibold text-slate-900">{supplier.ifsc}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-mono text-sm font-semibold text-slate-900">{supplier.ifsc}</p>
+                                                <CopyButton text={supplier.ifsc} field="ifsc" />
+                                            </div>
                                         </div>
                                     )}
                                     {supplier.branch && (
@@ -332,17 +389,8 @@ const router = useRouter()
                                 <p className="text-xs text-red-700">This action cannot be undone.</p>
                             </div>
                             <div className="flex gap-2">
-                                <button 
-                                    onClick={async () => {
-                                        const result = await deleteSupplier(supplier.id)
-                                        if (result.success) {
-                                            onClose()
-                                            router.refresh()
-                                        } else {
-                                            // TODO: Show error toast
-                                            console.error('Delete failed:', result.error)
-                                        }
-                                    }}
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
                                     className="px-4 md:px-6 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hover:shadow-lg whitespace-nowrap"
                                 >
                                     Delete Supplier
@@ -353,6 +401,58 @@ const router = useRouter()
                 </div>
             </div>
 
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !isDeleting && setShowDeleteConfirm(false)} />
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300 relative z-10">
+                        <div className="p-8 text-center">
+                            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                                <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Are you sure?</h3>
+                            <p className="text-slate-500 mb-8 leading-relaxed">
+                                You are about to permanently delete <span className="font-bold text-slate-900">{supplier.company_name}</span>. This action cannot be reversed.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-6 py-3.5 border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition-all hover:border-slate-300 disabled:opacity-50"
+                                >
+                                    No, Keep it
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setIsDeleting(true)
+                                        const result = await deleteSupplier(supplier.id)
+                                        if (result.success) {
+                                            setShowDeleteConfirm(false)
+                                            onClose()
+                                            router.refresh()
+                                        } else {
+                                            setIsDeleting(false)
+                                            console.error('Delete failed:', result.error)
+                                        }
+                                    }}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-6 py-3.5 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        'Yes, Delete'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Edit Supplier Modal */}
             {showEditModal && editingSupplier && (
                 <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2">
@@ -362,7 +462,7 @@ const router = useRouter()
                                 <h3 className="text-xl font-bold text-slate-900">Edit Supplier</h3>
                                 <p className="text-slate-500 text-sm mt-1">Update supplier information</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setShowEditModal(false)}
                                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                             >
@@ -370,17 +470,17 @@ const router = useRouter()
                             </button>
                         </div>
                         <div className="p-6">
-                            <EditSupplierForm 
-                                supplier={editingSupplier} 
+                            <EditSupplierForm
+                                supplier={editingSupplier}
                                 onSuccess={() => {
                                     setShowEditModal(false)
                                     setEditingSupplier(null)
                                     router.refresh()
-                                }} 
+                                }}
                                 onCancel={() => {
                                     setShowEditModal(false)
                                     setEditingSupplier(null)
-                                }} 
+                                }}
                             />
                         </div>
                     </div>

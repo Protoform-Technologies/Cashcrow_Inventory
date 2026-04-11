@@ -1,14 +1,14 @@
 'use client'
 
-import { 
-    Building2, 
-    ChevronRight, 
+import {
+    Building2,
+    ChevronRight,
     ChevronLeft,
     Pencil,
     Trash2,
     Loader2
 } from 'lucide-react'
-import { deleteSupplier } from '@/actions/suppliers.actions'
+import { deleteSupplier } from '@/actions/suppliers'
 import { Button } from '@/components/ui/button'
 
 interface Supplier {
@@ -140,7 +140,7 @@ export default function SuppliersTable({
                                     </tr>
                                 )
                             }
-                            
+
                             return (
                                 <tr key={supplier.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="px-3 md:px-6 py-4">
@@ -187,8 +187,8 @@ export default function SuppliersTable({
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-600">
                         <span>Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, suppliers.length)} of {suppliers.length} suppliers</span>
                         <div className="flex items-center gap-1">
-                            <button 
-                                onClick={() => onPageChange(currentPage - 1)} 
+                            <button
+                                onClick={() => onPageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
                                 className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1 text-slate-600 hover:text-slate-900 transition-all"
                             >
@@ -197,8 +197,8 @@ export default function SuppliersTable({
                             <span className="px-3 py-1 font-medium text-slate-900 bg-white border border-slate-200 rounded-lg shadow-sm">
                                 Page {currentPage} of {totalPages}
                             </span>
-                            <button 
-                                onClick={() => onPageChange(currentPage + 1)} 
+                            <button
+                                onClick={() => onPageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
                                 className="p-2 rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1 text-slate-600 hover:text-slate-900 transition-all"
                             >

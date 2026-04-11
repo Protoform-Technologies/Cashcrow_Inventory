@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react"
-import { updatePart } from "@/actions/products.actions"
+import { updateProduct } from "@/actions/products"
 import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2, Loader2 } from "lucide-react"
 
 interface Vendor {
@@ -80,7 +80,7 @@ export default function EditPartForm({ part, onSuccess, onCancel }: EditPartForm
         formData.append('existing_image_url', part.image_url || '')
         formData.append('vendors', JSON.stringify(vendors.filter(v => v.name.trim() !== '')))
 
-        const result = await updatePart(part.id, formData)
+        const result = await updateProduct(part.id, formData)
 
         if (result?.error) {
             setStatus({ type: 'error', message: result.error })

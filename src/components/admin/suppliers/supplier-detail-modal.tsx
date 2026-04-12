@@ -61,6 +61,13 @@ function getPaymentTermsLabel(value: string) {
     return labels[value] || value
 }
 
+// Logistics Logic: Categorize lead times based on days
+function getLeadTimeStatus(days: number) {
+    if (days <= 5) return { label: 'Fast Delivery', bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200' }
+    if (days <= 10) return { label: 'Standard', bg: 'bg-blue-100', text: 'text-blue-700', ring: 'ring-blue-200' }
+    return { label: 'Slow Turnaround', bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' }
+}
+
 function getCategoryLabel(value: string) {
     const labels: Record<string, string> = {
         'logistics': 'Logistics',
@@ -158,7 +165,7 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                     </div>
 
                     {/* Action Buttons - Stack on mobile */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3 mt-4 md:mt-6">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:gap-3 mt-4 md:mt-6">
                         <button
                             onClick={() => {
                                 setEditingSupplier(supplier)
@@ -181,9 +188,10 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                         </button>
                         {supplier.email ? (
                             <a
-                                href={`mailto:${supplier.email}`}
-                                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition-colors" target="_blank" rel="noopener noreferrer"
-
+                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${supplier.email}&su=Inquiry from Cashcrow Inventory`}
+                                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-[#265136] text-white rounded-lg text-sm font-semibold hover:bg-[#1f422b] transition-colors shadow-sm"
+                                target="_blank"
+                                rel="noopener noreferrer"
                             >
                                 <Mail className="w-4 h-4" />
                                 <span className="hidden sm:inline">Email Supplier</span>
@@ -256,11 +264,19 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                                 <Clock className="w-4 h-4 md:w-5 md:h-5 text-[var(--color-cashcrow-primary)]" />
                                 <span className="text-sm md:text-base">Lead Time</span>
                             </h4>
-                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg">
+                            <div className="p-2 md:p-4 bg-slate-50 rounded-lg flex items-center justify-between">
                                 <div className="flex items-baseline gap-1 md:gap-2">
                                     <h3 className="text-sm md:text-lg font-bold text-slate-900">{supplier.lead_time}</h3>
                                     <span className="text-slate-400 text-xs md:text-sm">Days</span>
                                 </div>
+                                {(() => {
+                                    const status = getLeadTimeStatus(supplier.lead_time)
+                                    return (
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${status.bg} ${status.text} ring-1 ${status.ring}`}>
+                                            {status.label}
+                                        </span>
+                                    )
+                                })()}
                             </div>
                         </div>
                     </div>

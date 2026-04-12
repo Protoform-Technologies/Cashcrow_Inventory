@@ -1,8 +1,18 @@
 'use client'
 
-import { useState, useRef, useEffect } from "react"
-import { updateSupplier } from "@/actions/suppliers"
-import { CheckCircle2, AlertCircle, Loader2, Building2, User, Settings, CreditCard } from "lucide-react"
+import { useState, useEffect } from 'react'
+import { 
+    Building2, 
+    User,
+    Settings,
+    CreditCard,
+    Save,
+    Loader2,
+    CheckCircle,
+    AlertCircle
+} from 'lucide-react'
+import { updateSupplier } from '@/actions/suppliers'
+import { Button } from '@/components/ui/button'
 
 interface Supplier {
     id: string
@@ -30,7 +40,18 @@ interface EditSupplierFormProps {
 export default function EditSupplierForm({ supplier, onSuccess, onCancel }: EditSupplierFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
-    const formRef = useRef<HTMLFormElement>(null)
+    
+    // Standard Categories list matching AddSupplierForm
+    const categories = [
+        "Electronics", 
+        "Hardware", 
+        "Consumables", 
+        "Lab Equipment", 
+        "IT Services",
+        "Office Supplies",
+        "Manufacturing",
+        "General"
+    ]
 
     const [formData, setFormData] = useState({
         company_name: supplier.company_name || '',
@@ -77,19 +98,9 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
         setStatus(null)
 
         const formDataObj = new FormData()
-        formDataObj.append('company_name', formData.company_name)
-        formDataObj.append('website', formData.website)
-        formDataObj.append('contact_name', formData.contact_name)
-        formDataObj.append('email', formData.email)
-        formDataObj.append('phone', formData.phone)
-        formDataObj.append('lead_time', formData.lead_time || '7')
-        formDataObj.append('payment_terms', formData.payment_terms)
-        formDataObj.append('category', formData.category)
-        formDataObj.append('payment_id', formData.payment_id)
-        formDataObj.append('gst_no', formData.gst_no)
-        formDataObj.append('bank_account', formData.bank_account)
-        formDataObj.append('ifsc', formData.ifsc)
-        formDataObj.append('branch', formData.branch)
+        Object.entries(formData).forEach(([key, value]) => {
+            formDataObj.append(key, value)
+        })
 
         const result = await updateSupplier(supplier.id, formDataObj)
 
@@ -105,287 +116,250 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
     }
 
     return (
-        <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl mx-auto pb-12">
-
+        <form onSubmit={handleSubmit} className="space-y-8 p-1">
             {status && (
-                <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${status.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold">{status.message}</p>
+                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+                    {status.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+                    <p className="font-semibold text-sm">{status.message}</p>
                 </div>
             )}
 
-            {/* Section 1: General Information */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">General Information</h3>
+            {/* General Information */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <Building2 className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">General Information</h3>
                 </div>
-                <div className="p-4 md:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Company Name <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                name="company_name"
-                                value={formData.company_name}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. Global Logistics Inc."
-                                required
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Website
-                            </label>
-                            <div className="relative">
-                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">
-                                    https://
-                                </span>
-                                <input
-                                    name="website"
-                                    value={formData.website}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-16 pr-4 py-3 transition-all"
-                                    placeholder="www.company.com"
-                                    type="text"
-                                />
-                            </div>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Company Name <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                            name="company_name"
+                            value={formData.company_name}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="e.g. Global Logistics Inc."
+                            required
+                            type="text"
+                        />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Website
+                        </label>
+                        <input
+                            name="website"
+                            value={formData.website}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="www.company.com"
+                            type="text"
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Section 2: Contact Details */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <User className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Contact Details</h3>
+            {/* Contact Details */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <User className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">Contact Details</h3>
                 </div>
-                <div className="p-4 md:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Primary Contact Name
-                            </label>
-                            <input
-                                name="contact_name"
-                                value={formData.contact_name}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="John Doe"
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="john@company.com"
-                                type="email"
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Phone Number
-                            </label>
-                            <input
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="+1 (555) 000-0000"
-                                type="tel"
-                            />
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Contact Name
+                        </label>
+                        <input
+                            name="contact_name"
+                            value={formData.contact_name}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="John Doe"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Email
+                        </label>
+                        <input
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="john@company.com"
+                            type="email"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Phone
+                        </label>
+                        <input
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="+91 9876543210"
+                            type="tel"
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Section 3: Operational Information */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Operational Information</h3>
+            {/* Logistics & Category */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <Settings className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">Logistics & Category</h3>
                 </div>
-                <div className="p-4 md:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Typical Lead Time
-                            </label>
-                            <div className="relative">
-                                <input
-                                    name="lead_time"
-                                    value={formData.lead_time}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] pl-4 pr-12 py-3 transition-all"
-                                    placeholder="7"
-                                    type="number"
-                                />
-                                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-sm">
-                                    Days
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Payment Terms <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="payment_terms"
-                                value={formData.payment_terms}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                required
-                            >
-                                <option disabled value="">Select Terms</option>
-                                <option value="immediate">Immediate</option>
-                                <option value="net15">Net 15</option>
-                                <option value="net30">Net 30</option>
-                                <option value="net45">Net 45</option>
-                                <option value="net60">Net 60</option>
-                                <option value="net90">Net 90</option>
-                                <option value="cod">COD (Cash on Delivery)</option>
-                                <option value="due_on_receipt">Due on Receipt</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Category <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="category"
-                                value={formData.category}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                required
-                            >
-                                <option disabled value="">Select Category</option>
-                                <option value="logistics">Logistics</option>
-                                <option value="manufacturing">Manufacturing</option>
-                                <option value="it_services">IT Services</option>
-                                <option value="office_supplies">Office Supplies</option>
-                                <option value="electronics">Electronics</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Category <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
+                            required
+                        >
+                            <option value="" disabled>Select Category</option>
+                            {categories.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Payment Terms <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                            name="payment_terms"
+                            value={formData.payment_terms}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
+                            required
+                        >
+                            <option value="" disabled>Select Terms</option>
+                            <option value="immediate">Immediate</option>
+                            <option value="net15">Net 15</option>
+                            <option value="net30">Net 30</option>
+                            <option value="cod">COD</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Lead Time (Days)
+                        </label>
+                        <input
+                            name="lead_time"
+                            value={formData.lead_time}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="7"
+                            type="number"
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Section 4: Billing Information */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Billing Information</h3>
+            {/* Billing Information */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <CreditCard className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">Billing Information</h3>
                 </div>
-                <div className="p-4 md:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                GST Number
-                            </label>
-                            <input
-                                name="gst_no"
-                                value={formData.gst_no || ''}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. 27AAACH7167R1Z5"
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Bank Account
-                            </label>
-                            <input
-                                name="bank_account"
-                                value={formData.bank_account || ''}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. 123456789012"
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                IFSC Code
-                            </label>
-                            <input
-                                name="ifsc"
-                                value={formData.ifsc || ''}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. SBIN0001234"
-                                type="text"
-                                maxLength={11}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                Bank Branch
-                            </label>
-                            <input
-                                name="branch"
-                                value={formData.branch || ''}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. Main Branch, Mumbai"
-                                type="text"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">
-                                GPay ID / Payment Mobile
-                            </label>
-                            <input
-                                name="payment_id"
-                                value={formData.payment_id || ''}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border-slate-300 bg-white text-slate-900 focus:ring-[var(--color-cashcrow-primary)] focus:border-[var(--color-cashcrow-primary)] px-4 py-3 transition-all"
-                                placeholder="e.g. UPI ID or Number"
-                                type="text"
-                            />
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            GST Number
+                        </label>
+                        <input
+                            name="gst_no"
+                            value={formData.gst_no}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="GSTIN"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            Bank Account
+                        </label>
+                        <input
+                            name="bank_account"
+                            value={formData.bank_account}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="Account Number"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            IFSC Code
+                        </label>
+                        <input
+                            name="ifsc"
+                            value={formData.ifsc}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none text-sm"
+                            placeholder="IFSC Code"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                            UPI ID / Mobile
+                        </label>
+                        <input
+                            name="payment_id"
+                            value={formData.payment_id}
+                            onChange={handleChange}
+                            className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
+                            placeholder="e.g. 9876543210@upi"
+                            type="text"
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 mt-10">
-                <button
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                <Button 
                     type="button"
-                    className="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
+                    variant="outline"
                     onClick={onCancel}
+                    className="w-full sm:w-auto px-6 h-12 rounded-xl border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
                 >
                     Cancel
-                </button>
-                <button
+                </Button>
+                <Button 
                     type="submit"
                     disabled={isLoading}
-                    className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70"
+                    className="w-full sm:w-auto bg-[#265136] hover:bg-[#1f422b] text-white h-12 px-10 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#265136]/10 transition-all active:scale-95 disabled:opacity-70"
                 >
                     {isLoading ? (
                         <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin" />
                             Saving...
                         </>
                     ) : (
                         <>
+                            <Save className="w-4 h-4" />
                             Update Supplier
                         </>
                     )}
-                </button>
+                </Button>
             </div>
         </form>
     )
 }
-

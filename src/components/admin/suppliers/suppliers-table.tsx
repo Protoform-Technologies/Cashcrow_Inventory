@@ -57,6 +57,13 @@ function getPaymentTermsLabel(value: string) {
     return labels[value] || value
 }
 
+// Logistics Logic: Categorize lead times based on days
+function getLeadTimeStatus(days: number) {
+    if (days <= 5) return { label: 'Fast Delivery', bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200' }
+    if (days <= 10) return { label: 'Standard', bg: 'bg-blue-100', text: 'text-blue-700', ring: 'ring-blue-200' }
+    return { label: 'Slow Turnaround', bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' }
+}
+
 function getCategoryLabel(value: string) {
     const labels: Record<string, string> = {
         'logistics': 'Logistics',
@@ -111,6 +118,7 @@ export default function SuppliersTable({
                             <th className="hidden lg:table-cell px-2 md:px-6 py-3 md:py-4">Email</th>
                             <th className="hidden lg:table-cell px-2 md:px-6 py-3 md:py-4">Category</th>
                             <th className="hidden xl:table-cell px-2 md:px-6 py-3 md:py-4">Terms</th>
+                            <th className="hidden xl:table-cell px-2 md:px-6 py-3 md:py-4">Delivery</th>
                             <th className="w-[12%] px-2 md:px-6 py-3 md:py-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -164,6 +172,16 @@ export default function SuppliersTable({
                                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                                             {getPaymentTermsLabel(supplier.payment_terms)}
                                         </span>
+                                    </td>
+                                    <td className="px-3 md:px-6 py-4 hidden xl:table-cell">
+                                        {(() => {
+                                            const status = getLeadTimeStatus(supplier.lead_time)
+                                            return (
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${status.bg} ${status.text} ring-1 ${status.ring}`}>
+                                                    {status.label}
+                                                </span>
+                                            )
+                                        })()}
                                     </td>
                                     <td className="px-3 md:px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">

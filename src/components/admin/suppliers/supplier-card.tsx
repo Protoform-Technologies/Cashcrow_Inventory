@@ -157,9 +157,14 @@ export default function SupplierCard({ supplier, onClick }: SupplierCardProps) {
                 {/* Email */}
                 <div className="flex items-start gap-2">
                     <Mail className="w-3.5 h-3.5 text-slate-400 mt-0.5" />
-                    <span className="text-xs text-slate-600 font-medium break-all">
+                    <a 
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${supplier.email}&su=Inquiry from Cashcrow Inventory`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-slate-600 font-medium break-all hover:text-[var(--color-cashcrow-primary)] hover:underline transition-colors"
+                    >
                         {supplier.email || 'No email'}
-                    </span>
+                    </a>
                 </div>
 
                 {/* Lead Time Metrics */}

@@ -1,57 +1,37 @@
-import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
-import { redirect } from 'next/navigation'
+import { getAdminProfileOrRedirect } from '@/actions/auth'
 import DashboardLayout from '@/components/shared/dashboard/layout'
-import AddSuppliersClient from './add-suppliers-client'
+import AddSupplierForm from '@/components/admin/suppliers/add-supplier-form'
+import { Metadata } from 'next'
 
-interface Supplier {
-    id: string
-    company_name: string
-    website: string | null
-    contact_name: string | null
-    email: string | null
-    phone: string | null
-    lead_time: number
-    payment_terms: string
-    category: string
-    created_at: string
+export const metadata: Metadata = {
+    title: 'Add Suppliers | Cashcrow',
+    description: 'Onboard new inventory source partners and manage procurement logistics.',
 }
 
 export default async function AddSuppliersPage() {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        redirect('/')
-    }
-
-    const adminClient = getSupabaseAdmin()
-    const { data: profile } = await adminClient
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-    if (!profile || profile.role?.toUpperCase() !== 'ADMIN') {
-        redirect('/')
-    }
-
+    const profile = await getAdminProfileOrRedirect()
     const fullName = `${profile.first_name} ${profile.last_name}`
-
-    // Fetch suppliers from the database
-    const { data: suppliers } = await adminClient
-        .from('suppliers')
-        .select('*')
-        .order('created_at', { ascending: false })
 
     return (
         <DashboardLayout 
             userName={fullName} 
-            userRole="Lab Admin" 
+            userRole={profile.role} 
+            userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Add Suppliers"
         >
-            <AddSuppliersClient userName={fullName} suppliers={suppliers || []} />
+            <div className="w-full space-y-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Onboard New Supplier</h2>
+                    <p className="text-slate-500 font-medium">
+                        Fill in the details below to register a new vendor.
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-10">
+                    <AddSupplierForm />
+                </div>
+            </div>
         </DashboardLayout>
     )
 }
-

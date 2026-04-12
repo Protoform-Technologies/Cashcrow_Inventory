@@ -4,6 +4,13 @@ import { createServerSupabaseClient } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
 
+function toTitleCase(str: string) {
+    if (!str) return ''
+    return str.split(/[\s_]+/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+}
+
 export async function addSupplier(formData: FormData) {
     const supabase = await createServerSupabaseClient()
 
@@ -14,7 +21,7 @@ export async function addSupplier(formData: FormData) {
     const phone = formData.get('phone') as string
     const lead_time = parseInt(formData.get('lead_time') as string || '7', 10)
     const payment_terms = formData.get('payment_terms') as string
-    const category = formData.get('category') as string
+    const category = toTitleCase((formData.get('category') as string || '').trim())
     const gst_no = formData.get('gst_no') as string
     const bank_account = formData.get('bank_account') as string
     const ifsc = formData.get('ifsc') as string
@@ -71,7 +78,7 @@ export async function updateSupplier(id: string, formData: FormData) {
     const phone = formData.get('phone') as string
     const lead_time = parseInt(formData.get('lead_time') as string || '7', 10)
     const payment_terms = formData.get('payment_terms') as string
-    const category = formData.get('category') as string
+    const category = toTitleCase((formData.get('category') as string || '').trim())
     const gst_no = formData.get('gst_no') as string
     const bank_account = formData.get('bank_account') as string
     const ifsc = formData.get('ifsc') as string
@@ -148,5 +155,29 @@ export async function getSuppliers(page: number = 1, limit: number = 100, query?
     }
 
     return { suppliers: data || [], count: count || 0 };
+}
+
+export async function getUniqueCategories() {
+    const supabase = await createServerSupabaseClient()
+    
+    // Fetch unique categories using select
+    const { data, error } = await supabase
+        .from('suppliers')
+        .select('category')
+        .order('category', { ascending: true })
+
+    if (error) {
+        console.error("Fetch categories error:", error)
+        return []
+    }
+
+    // Filter for uniqueness and normalize to Title Case in memory
+    const categories = Array.from(
+        new Set(
+            data.map(item => toTitleCase((item.category || '').trim()))
+        )
+    ).filter(Boolean).sort()
+    
+    return categories
 }
 

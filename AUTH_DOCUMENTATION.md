@@ -76,3 +76,19 @@ $$ language plpgsql security definer;
 ```
 
 This trigger fires whenever a row in the `profiles` table is inserted or updated, keeping the authentication token in sync with the database.
+
+---
+
+## 🛡️ Role-Based Permission Matrix
+
+Access to system resources is strictly governed by the user's role:
+
+| Feature | ADMIN Role | MEMBER Role |
+| :--- | :--- | :--- |
+| **Inventory Viewing** | Full Access | Full Access |
+| **Stock Adjustments** | Full Access | No Access |
+| **Supplier Management** | **Full Access** | No Access |
+| **Logistics Branding** | **Full Access** | No Access |
+
+### Administrative Management Logic
+Only users with the `ADMIN` role can access the **Supplier Onboarding** workflows. This ensures that critical logistics metadata—such as **Lead Times** (Standard/Fast) and **Payment Terms** (Immediate)—is managed by authorized procurement officers to maintain platform-wide data integrity.

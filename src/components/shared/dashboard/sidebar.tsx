@@ -27,7 +27,7 @@ const adminNavItems = [
     { name: 'Suppliers', icon: List, href: '/admin/suppliers' },
     { name: 'Quotes', icon: FileText, href: '/admin/quotes' },
     { name: 'Add Suppliers', icon: Truck, href: '/admin/add-suppliers' },
-    { name: 'Add Product', icon: PlusSquare, href: '/admin/add-product' },
+    { name: 'Add Parts', icon: PlusSquare, href: '/admin/add-parts' },
     { name: 'Add Members', icon: UserPlus, href: '/admin/add-members' },
     { name: 'Daily Log', icon: History, href: '/admin/daily-log' },
     { name: 'Reports', icon: BarChart3, href: '/admin/reports' },

@@ -85,8 +85,9 @@ Access to system resources is strictly governed by the user's role:
 
 | Feature | ADMIN Role | MEMBER Role |
 | :--- | :--- | :--- |
-| **Inventory Viewing** | Full Access | Full Access |
+| **Parts Viewing** | Full Access | Full Access |
 | **Stock Adjustments** | Full Access | No Access |
+| **Parts Onboarding** | Full Access | No Access |
 | **Supplier Management** | **Full Access** | No Access |
 | **Logistics Branding** | **Full Access** | No Access |
 

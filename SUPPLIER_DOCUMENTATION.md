@@ -1,6 +1,6 @@
 # Supplier Management & Logistics Documentation
 
-This document explains the technical implementation of the Supplier Management system, used to track procurement partners, financial details, and logistics metadata within the Cashcrow Inventory platform.
+This document explains the technical implementation of the Supplier Management system, used to track procurement partners, financial details, and logistics metadata within the Cashcrow Parts Management.
 
 ## 🏗 Architecture Overview
 
@@ -101,8 +101,9 @@ src/
 
 ---
 
-## 🔔 Onboarding Alerts
+## 🚛 Procurement Connectivity (Parts Sync)
 
-To maintain transparency across the management team, the supplier system is linked to the notification engine:
-- **Targeting**: New supplier alerts are routed specifically to **ADMIN** roles.
-- **Contextual Links**: Notifications include direct links to the newly created supplier profile for immediate verification.
+The supplier system is the primary data source for the **Multi-Vendor Logic** used in the Parts Management module:
+- **Part Association**: Suppliers defined here can be linked to multiple parts in the **Parts Onboarding** workflow.
+- **Logistics Integration**: The **Standard Lead Times** documented here directly inform the procurement strategy for associated parts.
+- **Financial Sync**: **Payment Terms** (e.g., Immediate) ensure that replenishment orders for parts align with the organization's financial liquidity policies.

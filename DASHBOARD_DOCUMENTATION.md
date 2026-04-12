@@ -1,6 +1,6 @@
-# Dashboard & Inventory Insights Documentation
+# Dashboard & Parts Insights Documentation
 
-This document describes the implementation of the Dashboard system, including data fetching strategies, shared components, and the real-time activity tracking used in the Cashcrow Inventory Management system.
+This document describes the implementation of the Dashboard system, including data fetching strategies, shared components, and the real-time activity tracking used in the Cashcrow Parts Management system.
 
 ## 🏗 Architecture Overview
 
@@ -46,7 +46,7 @@ The system uses a set of primitive components located in `src/components/shared/
 
 The dashboard provides a "Command-K" style search experience:
 - **Multi-Table Search**: Queries both `products` and `suppliers` tables in a single operation.
-- **Result Grouping**: Automatically categorizes results into "Products" and "Suppliers" with status indicators.
+- **Result Grouping**: Automatically categorizes results into "Parts" and "Suppliers" with status indicators.
 - **Debounced Interaction**: Optimized to prevent database spamming during rapid typing.
 
 ---

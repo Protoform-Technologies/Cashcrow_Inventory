@@ -2,11 +2,33 @@
 
 import { useState, useRef } from "react"
 import { addProduct } from "@/actions/products"
-import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2 } from "lucide-react"
+import { 
+    PlusCircle, 
+    Image as ImageIcon, 
+    CheckCircle2, 
+    AlertCircle, 
+    Store, 
+    Info, 
+    MapPin, 
+    BarChart3, 
+    StickyNote,
+    Loader2,
+    Trash2,
+    Globe,
+    UserCircle2
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface Supplier {
     id: string
     company_name: string
+}
+
+interface VendorEntry {
+    mode: 'online' | 'offline'
+    name: string
+    fund: string
+    link?: string
 }
 
 interface AddPartFormProps {
@@ -21,13 +43,35 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
-    const [purchaseMode, setPurchaseMode] = useState<'online' | 'offline' | ''>('')
-    const [selectedSupplierId, setSelectedSupplierId] = useState('')
-    const [showOtherVendor, setShowOtherVendor] = useState(false)
-    const [otherVendor, setOtherVendor] = useState({ name: '', fund: '', link: '' })
-    const [shopName, setShopName] = useState('')
-    const [mrp, setMrp] = useState('')
-    const [websiteLink, setWebsiteLink] = useState('')
+    // Vendor Management State
+    const [vendors, setVendors] = useState<VendorEntry[]>([
+        { mode: 'online', name: '', fund: '', link: '' }
+    ])
+
+    const categories = [
+        "Electronics", 
+        "Hardware", 
+        "Consumables", 
+        "Lab Equipment", 
+        "IT Services",
+        "Office Supplies",
+        "Manufacturing",
+        "General"
+    ]
+
+    const addVendor = () => {
+        setVendors([...vendors, { mode: 'online', name: '', fund: '', link: '' }])
+    }
+
+    const removeVendor = (index: number) => {
+        setVendors(vendors.filter((_, i) => i !== index))
+    }
+
+    const updateVendor = (index: number, updates: Partial<VendorEntry>) => {
+        const newVendors = [...vendors]
+        newVendors[index] = { ...newVendors[index], ...updates }
+        setVendors(newVendors)
+    }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -40,61 +84,16 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
         }
     }
 
-    const handleSupplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value
-        setSelectedSupplierId(value)
-        setShowOtherVendor(value === 'others')
-        if (value !== 'others') {
-            setOtherVendor({ name: '', fund: '', link: '' })
-        }
-    }
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
         setStatus(null)
 
         const formData = new FormData(e.currentTarget)
-
-        let vendors: any[] = []
-        if (purchaseMode === 'online') {
-            if (selectedSupplierId && selectedSupplierId !== 'others') {
-                const supplier = suppliers.find(s => s.id === selectedSupplierId)
-                if (supplier) {
-                    vendors = [{
-                        name: supplier.company_name,
-                        fund: mrp || undefined,
-                        link: websiteLink || undefined
-                    }]
-                }
-            } else if (showOtherVendor && otherVendor.name.trim()) {
-                vendors = [{
-                    name: otherVendor.name,
-                    fund: mrp || undefined,
-                    link: websiteLink || undefined
-                }]
-            }
-        } else if (purchaseMode === 'offline') {
-            if (selectedSupplierId && selectedSupplierId !== 'others') {
-                const supplier = suppliers.find(s => s.id === selectedSupplierId)
-                if (supplier) {
-                    vendors = [{
-                        name: supplier.company_name,
-                        fund: mrp,
-                        mode: 'offline'
-                    }]
-                }
-            } else if (showOtherVendor && otherVendor.name.trim()) {
-                vendors = [{
-                    name: otherVendor.name,
-                    fund: mrp,
-                    mode: 'offline'
-                }]
-            }
-        }
-        if (vendors.length > 0) {
-            formData.append('vendors', JSON.stringify(vendors))
-        }
+        
+        // Filter out empty vendors and format link
+        const formattedVendors = vendors.filter(v => v.name.trim() !== '')
+        formData.append('vendors', JSON.stringify(formattedVendors))
 
         const result = await addProduct(formData)
 
@@ -104,39 +103,42 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
             setStatus({ type: 'success', message: 'Part added successfully!' })
             formRef.current?.reset()
             setImagePreview(null)
-            setSelectedSupplierId('')
-            setShowOtherVendor(false)
-            setOtherVendor({ name: '', fund: '', link: '' })
+            setVendors([{ mode: 'online', name: '', fund: '', link: '' }])
             if (onSuccess) {
-                onSuccess()
+                setTimeout(() => onSuccess(), 1000)
             }
         }
         setIsLoading(false)
     }
 
     return (
-        <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl mx-auto pb-12">
-
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-8 p-1">
             {status && (
-                <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${status.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
                     {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold">{status.message}</p>
+                    <p className="font-semibold text-sm">{status.message}</p>
                 </div>
             )}
 
-            {/* Part Photo */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">image</span>
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">Part Photo</h3>
+            {/* General Information */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <Info className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">General Information</h3>
                 </div>
-                <div className="p-4 md:p-6">
-                    <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
-                        <div className={`w-24 h-24 md:w-32 md:h-32 rounded-xl border-2 border-dashed ${imagePreview ? 'border-[var(--color-cashcrow-primary)]' : 'border-slate-300'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden shrink-0 group`}>
+                
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+                    {/* Photo Upload - Centered on mobile */}
+                    <div className="flex flex-col items-center md:items-start shrink-0">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Part Photo</label>
+                        <div className={`w-36 h-36 rounded-2xl border-2 border-dashed ${imagePreview ? 'border-[#265136]' : 'border-slate-200'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden group transition-all`}>
                             {imagePreview ? (
                                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
-                                <ImageIcon className="w-6 h-6 md:w-8 md:h-8 text-slate-400 mb-1 md:mb-2 group-hover:scale-110 transition-transform" />
+                                <div className="text-center">
+                                    <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-bold text-slate-400">UPLOAD</span>
+                                </div>
                             )}
                             <input
                                 type="file"
@@ -146,310 +148,266 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
                         </div>
-                        <div className="flex-1 text-center sm:text-left">
-                            <h4 className="font-bold text-slate-800 text-sm mb-1">Upload Photo</h4>
-                            <p className="text-slate-500 text-xs mb-3">PNG, JPG up to 5MB.</p>
-                            <label className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer inline-block">
-                                Browse
-                                <input type="file" name="photo" accept="image/*" onChange={handleImageChange} className="hidden" />
-                            </label>
-                        </div>
                     </div>
-                </div>
-            </div>
 
-            {/* General Info */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-4 md:px-6 py-3 md:py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[18px] md:text-[20px]">info</span>
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-700">General Information</h3>
-                </div>
-                <div className="p-4 md:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-8 gap-y-4 md:gap-y-6">
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Part Name<span className="text-red-500 ml-1 font-bold">*</span>
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                                Part Name <span className="text-rose-500">*</span>
                             </label>
-                            <input required name="name" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 md:px-4 py-2 md:py-2.5 text-sm transition-all outline-none" placeholder="e.g. Micro-Centrifuge Tubes" type="text" />
+                            <input
+                                required
+                                name="name"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="e.g. Micro-Centrifuge Tubes"
+                                type="text"
+                            />
                         </div>
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                SKU / Item Code<span className="text-red-500 ml-1 font-bold">*</span>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                                SKU / Item Code <span className="text-rose-500">*</span>
                             </label>
-                            <div className="relative">
-                                <input required name="sku" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] pl-3 md:pl-4 pr-10 py-2 md:py-2.5 text-sm transition-all outline-none" placeholder="Scan or enter code" type="text" />
-                                <span className="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 cursor-pointer hover:text-[var(--color-cashcrow-primary)]">barcode_scanner</span>
-                            </div>
+                            <input
+                                required
+                                name="sku"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="Scan or enter code"
+                                type="text"
+                            />
                         </div>
-                        <div className="col-span-1 md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Category<span className="text-red-500 ml-1 font-bold">*</span>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                                Category <span className="text-rose-500">*</span>
                             </label>
-                            <select required name="category" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 md:px-4 py-2 md:py-2.5 text-sm transition-all outline-none bg-white">
-                                <option value="">Select Category</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Hardware">Hardware</option>
-                                <option value="Consumables">Consumables</option>
-                                <option value="Lab Equipment">Lab Equipment</option>
+                            <select
+                                required
+                                name="category"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none appearance-none"
+                                defaultValue=""
+                            >
+                                <option value="" disabled>Select Category</option>
+                                {categories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
-                {/* Storage Location */}
-                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">location_on</span>
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Storage Location</h3>
+            {/* Storage & Inventory */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                        <MapPin className="w-5 h-5 text-[#265136]" />
+                        <h3 className="font-bold text-slate-800">Storage Location</h3>
                     </div>
-                    <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Shelf Code<span className="text-red-500 ml-1 font-bold">*</span>
-                            </label>
-                            <input required name="shelf_code" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. S2" type="text" />
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Shelf Code</label>
+                            <input
+                                required
+                                name="shelf_code"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="e.g. S2"
+                                type="text"
+                            />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Box Code<span className="text-red-500 ml-1 font-bold">*</span>
-                            </label>
-                            <input required name="box_code" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="e.g. B12" type="text" />
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Box Code</label>
+                            <input
+                                required
+                                name="box_code"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="e.g. B12"
+                                type="text"
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Inventory Details */}
-                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">inventory</span>
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Inventory Details</h3>
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                        <BarChart3 className="w-5 h-5 text-[#265136]" />
+                        <h3 className="font-bold text-slate-800">Inventory Management</h3>
                     </div>
-                    <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Initial Quantity<span className="text-red-500 ml-1 font-bold">*</span>
-                            </label>
-                            <input required name="initial_quantity" min="0" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="0" type="number" />
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Quantity</label>
+                            <input
+                                required
+                                name="initial_quantity"
+                                min="0"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="0"
+                                type="number"
+                            />
                         </div>
                         <div>
-                            <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
-                                Min. Stock Level (Alert)<span className="text-red-500 ml-1 font-bold">*</span>
-                                <span className="material-symbols-outlined text-[14px] text-slate-400 cursor-help" title="System will alert you when stock falls below this number">help</span>
-                            </label>
-                            <input required name="min_stock_level" min="0" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none" placeholder="10" type="number" />
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Min Stock</label>
+                            <input
+                                required
+                                name="min_stock_level"
+                                min="0"
+                                className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 transition-all outline-none"
+                                placeholder="10"
+                                type="number"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Suppliers/Vendors Section - ORIGINAL DESIGN */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <Store className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Purchase Details</h3>
+            {/* Purchase Details - Multi-Vendor Restoration */}
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <Store className="w-5 h-5 text-[#265136]" />
+                        <h3 className="font-bold text-slate-800">Purchase Details (Vendors)</h3>
+                    </div>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addVendor}
+                        className="h-10 border-[#265136] text-[#265136] hover:bg-[#265136] hover:text-white transition-all rounded-xl font-bold text-xs uppercase tracking-widest flex items-center gap-2 shadow-sm active:scale-95"
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        Add New Vendor
+                    </Button>
                 </div>
-                <div className="p-6">
-                    <div className="space-y-4">
-                        <div className="space-y-4">
-                            {/* Mode Selector */}
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                    Mode of Purchase <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={purchaseMode}
-                                    onChange={(e) => {
-                                        setPurchaseMode(e.target.value as 'online' | 'offline')
-                                        setSelectedSupplierId('')
-                                        setShopName('')
-                                        setWebsiteLink('')
-                                        setMrp('')
-                                        setShowOtherVendor(false)
-                                    }}
-                                    className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
-                                    required
+
+                <div className="space-y-6">
+                    {vendors.map((vendor, index) => (
+                        <div key={index} className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 relative group animate-in slide-in-from-top-2 duration-300">
+                            {vendors.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeVendor(index)}
+                                    className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center hover:bg-rose-100 transition-all shadow-sm z-10"
+                                    title="Remove Vendor"
                                 >
-                                    <option value="">Select mode</option>
-                                    <option value="online">Online Supplier</option>
-                                    <option value="offline">Offline/Local Shop</option>
-                                </select>
-                            </div>
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            )}
 
-                            {/* Conditional Fields based on Mode */}
-                            {purchaseMode === 'online' && (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            Online Supplier <span className="text-red-500">*</span>
-                                        </label>
-                                        <select
-                                            value={selectedSupplierId}
-                                            onChange={handleSupplierChange}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
-                                            required
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                {/* Mode Toggle */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Mode</label>
+                                    <div className="flex bg-white rounded-xl p-1 border border-slate-200">
+                                        <button
+                                            type="button"
+                                            onClick={() => updateVendor(index, { mode: 'online' })}
+                                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${vendor.mode === 'online' ? 'bg-[#265136] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            <option value="">Choose supplier</option>
-                                            {suppliers.map((supplier) => (
-                                                <option key={supplier.id} value={supplier.id}>
-                                                    {supplier.company_name}
-                                                </option>
-                                            ))}
-                                            <option value="others">➕ New Online Vendor</option>
-                                        </select>
+                                            <Globe className="w-3 h-3" />
+                                            Online
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => updateVendor(index, { mode: 'offline' })}
+                                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold transition-all ${vendor.mode === 'offline' ? 'bg-[#265136] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            Offline
+                                        </button>
                                     </div>
+                                </div>
 
-                                    {showOtherVendor && (
-                                        <div className="p-4 bg-slate-50 rounded-xl border">
-                                            <h5 className="text-sm font-semibold mb-3 text-slate-700">Other Online Vendor</h5>
-                                            <input
-                                                value={otherVendor.name}
-                                                onChange={(e) => setOtherVendor(prev => ({ ...prev, name: e.target.value }))}
-                                                className="w-full p-3 border rounded-lg"
-                                                placeholder="Vendor name"
-                                                required={!selectedSupplierId}
-                                            />
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            MRP/Fund <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
-                                            <input
-                                                value={mrp}
-                                                onChange={(e) => setMrp(e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 rounded-lg border-slate-200 focus:ring-2 text-sm"
-                                                placeholder="2500"
-                                                type="number"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            Website (Optional)
-                                        </label>
+                                {/* Vendor Name */}
+                                <div className="md:col-span-1">
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Shop Name</label>
+                                    <div className="relative">
+                                        <UserCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                         <input
-                                            value={websiteLink}
-                                            onChange={(e) => setWebsiteLink(e.target.value)}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 px-4 py-2.5 text-sm"
-                                            placeholder="https://supplier.com"
+                                            value={vendor.name}
+                                            onChange={(e) => updateVendor(index, { name: e.target.value })}
+                                            className="w-full h-12 pl-11 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
+                                            placeholder="Supplier name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* MRP / Amount */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">MRP / Amount</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
+                                        <input
+                                            value={vendor.fund}
+                                            onChange={(e) => updateVendor(index, { fund: e.target.value })}
+                                            className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
+                                            placeholder="0.00"
+                                            type="number"
+                                            step="0.01"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Link (Online Only) */}
+                                <div className={vendor.mode === 'online' ? 'opacity-100' : 'opacity-30 pointer-events-none'}>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Vendor Link</label>
+                                    <div className="relative">
+                                        <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                                        <input
+                                            value={vendor.link}
+                                            onChange={(e) => updateVendor(index, { link: e.target.value })}
+                                            disabled={vendor.mode !== 'online'}
+                                            className="w-full h-12 pl-11 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all disabled:bg-slate-50"
+                                            placeholder="https://..."
                                             type="url"
                                         />
                                     </div>
                                 </div>
-                            )}
-
-                            {purchaseMode === 'offline' && (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            Offline Supplier <span className="text-red-500">*</span>
-                                        </label>
-                                        <select
-                                            value={selectedSupplierId}
-                                            onChange={handleSupplierChange}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none bg-white"
-                                            required
-                                        >
-                                            <option value="">Choose supplier</option>
-                                            {suppliers.map((supplier) => (
-                                                <option key={supplier.id} value={supplier.id}>
-                                                    {supplier.company_name}
-                                                </option>
-                                            ))}
-                                            <option value="others">➕ New Offline Shop</option>
-                                        </select>
-                                    </div>
-
-                                    {showOtherVendor && (
-                                        <div className="space-y-4 p-4 bg-slate-50 rounded-xl border">
-                                            <h5 className="text-sm font-semibold text-slate-700">New Offline Shop</h5>
-                                            <input
-                                                value={otherVendor.name}
-                                                onChange={(e) => setOtherVendor(prev => ({ ...prev, name: e.target.value }))}
-                                                className="w-full p-3 border rounded-lg"
-                                                placeholder="Enter shop name"
-                                                required={!selectedSupplierId}
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* Separate shop name input for offline */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            Shop Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            value={shopName}
-                                            onChange={(e) => setShopName(e.target.value)}
-                                            className="w-full rounded-lg border-slate-200 focus:ring-2 px-4 py-2.5 text-sm"
-                                            placeholder="Enter shop name"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-tight mb-2">
-                                            MRP/Fund <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
-                                            <input
-                                                value={mrp}
-                                                onChange={(e) => setMrp(e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 rounded-lg border-slate-200 focus:ring-2 text-sm transition-all outline-none"
-                                                placeholder="2500"
-                                                type="number"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Additional Notes */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">notes</span>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Additional Notes</h3>
+            {/* Notes */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <StickyNote className="w-5 h-5 text-[#265136]" />
+                    <h3 className="font-bold text-slate-800">Additional Notes</h3>
                 </div>
-                <div className="p-6">
-                    <textarea name="notes" className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-4 py-2.5 text-sm transition-all outline-none resize-none" placeholder="Enter any additional part specifications, supplier details, or handling instructions..." rows={5}></textarea>
-                </div>
+                <textarea
+                    name="notes"
+                    className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none resize-none"
+                    placeholder="Enter technical specifications, special handling instructions, or other details..."
+                    rows={4}
+                />
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 mt-10">
-                <button
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                <Button 
                     type="button"
-                    className="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
+                    variant="outline"
                     onClick={onCancel}
+                    className="w-full sm:w-auto px-6 h-12 rounded-xl border-slate-200 font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95"
                 >
                     Cancel
-                </button>
-                <button type="submit" disabled={isLoading} className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70">
+                </Button>
+                <Button 
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto bg-[#265136] hover:bg-[#1f422b] text-white h-12 px-10 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#265136]/10 transition-all active:scale-95 disabled:opacity-70"
+                >
                     {isLoading ? (
                         <>
-                            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin" />
                             Saving...
                         </>
                     ) : (
                         <>
-                            <PlusCircle className="w-5 h-5" />
+                            <PlusCircle className="w-4 h-4" />
                             Save Part
                         </>
                     )}
-                </button>
+                </Button>
             </div>
         </form>
     )

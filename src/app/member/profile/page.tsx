@@ -20,6 +20,7 @@ export default async function MemberProfilePage() {
     <DashboardLayout 
       userName={fullName} 
       userRole="Research Scientist" 
+      userId={profile.id}
       avatarUrl={profile.avatar_url}
       title="User Profile"
     >

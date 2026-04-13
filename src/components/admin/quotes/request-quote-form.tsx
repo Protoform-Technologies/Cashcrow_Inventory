@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 import { Plus, Info, FileText, Mail, History, Store, Phone, Clock, Archive } from 'lucide-react'
-import { createQuote } from '@/actions/quotes.actions'
+import { createQuote } from '@/actions/quotes'
 import QuoteHistoryTable from './quote-history-table'
 
-interface Part {
+interface Product {
     id: string
     name: string
     sku: string
@@ -23,13 +23,13 @@ interface Supplier {
 }
 
 interface RequestQuoteFormProps {
-    parts: Part[]
+    products: Product[]
     suppliers: Supplier[]
     initialRecentQuotes: any[]
 }
 
-export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes }: RequestQuoteFormProps) {
-    const [selectedPartId, setSelectedPartId] = useState('')
+export default function RequestQuoteForm({ products, suppliers, initialRecentQuotes }: RequestQuoteFormProps) {
+    const [selectedProductId, setSelectedProductId] = useState('')
     const [selectedSupplierId, setSelectedSupplierId] = useState('')
     const [quantity, setQuantity] = useState('')
     const [expectedDate, setExpectedDate] = useState('')
@@ -47,11 +47,11 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
         setRequestId(generateUniqueId())
     }, [])
 
-    const selectedPart = parts.find(p => p.id === selectedPartId)
+    const selectedProduct = products.find(p => p.id === selectedProductId)
     const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId)
 
     const handleSaveAndGenerate = async () => {
-        if (!selectedPartId || !selectedSupplierId || !quantity || !estimatedTotal) {
+        if (!selectedProductId || !selectedSupplierId || !quantity || !estimatedTotal) {
             alert('Please fill in all required fields.')
             return
         }
@@ -60,7 +60,7 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
         try {
             // 1. Save to Database
             const result = await createQuote({
-                part_id: selectedPartId,
+                product_id: selectedProductId,
                 supplier_id: selectedSupplierId,
                 quantity: parseFloat(quantity),
                 total_amount: parseFloat(estimatedTotal),
@@ -85,7 +85,7 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
                 setQuantity('')
                 setEstimatedTotal('')
                 setNotes('')
-                setSelectedPartId('')
+                setSelectedProductId('')
                 setSelectedSupplierId('')
                 setRequestId(generateUniqueId()) // VERY IMPORTANT: Generate new ID for next entry
             } else {
@@ -108,7 +108,7 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
         doc.text(`Request ID: ${requestId}`, 20, 35)
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 42)
         
-        doc.text(`Part: ${selectedPart?.name || 'N/A'} (${selectedPart?.sku || 'N/A'})`, 20, 55)
+        doc.text(`Part: ${selectedProduct?.name || 'N/A'} (${selectedProduct?.sku || 'N/A'})`, 20, 55)
         doc.text(`Supplier: ${selectedSupplier?.company_name || 'N/A'}`, 20, 62)
         doc.text(`Quantity: ${quantity}`, 20, 69)
         doc.text(`Expected Delivery: ${expectedDate}`, 20, 76)
@@ -126,8 +126,8 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
             alert('No supplier email found')
             return
         }
-        const subject = `Quote Request: ${selectedPart?.name || 'Parts'} (${requestId})`
-        const body = `Hello ${selectedSupplier.contact_name || selectedSupplier.company_name},\n\nWe would like to request a quote for the following part:\n\nRequest ID: ${requestId}\nPart: ${selectedPart?.name}\nSKU: ${selectedPart?.sku}\nQuantity: ${quantity}\nExpected Delivery: ${expectedDate}\n\nNotes: ${notes}\n\nThank you.`
+        const subject = `Quote Request: ${selectedProduct?.name || 'Parts'} (${requestId})`
+        const body = `Hello ${selectedSupplier.contact_name || selectedSupplier.company_name},\n\nWe would like to request a quote for the following part:\n\nRequest ID: ${requestId}\nPart: ${selectedProduct?.name}\nSKU: ${selectedProduct?.sku}\nQuantity: ${quantity}\nExpected Delivery: ${expectedDate}\n\nNotes: ${notes}\n\nThank you.`
         
         window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     }
@@ -157,14 +157,14 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
                         </div>
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Part</label>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Product</label>
                                 <select 
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none transition-all"
-                                    value={selectedPartId}
-                                    onChange={(e) => setSelectedPartId(e.target.value)}
+                                    value={selectedProductId}
+                                    onChange={(e) => setSelectedProductId(e.target.value)}
                                 >
-                                    <option value="">Select a part...</option>
-                                    {parts.map(p => (
+                                    <option value="">Select a product...</option>
+                                    {products.map(p => (
                                         <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>
                                     ))}
                                 </select>
@@ -253,10 +253,10 @@ export default function RequestQuoteForm({ parts, suppliers, initialRecentQuotes
                         <h3 className="text-xs font-black uppercase tracking-widest text-white/60 mb-4">Request Summary</h3>
                         <div className="space-y-4">
                             <div className="flex justify-between items-start">
-                                <span className="text-xs text-white/70">Part Reference</span>
+                                <span className="text-xs text-white/70">Product Reference</span>
                                 <span className="text-sm font-bold text-right">
-                                    {selectedPart ? selectedPart.sku : '---'}<br/>
-                                    <span className="text-[10px] font-normal text-white/50">{selectedPart ? selectedPart.name : 'No part selected'}</span>
+                                    {selectedProduct ? selectedProduct.sku : '---'}<br/>
+                                    <span className="text-[10px] font-normal text-white/50">{selectedProduct ? selectedProduct.name : 'No product selected'}</span>
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">

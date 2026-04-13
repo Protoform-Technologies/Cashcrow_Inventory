@@ -11,7 +11,7 @@ interface DayLogItem {
     purpose: string
     notes: string
     created_at: string
-    parts: {
+    products: {
         name: string
         sku: string
         quantity: number

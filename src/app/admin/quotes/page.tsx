@@ -2,7 +2,7 @@ import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'
 import { getSuppliers } from '@/actions/suppliers'
 import { getRecentQuotes } from '@/actions/quotes'
-import RequestQuoteForm from '@/components/member/requests/request-quote-form'
+import RequestQuoteForm from '@/components/admin/quotes/request-quote-form'
 import DashboardLayout from '@/components/shared/dashboard/layout'
 
 export default async function RequestQuotePage() {
@@ -20,6 +20,7 @@ export default async function RequestQuotePage() {
         <DashboardLayout 
             userName={fullName} 
             userRole="Lab Admin" 
+            userId={profile.id}
             avatarUrl={profile.avatar_url}
             title="Request Quote"
         >

@@ -1,7 +1,17 @@
 'use server'
 
-import { getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
+import { 
+    dbGetMembers, 
+    dbAddMemberAuth, 
+    dbUpsertMemberProfile, 
+    dbUpdateMemberProfile, 
+    dbUpdateMemberAuth, 
+    dbDeleteMember,
+    dbGetMemberById,
+    dbForceLogOutMember
+} from '@/lib/members'
+import { sendOnboardingEmail } from '@/lib/email'
 
 export async function addMember(formData: FormData) {
     const firstName = formData.get('firstName') as string
@@ -13,36 +23,17 @@ export async function addMember(formData: FormData) {
         return { error: 'Please provide all required fields.' }
     }
 
-    const adminClient = getSupabaseAdmin()
+    try {
+        // 1. Create User in Supabase Auth
+        const user = await dbAddMemberAuth(email, firstName, lastName, role)
 
-    // 1. Create User in Supabase Auth
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-        email: email,
-        password: 'Cashcrow@123',
-        email_confirm: true,
-        user_metadata: {
-            first_name: firstName,
-            last_name: lastName,
-            role: role
+        if (!user) {
+            return { error: 'Failed to create member account.' }
         }
-    })
 
-    if (authError) {
-        console.error('Create member auth error:', authError.message)
-        return { error: authError.message }
-    }
-
-    const userId = authData.user?.id
-
-    if (!userId) {
-        return { error: 'Failed to create member account.' }
-    }
-
-    // 2. Insert into Profiles table with is_active = false
-    const { error: profileError } = await adminClient
-        .from('profiles')
-        .upsert({
-            id: userId,
+        // 2. Insert into Profiles table with is_active = false
+        await dbUpsertMemberProfile({
+            id: user.id,
             first_name: firstName,
             last_name: lastName,
             email: email,
@@ -50,43 +41,26 @@ export async function addMember(formData: FormData) {
             is_active: false
         })
 
-    if (profileError) {
-        console.error('Create member profile error:', profileError.message)
-        return { error: 'Failed to create member profile. Note: Ensure "is_active" (boolean) exists in the profiles table.' }
+        // 3. Send Onboarding Email
+        await sendOnboardingEmail(email, firstName, lastName)
+
+        revalidatePath('/admin/add-members')
+        return { success: `Successfully added ${firstName} ${lastName}! An onboarding email has been sent to ${email}.` }
+    } catch (error: any) {
+        console.error('Add member error:', error.message)
+        return { error: error.message || 'An unexpected error occurred.' }
     }
-
-    revalidatePath('/admin/add-members')
-
-    return { success: `Successfully added ${firstName} ${lastName}! Please notify them to login with Cashcrow@123.` }
 }
 
 export async function deleteMember(id: string) {
-    const adminClient = getSupabaseAdmin()
-
-    // Delete from profiles table first
-    const { error: profileError } = await adminClient
-        .from('profiles')
-        .delete()
-        .eq('id', id)
-
-    if (profileError) {
-        console.error('Delete member profile error:', profileError.message)
-        return { error: 'Failed to delete member profile.' }
-    }
-
-    // Delete from auth users
-    const { error: authError } = await adminClient.auth.admin.deleteUser(id)
-
-    if (authError) {
-        console.error('Delete member auth error:', authError.message)
-        // Profile was already deleted, but auth failed - we should still revalidate
+    try {
+        await dbDeleteMember(id)
         revalidatePath('/admin/add-members')
-        return { error: 'Failed to delete member authentication.' }
+        return { success: true }
+    } catch (error: any) {
+        console.error('Delete member error:', error.message)
+        return { error: error.message || 'Failed to delete member.' }
     }
-
-    revalidatePath('/admin/add-members')
-
-    return { success: true }
 }
 
 export async function updateMember(id: string, formData: FormData) {
@@ -99,56 +73,47 @@ export async function updateMember(id: string, formData: FormData) {
         return { error: 'Please provide all required fields.' }
     }
 
-    const adminClient = getSupabaseAdmin()
+    try {
+        // 1. Fetch current profile to check for role change
+        const currentProfile = await dbGetMemberById(id)
+        const roleChanged = currentProfile.role !== role
 
-    // Update profile
-    const { error: profileError } = await adminClient
-        .from('profiles')
-        .update({
+        // 2. Update profile in database
+        await dbUpdateMemberProfile(id, {
             first_name: firstName,
             last_name: lastName,
             role: role,
             is_active: isActive
         })
-        .eq('id', id)
 
-    if (profileError) {
-        console.error('Update member profile error:', profileError.message)
-        return { error: 'Failed to update member profile.' }
-    }
-
-    // Update user metadata in auth
-    const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
-        user_metadata: {
+        // 3. Update user metadata in auth
+        await dbUpdateMemberAuth(id, {
             first_name: firstName,
             last_name: lastName,
             role: role
+        })
+
+        // 4. Force Logout if role changed (requirement: immediate enforcement)
+        if (roleChanged) {
+            await dbForceLogOutMember(id)
         }
-    })
 
-    if (authError) {
-        console.error('Update member auth error:', authError.message)
-        // Profile was updated, but auth metadata failed - we should still revalidate
         revalidatePath('/admin/add-members')
-        return { error: 'Failed to update member authentication metadata.' }
+        return { 
+            success: true, 
+            message: roleChanged ? 'Role updated and user signed out for security.' : undefined 
+        }
+    } catch (error: any) {
+        console.error('Update member error:', error.message)
+        return { error: error.message || 'An unexpected error occurred.' }
     }
-
-    revalidatePath('/admin/add-members')
-
-    return { success: true }
 }
 
 export async function getMembers() {
-    const adminClient = getSupabaseAdmin()
-    const { data: members, error } = await adminClient
-        .from('profiles')
-        .select('id, first_name, last_name, email, role, is_active')
-        .order('first_name', { ascending: true })
-
-    if (error) {
-        console.error('Failed to fetch members data:', error.message)
+    try {
+        return await dbGetMembers()
+    } catch (error) {
+        console.error('Fetch members action error:', error)
         return []
     }
-
-    return members || []
 }

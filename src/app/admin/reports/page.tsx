@@ -1,11 +1,11 @@
 import React from "react";
 import DashboardLayout from "@/components/shared/dashboard/layout";
 import { getAdminProfileOrRedirect } from "@/actions/auth";
-import ReportsHeader from "@/components/reports/reports-header";
-import ReportStats from "@/components/reports/report-stats";
-import StockMovementChart from "@/components/reports/stock-movement-chart";
-import InventoryByCategoryChart from "@/components/reports/inventory-category-chart";
-import TopUsedParts from "@/components/reports/top-used-parts";
+import ReportsHeader from "@/components/admin/reports/reports-header";
+import ReportStats from "@/components/admin/reports/report-stats";
+import StockMovementChart from "@/components/admin/reports/stock-movement-chart";
+import InventoryByCategoryChart from "@/components/admin/reports/inventory-category-chart";
+import TopUsedParts from "@/components/admin/reports/top-used-parts";
 import { getReportAnalytics } from "@/actions/reports";
 
 export const metadata = {
@@ -35,9 +35,9 @@ export default async function ReportsPage({
   };
 
   return (
-    <DashboardLayout 
-      userName={fullName} 
-      userRole={profile.role} 
+    <DashboardLayout
+      userName={fullName}
+      userRole={profile.role}
       userId={profile.id}
       avatarUrl={profile.avatar_url}
       title="Reports & Analytics"

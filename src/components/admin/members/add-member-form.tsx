@@ -1,11 +1,9 @@
-'use client'
-
 import { ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { addMember } from "@/actions/members.actions"
+import { addMember } from "@/actions/members"
 
 interface AddMemberFormProps {
     onSuccess?: () => void
@@ -48,45 +46,45 @@ export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-                <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-medium">{error}</p>
+                    <p className="font-semibold">{error}</p>
                 </div>
             )}
             {successMsg && (
-                <div className="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
                     <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-medium">{successMsg}</p>
+                    <p className="font-semibold">{successMsg}</p>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="firstName" className="text-slate-700 font-bold ml-1">First Name <span className="text-red-500">*</span></Label>
                     <Input
                         id="firstName"
                         name="firstName"
                         placeholder="e.g. Sarah"
                         required
                         disabled={isPending}
-                        className="h-11"
+                        className="h-12 rounded-xl border-slate-200 focus:border-[#265136] focus:ring-[#265136]/10 transition-all font-medium"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="lastName" className="text-slate-700 font-bold ml-1">Last Name <span className="text-red-500">*</span></Label>
                     <Input
                         id="lastName"
                         name="lastName"
                         placeholder="e.g. Jenkins"
                         required
                         disabled={isPending}
-                        className="h-11"
+                        className="h-12 rounded-xl border-slate-200 focus:border-[#265136] focus:ring-[#265136]/10 transition-all font-medium"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="email" className="text-slate-700 font-bold ml-1">Email Address <span className="text-red-500">*</span></Label>
                     <Input
                         id="email"
                         name="email"
@@ -94,34 +92,38 @@ export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
                         placeholder="sarah.j@cashcrowlab.com"
                         required
                         disabled={isPending}
-                        className="h-11"
+                        className="h-12 rounded-xl border-slate-200 focus:border-[#265136] focus:ring-[#265136]/10 transition-all font-medium"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="role" className="text-slate-700 font-bold ml-1">Access Role <span className="text-red-500">*</span></Label>
                     <select
                         id="role"
                         name="role"
                         required
                         disabled={isPending}
                         defaultValue=""
-                        className="w-full h-11 px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:border-[var(--color-cashcrow-primary)] focus:ring-1 focus:ring-[var(--color-cashcrow-primary)] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
+                        className="w-full h-12 px-4 py-2 bg-white border border-slate-200 rounded-xl focus:border-[#265136] focus:ring-1 focus:ring-[#265136] outline-none transition-all placeholder:text-slate-400 font-medium text-slate-700"
                     >
-                        <option value="" disabled>Select a role</option>
-                        <option value="MEMBER">Member (Edit Access)</option>
-                        <option value="ADMIN">Admin (Full Access)</option>
+                        <option value="" disabled>Select access level</option>
+                        <option value="MEMBER">Member</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
             </div>
 
-            <div className="flex justify-end pt-4">
-                <Button type="submit" className="bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-primary)]/90 text-white font-semibold py-2 px-8 rounded-lg transition-all shadow-md flex items-center gap-2" disabled={isPending}>
+            <div className="flex justify-end pt-4 border-t border-slate-100 mt-6">
+                <Button 
+                    type="submit" 
+                    className="bg-[#265136] hover:bg-[#1f422b] text-white font-bold h-12 px-10 rounded-full transition-all shadow-lg shadow-[#265136]/10 flex items-center gap-3 active:scale-95 group w-full sm:w-auto" 
+                    disabled={isPending}
+                >
                     {isPending ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                         <>
-                            <span>Add Member</span>
-                            <ArrowRight className="w-5 h-5" />
+                            <span>Add to Team</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </>
                     )}
                 </Button>

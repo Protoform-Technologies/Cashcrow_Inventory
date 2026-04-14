@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Mail, BadgeCheck, Building2, MapPin, BadgeInfo, Save, Loader2, User } from "lucide-react";
+import { Mail, BadgeInfo, Save, Loader2, User, Phone } from "lucide-react";
 import { updateProfile } from "@/actions/profile";
 
 interface AccountInfoProps {
@@ -16,9 +16,7 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
   const [formData, setFormData] = useState({
     firstName: profile.first_name || "",
     lastName: profile.last_name || "",
-    memberId: profile.member_id || "",
-    researchArea: profile.research_area || "",
-    location: profile.location || "",
+    phone: profile.phone_number || "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +33,7 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
     startTransition(async () => {
       const fd = new FormData();
       Object.entries(formData).forEach(([key, val]) => fd.append(key, val));
-      
+
       const result = await updateProfile(fd);
       if (result.success) {
         setSuccess(true);
@@ -47,11 +45,9 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
   };
 
   const fields = [
-    { label: "First Name", icon: User, name: "firstName" },
-    { label: "Last Name", icon: User, name: "lastName" },
-    { label: "Member ID", icon: BadgeCheck, name: "memberId", placeholder: "e.g. CC-9821" },
-    { label: "Research Area", icon: Building2, name: "researchArea", placeholder: "e.g. Clinical Research" },
-    { label: "Primary Location", icon: MapPin, name: "location", placeholder: "e.g. Main Lab (Building A)" },
+    { label: "First Name", icon: User, name: "firstName", placeholder: "e.g. John" },
+    { label: "Last Name", icon: User, name: "lastName", placeholder: "e.g. Doe" },
+    { label: "Phone Number", icon: Phone, name: "phone", placeholder: "e.g. +1 (555) 000-0000" },
   ];
 
   return (
@@ -104,7 +100,7 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
                   value={(formData as any)[field.name]}
                   onChange={handleChange}
                   placeholder={field.placeholder}
-                  className="bg-transparent border-none p-0 w-full text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:ring-0 outline-none"
+                  className=" border-none p-0 w-full text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:ring-0 outline-none"
                 />
               </div>
             </div>

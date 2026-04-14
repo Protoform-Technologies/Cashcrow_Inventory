@@ -1,9 +1,8 @@
 import React from "react";
 import DashboardLayout from "@/components/shared/dashboard/layout";
 import { getAdminProfileOrRedirect } from "@/actions/auth";
-import ProfileHeader from "@/components/profile/profile-header";
-import AccountInfo from "@/components/profile/account-info";
-import ProfilePreferences from "@/components/profile/profile-preferences";
+import ProfileHeader from "@/components/shared/profile/profile-header";
+import AccountInfo from "@/components/shared/profile/account-info";
 import { ShieldAlert, LogOut } from "lucide-react";
 import { logout } from "@/actions/auth";
 
@@ -17,9 +16,9 @@ export default async function AdminProfilePage() {
   const fullName = `${profile.first_name} ${profile.last_name}`;
 
   return (
-    <DashboardLayout 
-      userName={fullName} 
-      userRole={profile.role} 
+    <DashboardLayout
+      userName={fullName}
+      userRole={profile.role}
       userId={profile.id}
       avatarUrl={profile.avatar_url}
       title="User Profile"
@@ -33,7 +32,6 @@ export default async function AdminProfilePage() {
           {/* Main Info Column */}
           <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <AccountInfo profile={profile} />
-            <ProfilePreferences profile={profile} />
           </div>
 
           {/* Right Sidebar: Security & Actions */}

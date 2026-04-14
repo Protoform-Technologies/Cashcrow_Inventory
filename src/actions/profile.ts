@@ -32,9 +32,7 @@ export async function updateProfile(formData: FormData) {
 
     const firstName = formData.get('firstName') as string
     const lastName = formData.get('lastName') as string
-    const memberId = formData.get('memberId') as string
-    const researchArea = formData.get('researchArea') as string
-    const location = formData.get('location') as string
+    const phoneNumber = formData.get('phone') as string
 
     const adminClient = getSupabaseAdmin()
     const { error } = await adminClient
@@ -42,37 +40,13 @@ export async function updateProfile(formData: FormData) {
         .update({
             first_name: firstName,
             last_name: lastName,
-            member_id: memberId,
-            research_area: researchArea,
-            location: location,
+            phone_number: phoneNumber,
         })
         .eq('id', user.id)
 
     if (error) {
         console.error('Error updating profile:', error.message)
         return { error: 'Failed to update profile details' }
-    }
-
-    revalidatePath('/admin/profile')
-    revalidatePath('/member/profile')
-    return { success: true }
-}
-
-export async function updatePreferences(prefs: { push_notifications?: boolean, weekly_reports?: boolean }) {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return { error: 'Not authenticated' }
-
-    const adminClient = getSupabaseAdmin()
-    const { error } = await adminClient
-        .from('profiles')
-        .update(prefs)
-        .eq('id', user.id)
-
-    if (error) {
-        console.error('Error updating preferences:', error.message)
-        return { error: 'Failed to update preferences' }
     }
 
     revalidatePath('/admin/profile')
@@ -127,4 +101,26 @@ export async function uploadAvatar(formData: FormData) {
     revalidatePath('/admin/profile')
     revalidatePath('/member/profile')
     return { success: true, url: publicUrl }
+}
+
+export async function removeAvatar() {
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Not authenticated' }
+
+    const adminClient = getSupabaseAdmin()
+    const { error } = await adminClient
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('id', user.id)
+
+    if (error) {
+        console.error('Error removing avatar:', error.message)
+        return { error: 'Failed to remove avatar' }
+    }
+
+    revalidatePath('/admin/profile')
+    revalidatePath('/member/profile')
+    return { success: true }
 }

@@ -256,3 +256,8 @@ export async function getSubmittedLogsWithDetails() {
     const { getSubmittedLogsWithDetails: fetchLogs } = await import('@/lib/day-logs-service')
     return fetchLogs()
 }
+
+export async function getProductFullHistory(productId: string, page: number = 1, limit: number = 10) {
+    const { getProductFullHistory: fetchHistory } = await import('@/lib/day-logs-service')
+    return fetchHistory(productId, page, limit)
+}

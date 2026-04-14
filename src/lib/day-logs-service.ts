@@ -1,4 +1,4 @@
-import { DayLog, DayLogItem } from './day-logs'
+import { DayLog, DayLogItem } from '../types/day-logs'
 
 export async function getSubmittedLogsWithDetails() {
     // We import here to avoid circular dependencies
@@ -52,7 +52,7 @@ export async function getSubmittedLogsWithDetails() {
                     .eq('id', item.part_id)
                     .single()
 
-                let takenByName = item.taken_by 
+                let takenByName = item.taken_by
                 let takenByAvatarUrl = null
 
                 if (item.taken_by && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.taken_by)) {

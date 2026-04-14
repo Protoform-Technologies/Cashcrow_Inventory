@@ -19,6 +19,7 @@ import {
     PlusCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 interface Vendor {
     mode: 'online' | 'offline'
@@ -50,7 +51,6 @@ interface EditPartFormProps {
 
 export default function EditPartForm({ part, onSuccess, onCancel, suppliers = [] }: EditPartFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(part.image_url || null)
 
@@ -100,7 +100,6 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
-        setStatus(null)
 
         const formData = new FormData(e.currentTarget)
         formData.append('existing_image_url', part.image_url || '')
@@ -112,9 +111,9 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
         const result = await updateProduct(part.id, formData)
 
         if (result?.error) {
-            setStatus({ type: 'error', message: result.error })
+            toast.error(result.error)
         } else if (result?.success) {
-            setStatus({ type: 'success', message: 'Part updated successfully!' })
+            toast.success('Part updated successfully!')
             setTimeout(() => {
                 onSuccess()
             }, 1000)
@@ -124,12 +123,6 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
 
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-8 p-1">
-            {status && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
-                    {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold text-sm">{status.message}</p>
-                </div>
-            )}
 
             {/* General Information */}
             <div className="space-y-4">

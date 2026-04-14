@@ -1,9 +1,10 @@
-import { ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
 import { useState, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { addMember } from "@/actions/members"
+import { toast } from "sonner"
 
 interface AddMemberFormProps {
     onSuccess?: () => void
@@ -11,13 +12,9 @@ interface AddMemberFormProps {
 
 export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
     const [isPending, startTransition] = useTransition()
-    const [error, setError] = useState<string | null>(null)
-    const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setError(null)
-        setSuccessMsg(null)
 
         const formData = new FormData(e.currentTarget)
         const email = formData.get('email') as string
@@ -26,16 +23,16 @@ export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
         const lastName = formData.get('lastName') as string
 
         if (!email || !role || !firstName || !lastName) {
-            setError('Please provide all required fields.')
+            toast.error('Please provide all required fields.')
             return
         }
 
         startTransition(async () => {
             const result = await addMember(formData)
             if (result?.error) {
-                setError(result.error)
+                toast.error(result.error)
             } else if (result?.success) {
-                setSuccessMsg(result.success)
+                toast.success(result.success)
                 ;(e.target as HTMLFormElement).reset()
                 // Call onSuccess callback if provided
                 if (onSuccess) {
@@ -47,18 +44,6 @@ export default function AddMemberForm({ onSuccess }: AddMemberFormProps) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-semibold">{error}</p>
-                </div>
-            )}
-            {successMsg && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-semibold">{successMsg}</p>
-                </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">

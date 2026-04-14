@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
 export type NotificationType = 'PRODUCT_ADDED' | 'SUPPLIER_ADDED' | 'OUT_OF_STOCK'
@@ -16,7 +16,7 @@ export interface CreateNotificationParams {
 }
 
 export async function createNotification(params: CreateNotificationParams) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const { error } = await supabase
         .from('notifications')
@@ -59,7 +59,7 @@ export async function getNotifications(userRole: string, userId: string) {
 }
 
 export async function markNotificationAsRead(id: string) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const { error } = await supabase
         .from('notifications')
@@ -76,7 +76,7 @@ export async function markNotificationAsRead(id: string) {
 }
 
 export async function markAllAsRead(userRole: string, userId: string) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
     const role = userRole.toUpperCase()
 
     const { error } = await supabase
@@ -95,7 +95,7 @@ export async function markAllAsRead(userRole: string, userId: string) {
 }
 
 export async function deleteNotification(id: string) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const { error } = await supabase
         .from('notifications')

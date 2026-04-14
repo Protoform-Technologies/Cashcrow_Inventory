@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Package, Eye, Trash2, Clock, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react'
-import { DayLog, TransactionType } from '@/lib/day-logs'
+import { DayLog, TransactionType } from '@/types/day-logs'
 import Image from 'next/image'
 
 interface SubmittedLogsTableProps {
@@ -114,11 +114,11 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                             <div className="flex items-center gap-3">
                                                 <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 border border-white shadow-sm ring-1 ring-slate-100 shrink-0 overflow-hidden">
                                                     {item?.taken_by_avatar_url ? (
-                                                        <Image 
-                                                            src={item.taken_by_avatar_url} 
-                                                            alt={item?.taken_by_name || 'User'} 
-                                                            width={36} 
-                                                            height={36} 
+                                                        <Image
+                                                            src={item.taken_by_avatar_url}
+                                                            alt={item?.taken_by_name || 'User'}
+                                                            width={36}
+                                                            height={36}
                                                             className="object-cover w-full h-full"
                                                         />
                                                     ) : (
@@ -167,11 +167,11 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                 <div className="flex gap-4">
                                     <div className="size-14 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                                         {product?.image_url ? (
-                                            <Image 
-                                                src={product.image_url} 
-                                                alt={product.name} 
-                                                width={56} 
-                                                height={56} 
+                                            <Image
+                                                src={product.image_url}
+                                                alt={product.name}
+                                                width={56}
+                                                height={56}
                                                 className="object-cover w-full h-full"
                                             />
                                         ) : (
@@ -203,11 +203,11 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                             <p className="text-[11px] font-black text-slate-700 truncate max-w-[100px]">{item?.taken_by_name || 'System'}</p>
                                             <div className="size-6 rounded-full bg-slate-100 border border-white shadow-sm ring-1 ring-slate-50 flex items-center justify-center text-[9px] font-black text-slate-400 overflow-hidden">
                                                 {item?.taken_by_avatar_url ? (
-                                                    <Image 
-                                                        src={item.taken_by_avatar_url} 
-                                                        alt={item?.taken_by_name || 'User'} 
-                                                        width={24} 
-                                                        height={24} 
+                                                    <Image
+                                                        src={item.taken_by_avatar_url}
+                                                        alt={item?.taken_by_name || 'User'}
+                                                        width={24}
+                                                        height={24}
                                                         className="object-cover w-full h-full"
                                                     />
                                                 ) : (
@@ -225,14 +225,14 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{time}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => onView(log)}
                                             className="h-9 px-3 bg-white border border-slate-200 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
                                         >
                                             <Eye className="size-3" />
                                             Trace
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => onDelete(log.id)}
                                             disabled={isDeleting}
                                             className="size-9 bg-red-50 border border-red-100 text-red-500 rounded-lg flex items-center justify-center active:scale-95 disabled:opacity-50"

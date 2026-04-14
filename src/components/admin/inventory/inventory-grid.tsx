@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { PlusCircle, PackageOpen, ArrowLeft, ArrowRight, Search, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Product } from '@/types/product'
 import ProductCard from '@/components/shared/inventory/product-card'
 
@@ -147,7 +148,7 @@ export default function InventoryGrid({
                                         if (product.data_sheet_url) {
                                             window.open(product.data_sheet_url, '_blank')
                                         } else {
-                                            alert('No technical data sheet available for this part.')
+                                            toast.error('No technical data sheet available for this part.')
                                         }
                                     }}
                                 />

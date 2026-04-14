@@ -152,7 +152,7 @@ export const fetchRecentActivityFeed = cache(async (limit: number = 5) => {
         return {
             title,
             description,
-            time: new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ' • ' + (item.purpose || 'WAREHOUSE'),
+            time: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' • ' + new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ' • ' + (item.purpose || 'WAREHOUSE'),
             type: item.type,
             color
         }

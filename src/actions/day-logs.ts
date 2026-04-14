@@ -1,6 +1,6 @@
 'use server'
 
-import { DayLogEntry, DayLog, TransactionType } from '@/lib/day-logs'
+import { DayLogEntry, DayLog, TransactionType } from '@/types/day-logs'
 
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
@@ -157,8 +157,8 @@ export async function submitAtomicLogs(
     userId: string,
     notes?: string
 ): Promise<{ success: boolean; count: number } | { error: string }> {
-    const supabase = await createServerSupabaseClient()
-    
+    const supabase = getSupabaseAdmin()
+
     // 1. Validation Logic
     const validEntries = entries.filter(e => e.productId && e.quantity > 0)
     if (validEntries.length === 0) {

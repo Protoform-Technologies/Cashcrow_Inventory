@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 import { Plus, Info, FileText, Mail, History, Store, Phone, Clock, Archive } from 'lucide-react'
 import { createQuote } from '@/actions/quotes'
+import { QuoteStatus } from '@/types/quote'
 import QuoteHistoryTable from './quote-history-table'
+import { toast } from 'sonner'
 
 interface Product {
     id: string
@@ -37,7 +39,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
     const [notes, setNotes] = useState('')
     // Generate a more unique Request ID (uses Year-Random-Timestamp)
     const generateUniqueId = () => `RFQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}-${Date.now().toString().slice(-4)}`
-    
+
     const [requestId, setRequestId] = useState<string>('')
     const [recentQuotes, setRecentQuotes] = useState(initialRecentQuotes)
     const [isSaving, setIsSaving] = useState(false)
@@ -52,7 +54,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
 
     const handleSaveAndGenerate = async () => {
         if (!selectedProductId || !selectedSupplierId || !quantity || !estimatedTotal) {
-            alert('Please fill in all required fields.')
+            toast.error('Please fill in all required fields.')
             return
         }
 
@@ -66,21 +68,21 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                 total_amount: parseFloat(estimatedTotal),
                 expected_date: expectedDate,
                 notes: notes,
-                status: 'Approved',
+                status: QuoteStatus.APPROVED,
                 request_id: requestId
             })
 
             if (result.success) {
                 // 2. Download PDF
                 handleGeneratePdf()
-                
+
                 // 3. Update local history list
                 const newQuote = {
                     ...result.data,
                     suppliers: { company_name: selectedSupplier?.company_name }
                 }
                 setRecentQuotes([newQuote, ...recentQuotes].slice(0, 5))
-                
+
                 // 4. Reset Form & Generate NEW ID for next quote
                 setQuantity('')
                 setEstimatedTotal('')
@@ -88,12 +90,13 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                 setSelectedProductId('')
                 setSelectedSupplierId('')
                 setRequestId(generateUniqueId()) // VERY IMPORTANT: Generate new ID for next entry
+                toast.success('Quote generated and PDF ready!')
             } else {
-                alert('Error saving quote: ' + result.error)
+                toast.error('Error saving quote: ' + result.error)
             }
         } catch (error) {
             console.error('Failed to create quote:', error)
-            alert('An unexpected error occurred.')
+            toast.error('An unexpected error occurred.')
         } finally {
             setIsSaving(false)
         }
@@ -103,32 +106,32 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
         const doc = new jsPDF()
         doc.setFontSize(20)
         doc.text('Request for Quote', 20, 20)
-        
+
         doc.setFontSize(12)
         doc.text(`Request ID: ${requestId}`, 20, 35)
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 42)
-        
+
         doc.text(`Part: ${selectedProduct?.name || 'N/A'} (${selectedProduct?.sku || 'N/A'})`, 20, 55)
         doc.text(`Supplier: ${selectedSupplier?.company_name || 'N/A'}`, 20, 62)
         doc.text(`Quantity: ${quantity}`, 20, 69)
         doc.text(`Expected Delivery: ${expectedDate}`, 20, 76)
         doc.text(`Estimated Total: $${estimatedTotal}`, 20, 83)
-        
+
         doc.text('Notes:', 20, 95)
         doc.text(notes, 20, 102, { maxWidth: 170 })
-        
+
         doc.save(`${requestId}.pdf`)
     }
 
     const handleSendEmail = () => {
         const email = selectedSupplier?.email
         if (!email) {
-            alert('No supplier email found')
+            toast.error('No supplier email found')
             return
         }
         const subject = `Quote Request: ${selectedProduct?.name || 'Parts'} (${requestId})`
         const body = `Hello ${selectedSupplier.contact_name || selectedSupplier.company_name},\n\nWe would like to request a quote for the following part:\n\nRequest ID: ${requestId}\nPart: ${selectedProduct?.name}\nSKU: ${selectedProduct?.sku}\nQuantity: ${quantity}\nExpected Delivery: ${expectedDate}\n\nNotes: ${notes}\n\nThank you.`
-        
+
         window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     }
 
@@ -158,7 +161,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Part</label>
-                                <select 
+                                <select
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none transition-all"
                                     value={selectedProductId}
                                     onChange={(e) => setSelectedProductId(e.target.value)}
@@ -172,7 +175,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Select Supplier</label>
                                 <div className="flex gap-2">
-                                    <select 
+                                    <select
                                         className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none transition-all"
                                         value={selectedSupplierId}
                                         onChange={(e) => setSelectedSupplierId(e.target.value)}
@@ -182,7 +185,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                                             <option key={s.id} value={s.id}>{s.company_name}</option>
                                         ))}
                                     </select>
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => window.location.href = '/admin/add-suppliers'}
                                         className="bg-[var(--color-cashcrow-primary)]/10 text-[var(--color-cashcrow-primary)] p-3 rounded-xl hover:bg-[var(--color-cashcrow-primary)]/20 transition-colors"
@@ -205,8 +208,8 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Quantity Required</label>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         placeholder="0.00"
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none"
                                         value={quantity}
@@ -215,7 +218,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Expected Delivery</label>
-                                    <input 
+                                    <input
                                         type="date"
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none"
                                         value={expectedDate}
@@ -224,8 +227,8 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Estimated Total ($)</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         placeholder="0.00"
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[var(--color-cashcrow-primary)] focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none"
                                         value={estimatedTotal}
@@ -235,7 +238,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Internal Project Notes</label>
-                                <textarea 
+                                <textarea
                                     rows={4}
                                     placeholder="Mention project codes or specific packaging requirements..."
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] outline-none resize-none"
@@ -255,7 +258,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                             <div className="flex justify-between items-start">
                                 <span className="text-xs text-white/70">Part Reference</span>
                                 <span className="text-sm font-bold text-right">
-                                    {selectedProduct ? selectedProduct.sku : '---'}<br/>
+                                    {selectedProduct ? selectedProduct.sku : '---'}<br />
                                     <span className="text-[10px] font-normal text-white/50">{selectedProduct ? selectedProduct.name : 'No part selected'}</span>
                                 </span>
                             </div>
@@ -269,7 +272,7 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                                 <span className="text-xl font-black text-white">${estimatedTotal || '0.00'}</span>
                             </div>
                         </div>
-                        <button 
+                        <button
                             type="button"
                             onClick={handleSaveAndGenerate}
                             disabled={isSaving}
@@ -281,14 +284,14 @@ export default function RequestQuoteForm({ products, suppliers, initialRecentQuo
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
-                        <button 
+                        <button
                             onClick={handleGeneratePdf}
                             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-white hover:border-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-primary)] transition-all"
                         >
                             <FileText className="w-4 h-4" />
                             Draft PDF
                         </button>
-                        <button 
+                        <button
                             onClick={handleSendEmail}
                             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-white hover:border-[var(--color-cashcrow-primary)] hover:text-[var(--color-cashcrow-primary)] transition-all"
                         >

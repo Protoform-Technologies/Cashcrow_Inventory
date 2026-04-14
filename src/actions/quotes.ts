@@ -1,109 +1,67 @@
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
+import { QuoteStatus } from '@/types/quote'
+import { 
+    dbGetQuotes, 
+    dbCreateQuote, 
+    dbUpdateQuoteStatus, 
+    dbGetNextRequestId 
+} from '@/lib/quotes-db'
 
-export async function getRecentQuotes(productId?: string) {
-    const supabase = await createServerSupabaseClient()
-    
-    let query = supabase
-        .from('quotes')
-        .select(`
-            id,
-            created_at,
-            quantity,
-            total_amount,
-            status,
-            supplier_id,
-            suppliers (
-                company_name
-            )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-    if (productId) {
-        query = query.eq('product_id', productId)
+export async function getQuotes(page: number = 1, limit: number = 10, query?: string, startDate?: string, endDate?: string) {
+    try {
+        return await dbGetQuotes(page, limit, query, startDate, endDate)
+    } catch (error: any) {
+        return { quotes: [], count: 0, error: error.message }
     }
-
-    const { data, error } = await query
-
-    if (error) {
-        // If table doesn't exist yet, return some placeholder data for the UI
-        console.log('Quotes table not found in Supabase. Showing placeholder history.')
-        return [
-            {
-                id: '1',
-                created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-                quantity: 1000,
-                total_amount: 450,
-                status: 'Approved',
-                suppliers: { company_name: 'Mouser Electronics' }
-            },
-            {
-                id: '2',
-                created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-                quantity: 500,
-                total_amount: 240,
-                status: 'Pending',
-                suppliers: { company_name: 'DigiKey' }
-            }
-        ]
-    }
-
-
-    return data || []
 }
 
 export async function createQuote(quoteData: {
     product_id: string
     supplier_id: string
     quantity: number
-    total_amount: number
+    total_amount?: number
     expected_date: string
     notes: string
-    status: string
+    status: QuoteStatus
     request_id?: string
 }) {
-    const supabase = await createServerSupabaseClient()
-
-    // Generate a simple request ID if not provided
-    const requestId = quoteData.request_id || `RFQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-
-    const { data, error } = await supabase
-        .from('quotes')
-        .insert([{
-            ...quoteData,
-            request_id: requestId
-        }])
-        .select()
-
-    if (error) {
-        console.error('Error creating quote:', error)
+    try {
+        const data = await dbCreateQuote(quoteData)
+        return { success: true, data }
+    } catch (error: any) {
         return { success: false, error: error.message }
     }
-
-    return { success: true, data: data[0] }
 }
 
-export async function addQuote(formData: any) {
-    const supabase = await createServerSupabaseClient()
-    
-    const { error } = await supabase
-        .from('quotes')
-        .insert({
-            product_id: formData.productId,
-            supplier_id: formData.supplierId,
-            quantity: formData.quantity,
-            total_amount: formData.amount,
-            expected_date: formData.expectedDate,
-            notes: formData.notes,
-            status: 'Pending'
-        })
-
-    if (error) {
-        console.error('Error adding quote:', error)
-        return { error: error.message }
+export async function updateQuoteStatus(id: string, status: QuoteStatus) {
+    console.log(`[ACTION] Update status request for ${id} to ${status}`)
+    try {
+        const result = await dbUpdateQuoteStatus(id, status)
+        if (result) {
+            revalidatePath('/admin/quotes')
+            return { success: true }
+        }
+        return { success: false, error: 'Update failed - no record found' }
+    } catch (error: any) {
+        console.error('[ACTION ERROR] updateQuoteStatus:', error)
+        return { success: false, error: error.message }
     }
+}
 
-    return { success: true }
+export async function getNextRequestId() {
+    try {
+        return await dbGetNextRequestId()
+    } catch (error) {
+        const year = new Date().getFullYear()
+        const monthString = (new Date().getMonth() + 1).toString().padStart(2, '0')
+        const random = Math.floor(1000 + Math.random() * 9000)
+        return `RFQ-${year}-${monthString}-${random}`
+    }
+}
+
+export async function getRecentQuotes() {
+    const { quotes } = await getQuotes(1, 10)
+    return quotes
 }

@@ -14,12 +14,12 @@ import {
 } from 'lucide-react'
 import { addSupplier, getUniqueCategories } from '@/actions/suppliers'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
 export default function AddSupplierForm() {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     
     const [categories] = useState<string[]>([
         "Electronics", 
@@ -35,32 +35,25 @@ export default function AddSupplierForm() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
-        setStatus(null)
 
         const formData = new FormData(e.currentTarget)
 
         const result = await addSupplier(formData)
 
         if (result.error) {
-            setStatus({ type: 'error', message: result.error })
+            toast.error(result.error)
             setIsSubmitting(false)
         } else {
-            setStatus({ type: 'success', message: 'Supplier added successfully!' })
+            toast.success('Supplier added successfully!')
             setTimeout(() => {
                 router.push('/admin/suppliers')
                 router.refresh()
-            }, 1500)
+            }, 1000)
         }
     }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
-            {status && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
-                    {status.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold text-sm">{status.message}</p>
-                </div>
-            )}
 
             {/* General Information */}
             <div className="space-y-4">

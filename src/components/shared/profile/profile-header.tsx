@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Camera, Edit3, Loader2, User, Calendar, Briefcase, Trash2 } from "lucide-react";
 import { uploadAvatar, removeAvatar } from "@/actions/profile";
 import { getInitials } from "@/lib/getInitials";
+import { toast } from "sonner";
 
 interface ProfileHeaderProps {
   profile: any;
@@ -29,8 +30,9 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     const result = await uploadAvatar(formData);
     if (result.success && result.url) {
       setAvatarUrl(result.url);
+      toast.success("Profile photo updated");
     } else {
-      alert(result.error || "Failed to upload avatar");
+      toast.error(result.error || "Failed to upload avatar");
     }
     setIsUploading(false);
   };
@@ -42,8 +44,9 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     const result = await removeAvatar();
     if (result.success) {
       setAvatarUrl(null);
+      toast.success("Profile photo removed");
     } else {
-      alert(result.error || "Failed to remove avatar");
+      toast.error(result.error || "Failed to remove avatar");
     }
     setIsRemoving(false);
   };

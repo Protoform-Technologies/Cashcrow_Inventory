@@ -7,6 +7,7 @@ import EditMemberForm from "./edit-member-form"
 import { Pencil, Trash2, Loader2, Search, UserCircle, Mail, Shield, CheckCircle2, Clock, X, ChevronLeft, ChevronRight, UserPlus, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import AddMemberForm from "./add-member-form"
+import { toast } from "sonner"
 
 interface Profile {
     id: string
@@ -76,6 +77,9 @@ export default function MembersList({ members }: { members: Profile[] }) {
         const result = await deleteMember(deleteConfirmId)
         if (result?.success) {
             setLocalMembers(prev => prev.filter(m => m.id !== deleteConfirmId))
+            toast.success("Member removed successfully")
+        } else {
+            toast.error(result?.error || "Failed to remove member")
         }
         setDeleteConfirmId(null)
         setIsPending(false)

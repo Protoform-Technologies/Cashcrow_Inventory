@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Trash2, PlusCircle, Package, User, Hash, Clipboard, Activity, ChevronDown } from 'lucide-react'
-import { Product, Member, LogEntry, TransactionType } from '@/lib/day-logs'
+import { Product, Member, LogEntry, TransactionType } from '@/types/day-logs'
 import SearchableSelect, { Option } from '../searchable-select'
 
 interface DayLogFormProps {

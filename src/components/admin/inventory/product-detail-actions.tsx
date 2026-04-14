@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react'
 import { Edit3, Download, Trash2, Loader2, AlertTriangle, X, FileText, ChevronDown, Upload, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { jsPDF } from 'jspdf'
+import { toast } from 'sonner'
 import { Product } from '@/types/product'
 import { deleteProduct, updateProduct } from '@/actions/products'
 import EditProductForm from '@/components/admin/inventory/edit-product-form'
@@ -47,9 +48,10 @@ export default function ProductDetailActions({ product, logs, userName, isAdmin 
             const result = await updateProduct(product.id, formData)
             if (result.success) {
                 setShowDSMenu(false)
+                toast.success('Data sheet uploaded successfully')
                 router.refresh()
             } else {
-                alert(result.error || 'Failed to upload data sheet')
+                toast.error(result.error || 'Failed to upload data sheet')
             }
         } catch (err) {
             console.error('Data sheet upload error:', err)
@@ -178,11 +180,13 @@ export default function ProductDetailActions({ product, logs, userName, isAdmin 
         try {
             const result = await deleteProduct(product.id)
             if (result.success) {
+                toast.success('Part deleted successfully')
                 const basePath = window.location.pathname.includes('/admin') ? '/admin/parts' : '/member/parts'
                 router.push(basePath)
                 router.refresh()
             } else {
                 setDeleteError(result.error || 'Failed to delete product')
+                toast.error(result.error || 'Failed to delete product')
             }
         } catch (err) {
             setDeleteError('An unexpected error occurred during deletion.')

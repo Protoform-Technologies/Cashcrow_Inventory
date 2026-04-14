@@ -3,6 +3,7 @@
 import { useState, useRef } from "react"
 import { addProduct } from "@/actions/products"
 import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Supplier {
     id: string
@@ -17,7 +18,6 @@ interface AddProductFormProps {
 
 export default function AddProductForm({ suppliers, onSuccess, onCancel }: AddProductFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
@@ -52,7 +52,6 @@ const [purchaseMode, setPurchaseMode] = useState<'online' | 'offline' | ''>('')
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
-        setStatus(null)
 
         const formData = new FormData(e.currentTarget)
         
@@ -99,16 +98,16 @@ const [purchaseMode, setPurchaseMode] = useState<'online' | 'offline' | ''>('')
         const result = await addProduct(formData)
 
         if (result.error) {
-            setStatus({ type: 'error', message: result.error })
+            toast.error(result.error)
         } else {
-            setStatus({ type: 'success', message: 'Product added successfully!' })
+            toast.success('Product added successfully!')
             formRef.current?.reset()
             setImagePreview(null)
             setSelectedSupplierId('')
             setShowOtherVendor(false)
             setOtherVendor({ name: '', fund: '', link: '' })
             if (onSuccess) {
-                onSuccess()
+                setTimeout(() => onSuccess(), 1000)
             }
         }
         setIsLoading(false)
@@ -116,13 +115,6 @@ const [purchaseMode, setPurchaseMode] = useState<'online' | 'offline' | ''>('')
 
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl mx-auto pb-12">
-
-            {status && (
-                <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${status.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold">{status.message}</p>
-                </div>
-            )}
 
             {/* Product Photo */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-6 md:mb-8 overflow-hidden">

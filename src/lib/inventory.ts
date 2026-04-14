@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 
 /**
  * Core inventory data service (READ)
@@ -76,17 +76,17 @@ export const fetchProductsForDropdown = cache(async () => {
  */
 
 export async function createProduct(data: any) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
     return await supabase.from('products').insert(data)
 }
 
 export async function updateProductById(id: string, data: any) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
     return await supabase.from('products').update(data).eq('id', id)
 }
 
 export async function deleteProductById(id: string) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
     return await supabase.from('products').delete().eq('id', id)
 }
 

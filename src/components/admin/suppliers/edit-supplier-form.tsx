@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { updateSupplier } from '@/actions/suppliers'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface Supplier {
     id: string
@@ -39,7 +40,6 @@ interface EditSupplierFormProps {
 
 export default function EditSupplierForm({ supplier, onSuccess, onCancel }: EditSupplierFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     
     // Standard Categories list matching AddSupplierForm
     const categories = [
@@ -95,7 +95,6 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
-        setStatus(null)
 
         const formDataObj = new FormData()
         Object.entries(formData).forEach(([key, value]) => {
@@ -105,9 +104,9 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
         const result = await updateSupplier(supplier.id, formDataObj)
 
         if (result?.error) {
-            setStatus({ type: 'error', message: result.error })
+            toast.error(result.error)
         } else if (result?.success) {
-            setStatus({ type: 'success', message: 'Supplier updated successfully!' })
+            toast.success('Supplier updated successfully!')
             setTimeout(() => {
                 onSuccess()
             }, 1000)
@@ -117,12 +116,6 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8 p-1">
-            {status && (
-                <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
-                    {status.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold text-sm">{status.message}</p>
-                </div>
-            )}
 
             {/* General Information */}
             <div className="space-y-4">

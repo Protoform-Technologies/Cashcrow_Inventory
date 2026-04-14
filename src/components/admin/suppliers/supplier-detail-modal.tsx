@@ -22,6 +22,7 @@ import { deleteSupplier } from '@/actions/suppliers'
 import { useRouter } from 'next/navigation'
 import EditSupplierForm from './edit-supplier-form'
 import { generateSupplierPDF } from './supplier-card'
+import { toast } from 'sonner'
 
 
 interface Supplier {
@@ -443,11 +444,13 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                                         setIsDeleting(true)
                                         const result = await deleteSupplier(supplier.id)
                                         if (result.success) {
+                                            toast.success('Supplier deleted successfully')
                                             setShowDeleteConfirm(false)
                                             onClose()
                                             router.refresh()
                                         } else {
                                             setIsDeleting(false)
+                                            toast.error(result.error || 'Failed to delete supplier')
                                             console.error('Delete failed:', result.error)
                                         }
                                     }}

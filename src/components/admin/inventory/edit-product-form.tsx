@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { updateProduct } from "@/actions/products"
 import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Vendor {
     name: string
@@ -32,7 +33,6 @@ interface EditProductFormProps {
 
 export default function EditProductForm({ product, onSuccess, onCancel }: EditProductFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null)
 
@@ -74,7 +74,6 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
-        setStatus(null)
 
         const formData = new FormData(e.currentTarget)
         formData.append('existing_image_url', product.image_url || '')
@@ -83,9 +82,9 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
         const result = await updateProduct(product.id, formData)
 
         if (result?.error) {
-            setStatus({ type: 'error', message: result.error })
+            toast.error(result.error)
         } else if (result?.success) {
-            setStatus({ type: 'success', message: 'Product updated successfully!' })
+            toast.success('Product updated successfully!')
             setTimeout(() => {
                 onSuccess()
             }, 1000)
@@ -96,14 +95,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
     return (
         <form ref={formRef} onSubmit={handleSubmit} className="max-w-4xl mx-auto pb-12">
 
-            {status && (
-                <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${status.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                    {status.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
-                    <p className="font-semibold">{status.message}</p>
-                </div>
-            )}
-
-            <div className="bglate-200 rounded--white border border-s2xl shadow-sm mb-8 overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">image</span>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Product Photo</h3>

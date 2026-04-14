@@ -3,11 +3,13 @@
 import React, { useState, useMemo } from 'react'
 import { FileText, Send, Info, History as HistoryIcon, LayoutGrid, CheckCircle2, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { submitAtomicLogs, deleteDayLog } from '@/actions/day-logs'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import DayLogForm from './day-log-form'
 import SubmittedLogsTable from './submitted-logs-table'
 import LogDetailModal from './log-detail-modal'
 import LogFilters from './log-filters'
-import { Product, Member, DayLog, LogEntry, INITIAL_ENTRY, generateEntryId } from '@/lib/day-logs'
+import { Product, Member, DayLog, LogEntry, INITIAL_ENTRY, generateEntryId } from '@/types/day-logs'
 
 interface DailyLogManagerProps {
     userId: string
@@ -27,6 +29,7 @@ export default function DailyLogManager({ userId, userName, products, members, s
     const [searchTerm, setSearchTerm] = useState('')
     const [dateFilter, setDateFilter] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
+    const router = useRouter()
 
     const [showViewModal, setShowViewModal] = useState(false)
     const [selectedLog, setSelectedLog] = useState<DayLog | null>(null)
@@ -54,7 +57,7 @@ export default function DailyLogManager({ userId, userName, products, members, s
     const handleSubmit = async () => {
         const validEntries = entries.filter(e => e.productId && e.quantity > 0)
         if (validEntries.length === 0) {
-            alert('Please include at least one valid inventory movement.')
+            toast.error('Please include at least one valid inventory movement.')
             return
         }
 
@@ -64,16 +67,17 @@ export default function DailyLogManager({ userId, userName, products, members, s
 
         try {
             const result = await submitAtomicLogs(validEntries, userId)
-            
+
             if ('error' in result) {
-                alert(`Submission Error: ${result.error}`)
+                toast.error(`Submission Error: ${result.error}`)
             } else {
+                toast.success('Daily logs finalized and inventory updated!')
                 setEntries([{ ...INITIAL_ENTRY, id: generateEntryId() }])
-                window.location.reload()
+                router.refresh()
             }
         } catch (error) {
             console.error('Submission Error:', error)
-            alert('A critical error occurred during submission.')
+            toast.error('A critical error occurred during submission.')
         } finally {
             setIsSubmitting(false)
         }
@@ -83,12 +87,12 @@ export default function DailyLogManager({ userId, userName, products, members, s
     const filteredLogs = useMemo(() => {
         return submittedLogs.filter(log => {
             const matchesDate = !dateFilter || log.created_at.startsWith(dateFilter)
-            
+
             // Search in Creator Name or individual Item details (Product/TakenBy)
             const creatorName = `${log.profiles?.first_name} ${log.profiles?.last_name}`.toLowerCase()
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 creatorName.includes(searchTerm.toLowerCase()) ||
-                log.day_log_items.some(item => 
+                log.day_log_items.some(item =>
                     item.products?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     item.products?.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     item.taken_by_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -216,7 +220,8 @@ export default function DailyLogManager({ userId, userName, products, members, s
                                 if (confirm('Permanently delete this atomic record? This cannot be undone and provides immutable proof.')) {
                                     setIsDeleting(true);
                                     await deleteDayLog(id);
-                                    window.location.reload();
+                                    toast.success('Record deleted successfully');
+                                    router.refresh();
                                 }
                             }}
                             isDeleting={isDeleting}

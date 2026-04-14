@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { Mail, BadgeInfo, Save, Loader2, User, Phone } from "lucide-react";
 import { updateProfile } from "@/actions/profile";
+import { toast } from "sonner";
 
 interface AccountInfoProps {
   profile: any;
@@ -10,8 +11,6 @@ interface AccountInfoProps {
 
 export default function AccountInfo({ profile }: AccountInfoProps) {
   const [isPending, startTransition] = useTransition();
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: profile.first_name || "",
@@ -21,14 +20,10 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    setSuccess(false);
-    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccess(false);
-    setError(null);
 
     startTransition(async () => {
       const fd = new FormData();
@@ -36,10 +31,9 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
 
       const result = await updateProfile(fd);
       if (result.success) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        toast.success("Profile updated successfully!");
       } else {
-        setError(result.error || "Failed to update profile");
+        toast.error(result.error || "Failed to update profile");
       }
     });
   };
@@ -61,17 +55,6 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
             Account Information
           </h4>
         </div>
-
-        {success && (
-          <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
-            Changes saved successfully!
-          </span>
-        )}
-        {error && (
-          <span className="text-[10px] font-black text-red-500 uppercase tracking-widest animate-in fade-in slide-in-from-right-2">
-            {error}
-          </span>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -125,4 +108,3 @@ export default function AccountInfo({ profile }: AccountInfoProps) {
     </section>
   );
 }
-

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { updateMember, deleteMember } from "@/actions/members"
-import { ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,8 +23,6 @@ interface EditMemberFormProps {
 
 export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemberFormProps) {
     const [isPending, setIsPending] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [successMsg, setSuccessMsg] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         firstName: member.first_name,
         lastName: member.last_name,
@@ -33,11 +32,9 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        setError(null)
-        setSuccessMsg(null)
 
         if (!formData.firstName || !formData.lastName) {
-            setError('Please provide all required fields.')
+            toast.error('Please provide all required fields.')
             return
         }
 
@@ -51,9 +48,9 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
 
         const result = await updateMember(member.id, data)
         if (result?.error) {
-            setError(result.error)
+            toast.error(result.error)
         } else if (result?.success) {
-            setSuccessMsg('Member updated successfully!')
+            toast.success('Member updated successfully!')
             setTimeout(() => {
                 onSuccess()
             }, 800)
@@ -63,18 +60,6 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-semibold">{error}</p>
-                </div>
-            )}
-            {successMsg && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                    <p className="font-semibold">{successMsg}</p>
-                </div>
-            )}
 
             <div className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

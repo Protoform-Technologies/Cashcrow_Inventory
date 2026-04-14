@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { X, User, Package, Clock, ShieldCheck, FileText, Info, Hash, MapPin } from 'lucide-react'
-import { DayLog, TransactionType } from '@/lib/day-logs'
+import { DayLog, TransactionType } from '@/types/day-logs'
 import Image from 'next/image'
 
 interface LogDetailModalProps {
@@ -122,11 +122,11 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                             <div className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
                                 <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[11px] font-black text-slate-500 border border-white ring-1 ring-slate-100 overflow-hidden">
                                     {item?.taken_by_avatar_url ? (
-                                        <Image 
-                                            src={item.taken_by_avatar_url} 
-                                            alt={item?.taken_by_name || 'User'} 
-                                            width={36} 
-                                            height={36} 
+                                        <Image
+                                            src={item.taken_by_avatar_url}
+                                            alt={item?.taken_by_name || 'User'}
+                                            width={36}
+                                            height={36}
                                             className="object-cover w-full h-full"
                                         />
                                     ) : (
@@ -148,11 +148,11 @@ export default function LogDetailModal({ log, onClose }: LogDetailModalProps) {
                             <div className="flex items-center gap-3 p-4 bg-emerald-50/30 border border-emerald-100/50 rounded-xl">
                                 <div className="size-9 rounded-full bg-white flex items-center justify-center text-[11px] font-black text-emerald-600 border border-emerald-100 overflow-hidden">
                                     {creator?.avatar_url ? (
-                                        <Image 
-                                            src={creator.avatar_url} 
-                                            alt={`${creator.first_name} ${creator.last_name}`} 
-                                            width={36} 
-                                            height={36} 
+                                        <Image
+                                            src={creator.avatar_url}
+                                            alt={`${creator.first_name} ${creator.last_name}`}
+                                            width={36}
+                                            height={36}
                                             className="object-cover w-full h-full"
                                         />
                                     ) : (

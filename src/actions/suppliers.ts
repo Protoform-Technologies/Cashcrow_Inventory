@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
 
@@ -12,7 +12,7 @@ function toTitleCase(str: string) {
 }
 
 export async function addSupplier(formData: FormData) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const company_name = formData.get('company_name') as string
     const website = formData.get('website') as string
@@ -69,7 +69,7 @@ export async function addSupplier(formData: FormData) {
 }
 
 export async function updateSupplier(id: string, formData: FormData) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const company_name = formData.get('company_name') as string
     const website = formData.get('website') as string
@@ -115,7 +115,7 @@ export async function updateSupplier(id: string, formData: FormData) {
 }
 
 export async function deleteSupplier(id: string) {
-    const supabase = await createServerSupabaseClient()
+    const supabase = getSupabaseAdmin()
 
     const { error: deleteError } = await supabase
         .from('suppliers')
@@ -181,3 +181,29 @@ export async function getUniqueCategories() {
     return categories
 }
 
+export async function getOrCreateSupplierByName(name: string) {
+    const supabase = getSupabaseAdmin()
+
+    // 1. Check if exists
+    const { data: existing } = await supabase
+        .from('suppliers')
+        .select('id')
+        .ilike('company_name', name)
+        .single()
+
+    if (existing) return existing.id
+
+    // 2. Create minimal record
+    const { data: created, error } = await supabase
+        .from('suppliers')
+        .insert({ company_name: name })
+        .select('id')
+        .single()
+
+    if (error) {
+        console.error("Error creating guest supplier:", error)
+        throw new Error("Failed to resolve supplier")
+    }
+
+    return created.id
+}

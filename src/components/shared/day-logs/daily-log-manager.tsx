@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
-import { FileText, Send, Info, History as HistoryIcon, LayoutGrid, CheckCircle2 } from 'lucide-react'
-import { saveDayLogDraft, submitDayLog, deleteDayLog } from '@/actions/day-logs'
+import React, { useState, useMemo } from 'react'
+import { FileText, Send, Info, History as HistoryIcon, LayoutGrid, CheckCircle2, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { submitAtomicLogs, deleteDayLog } from '@/actions/day-logs'
 import DayLogForm from './day-log-form'
 import SubmittedLogsTable from './submitted-logs-table'
 import LogDetailModal from './log-detail-modal'
+import LogFilters from './log-filters'
 import { Product, Member, DayLog, LogEntry, INITIAL_ENTRY, generateEntryId } from '@/lib/day-logs'
 
 interface DailyLogManagerProps {
@@ -16,11 +17,16 @@ interface DailyLogManagerProps {
     submittedLogs: DayLog[]
 }
 
+const ITEMS_PER_PAGE = 10
+
 export default function DailyLogManager({ userId, userName, products, members, submittedLogs }: DailyLogManagerProps) {
     const [entries, setEntries] = useState<LogEntry[]>([{ ...INITIAL_ENTRY, id: generateEntryId() }])
-    const [globalNotes, setGlobalNotes] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [currentLogId, setCurrentLogId] = useState<string | null>(null)
+
+    // Filtering & Pagination State
+    const [searchTerm, setSearchTerm] = useState('')
+    const [dateFilter, setDateFilter] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
 
     const [showViewModal, setShowViewModal] = useState(false)
     const [selectedLog, setSelectedLog] = useState<DayLog | null>(null)
@@ -46,36 +52,25 @@ export default function DailyLogManager({ userId, userName, products, members, s
     }
 
     const handleSubmit = async () => {
-        if (!confirm('Are you sure you want to finalize and submit this log?')) return
-
-        setIsSubmitting(true)
         const validEntries = entries.filter(e => e.productId && e.quantity > 0)
-
         if (validEntries.length === 0) {
             alert('Please include at least one valid inventory movement.')
-            setIsSubmitting(false)
             return
         }
 
+        if (!confirm(`Initialize atomic submission for ${validEntries.length} lines? This will verify and update stock individually.`)) return
+
+        setIsSubmitting(true)
+
         try {
-            const draftResult = await saveDayLogDraft(currentLogId, validEntries, userId, globalNotes)
-            if ('error' in draftResult) {
-                alert(`Draft save failed: ${draftResult.error}`)
-                setIsSubmitting(false)
-                return
+            const result = await submitAtomicLogs(validEntries, userId)
+            
+            if ('error' in result) {
+                alert(`Submission Error: ${result.error}`)
+            } else {
+                setEntries([{ ...INITIAL_ENTRY, id: generateEntryId() }])
+                window.location.reload()
             }
-
-            const submitResult = await submitDayLog(draftResult.id)
-            if ('error' in submitResult) {
-                alert(`Submission failed: ${submitResult.error}`)
-                setIsSubmitting(false)
-                return
-            }
-
-            setEntries([{ ...INITIAL_ENTRY, id: generateEntryId() }])
-            setGlobalNotes('')
-            setCurrentLogId(null)
-            window.location.reload()
         } catch (error) {
             console.error('Submission Error:', error)
             alert('A critical error occurred during submission.')
@@ -84,53 +79,53 @@ export default function DailyLogManager({ userId, userName, products, members, s
         }
     }
 
-    const handleSaveDraft = async () => {
-        const validEntries = entries.filter(e => e.productId && e.quantity > 0)
-        try {
-            const result = await saveDayLogDraft(currentLogId, validEntries, userId, globalNotes)
-            if ('error' in result) {
-                alert(`Draft Error: ${result.error}`)
-                return
-            }
-            setCurrentLogId(result.id)
-            alert('Draft saved successfully.')
-        } catch (error) {
-            console.error('Draft Error:', error)
-        }
-    }
+    // Client-side Filtering Logic
+    const filteredLogs = useMemo(() => {
+        return submittedLogs.filter(log => {
+            const matchesDate = !dateFilter || log.created_at.startsWith(dateFilter)
+            
+            // Search in Creator Name or individual Item details (Product/TakenBy)
+            const creatorName = `${log.profiles?.first_name} ${log.profiles?.last_name}`.toLowerCase()
+            const matchesSearch = !searchTerm || 
+                creatorName.includes(searchTerm.toLowerCase()) ||
+                log.day_log_items.some(item => 
+                    item.products?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.products?.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.taken_by_name?.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+
+            return matchesDate && matchesSearch
+        })
+    }, [submittedLogs, searchTerm, dateFilter])
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE)
+    const paginatedLogs = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE
+        return filteredLogs.slice(start, start + ITEMS_PER_PAGE)
+    }, [filteredLogs, currentPage])
 
     return (
         <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-700 pb-10">
-            {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 border-b border-slate-100 pb-8">
-                <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-2xl bg-[var(--color-cashcrow-primary)] flex items-center justify-center text-white shadow-lg shadow-[var(--color-cashcrow-primary)]/20">
-                            <LayoutGrid className="size-5" />
-                        </div>
-                        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Daily Log Entry</h2>
-                    </div>
-                    <p className="text-slate-500 font-medium max-w-2xl leading-relaxed">
-                        Precision inventory management. Convert whiteboard observations into verified, structure digital ledger transactions for real-time stock accuracy.
+            {/* Reduced Padding Header Section */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-4">
+                <div>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">Daily Log Entry</h2>
+                    <p className="text-slate-500 font-medium mt-1 leading-relaxed max-w-2xl">
+                        Verify and record whiteboard observations as independent ledger transactions.
                     </p>
                 </div>
-                
+
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <button
-                        onClick={handleSaveDraft}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-sm transition-all active:scale-95"
-                    >
-                        <FileText className="w-4 h-4" />
-                        Save Draft
-                    </button>
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 bg-[var(--color-cashcrow-primary)] border border-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-8 py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-[var(--color-cashcrow-primary)]/20 transition-all active:scale-95 disabled:opacity-50"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 bg-[var(--color-cashcrow-primary)] border border-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-8 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[var(--color-cashcrow-primary)]/20 transition-all active:scale-95 disabled:opacity-50"
                     >
                         {isSubmitting ? (
-                            <span className="flex items-center gap-2 animate-pulse font-black">
-                                Processing...
+                            <span className="flex items-center gap-2 animate-pulse">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Verifying...
                             </span>
                         ) : (
                             <>
@@ -142,46 +137,46 @@ export default function DailyLogManager({ userId, userName, products, members, s
                 </div>
             </div>
 
-            {/* Instructional Toolbar */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-12">
-                    <div className="bg-white rounded-[2rem] p-1.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 border border-slate-200 shadow-sm">
-                        <div className="px-5 py-3 flex items-center gap-3 text-slate-900 border-r border-slate-100 shrink-0">
-                            <Info className="w-4 h-4 text-[var(--color-cashcrow-primary)]" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Transaction Guide</span>
-                        </div>
-                        <div className="flex-1 flex flex-wrap items-center gap-2 p-1">
-                            {[
-                                { label: 'IN (Restock)', color: 'bg-emerald-500' },
-                                { label: 'OUT (Usage)', color: 'bg-slate-400' },
-                                { label: 'RETURN (To Shelf)', color: 'bg-sky-400' },
-                                { label: 'ADJUST (Audit)', color: 'bg-amber-400' },
-                                { label: 'SCRAP (Damage)', color: 'bg-rose-500' }
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100">
-                                    <span className={`w-2 h-2 rounded-full ${item.color} shadow-sm`} />
-                                    <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{item.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+            {/* Standardized Transaction Guide with Detailed Logic */}
+            <div className="bg-white rounded-xl p-1.5 flex flex-col items-stretch gap-1 border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 flex items-center gap-3 text-slate-900 bg-slate-50/50 rounded-t-[1.5rem] border-b border-slate-100">
+                    <Info className="w-4 h-4 text-[var(--color-cashcrow-primary)]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Inventory Transaction Guide</span>
                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 p-2">
+                    {[
+                        { label: 'IN (Restock)', color: 'bg-emerald-500', desc: 'New inventory arrives. Stock Increases (+).' },
+                        { label: 'RETURN (To Shelf)', color: 'bg-sky-400', desc: 'Unused parts returned. Stock Increases (+).' },
+                        { label: 'OUT (Usage)', color: 'bg-slate-400', desc: 'Parts taken for projects. Stock Decreases (-).' },
+                        { label: 'SCRAP (Damage)', color: 'bg-rose-500', desc: 'Broken or lost items. Stock Decreases (-).' },
+                        { label: 'ADJUST (Audit)', color: 'bg-amber-400', desc: 'Audit corrections. Stock Decreases (-).' }
+                    ].map((item, idx) => (
+                        <div key={idx} className="flex flex-col gap-2 p-4 rounded-2xl bg-slate-50/50 border border-slate-100 transition-all hover:bg-white hover:border-[var(--color-cashcrow-primary)]/30 group">
+                            <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${item.color} shadow-sm group-hover:scale-125 transition-transform`} />
+                                <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">{item.label}</span>
+                            </div>
+                            <p className="text-[9px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">{item.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                {/* Ledger Input Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-12 space-y-6">
                     <div className="flex items-center justify-between px-2">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-slate-100 rounded-xl">
+                            <div className="size-9 bg-slate-100 rounded-xl flex items-center justify-center">
                                 <Send className="w-4 h-4 text-slate-600" />
                             </div>
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Ledger Active Buffer</h3>
+                            <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">Daily Logs</h3>
                         </div>
-                        <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 uppercase tracking-widest">
-                            {entries.length} Line Items
-                        </span>
+                        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full border border-emerald-100 shadow-sm">
+                            <span className="text-[10px] font-black uppercase tracking-widest">{entries.length} Atomic Items</span>
+                        </div>
                     </div>
 
-                    <div className="bg-slate-50/50 rounded-[3rem] p-2 sm:p-4 border border-slate-100 overflow-visible">
+                    <div className="bg-slate-50/20 rounded-xl p-2 sm:p-4 border border-slate-100 overflow-visible">
                         <DayLogForm
                             entries={entries}
                             products={products}
@@ -191,39 +186,34 @@ export default function DailyLogManager({ userId, userName, products, members, s
                             onUpdateEntry={updateEntry}
                         />
                     </div>
-
-                    {/* Transaction Annotations */}
-                    <div className="px-2">
-                        <div className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
-                            <div className="flex items-center gap-3 mb-4">
-                                <FileText className="w-4 h-4 text-[var(--color-cashcrow-primary)]" />
-                                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Private Log Annotations (Draftable)</h3>
-                            </div>
-                            <textarea
-                                className="w-full bg-slate-50 border border-slate-100 focus:bg-white focus:border-[var(--color-cashcrow-primary)] focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-2xl p-6 text-sm font-medium transition-all min-h-[120px]"
-                                placeholder="Add context, project references, or specific notes for this daily submission..."
-                                value={globalNotes}
-                                onChange={(e) => setGlobalNotes(e.target.value)}
-                            />
-                        </div>
-                    </div>
                 </div>
 
                 {/* History Section Area */}
-                <div className="lg:col-span-12 mt-12 space-y-6">
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="p-2 bg-slate-100 rounded-xl">
-                            <HistoryIcon className="size-3 text-slate-400" />
+                <div className="lg:col-span-12 mt-2 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-slate-100 rounded-xl">
+                                <HistoryIcon className="size-3 text-slate-400" />
+                            </div>
+                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Submission Log Archives</h3>
                         </div>
-                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Submission Log Archives</h3>
                     </div>
 
-                    <div className="bg-white rounded-[3rem] border border-slate-200 shadow-sm overflow-hidden p-2 sm:p-2">
+                    {/* Integrated Filters */}
+                    <LogFilters
+                        search={searchTerm}
+                        onSearchChange={(v) => { setSearchTerm(v); setCurrentPage(1); }}
+                        dateFilter={dateFilter}
+                        onDateChange={(v) => { setDateFilter(v); setCurrentPage(1); }}
+                        onClear={() => { setSearchTerm(''); setDateFilter(''); setCurrentPage(1); }}
+                    />
+
+                    <div className="overflow-visible">
                         <SubmittedLogsTable
-                            logs={submittedLogs}
+                            logs={paginatedLogs}
                             onView={(log) => { setSelectedLog(log); setShowViewModal(true); }}
                             onDelete={async (id) => {
-                                if (confirm('Permanently delete this record? This cannot be undone.')) {
+                                if (confirm('Permanently delete this atomic record? This cannot be undone and provides immutable proof.')) {
                                     setIsDeleting(true);
                                     await deleteDayLog(id);
                                     window.location.reload();
@@ -231,6 +221,31 @@ export default function DailyLogManager({ userId, userName, products, members, s
                             }}
                             isDeleting={isDeleting}
                         />
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between py-6 border-t border-slate-200/60 mt-4">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    Page {currentPage} of {totalPages} &bull; {filteredLogs.length} Total Records
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                        className="size-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="size-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -123,14 +123,6 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
             </span>
           </div>
         </div>
-
-        {/* Edit Button */}
-        <div className="pb-2 w-full md:w-auto">
-          <button className="w-full md:w-auto bg-[#265035] hover:bg-[#1e402a] text-white px-6 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#265035]/20 hover:shadow-2xl transition-all flex items-center justify-center gap-2.5 active:scale-95">
-            <Edit3 className="size-4" />
-            Edit Profile
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -1,236 +1,251 @@
 'use client'
 
 import React from 'react'
-import { FileText, Eye, Trash2, Loader2, User, Clock, Package, CheckCircle2 } from 'lucide-react'
-import { DayLog, DayLogItem, TransactionType } from '@/lib/day-logs'
+import { Package, Eye, Trash2, Clock, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react'
+import { DayLog, TransactionType } from '@/lib/day-logs'
+import Image from 'next/image'
 
 interface SubmittedLogsTableProps {
     logs: DayLog[]
-    onView?: (log: DayLog) => void
-    onDelete?: (logId: string) => void
+    onView: (log: DayLog) => void
+    onDelete: (id: string) => void
     isDeleting?: boolean
 }
 
-const getTransactionColor = (type: TransactionType) => {
+const getTransactionStyles = (type: TransactionType) => {
     switch (type) {
-        case 'IN': return 'bg-emerald-100 text-emerald-700 border-emerald-200'
-        case 'OUT': return 'bg-slate-100 text-slate-700 border-slate-200'
-        case 'RETURN': return 'bg-sky-100 text-sky-700 border-sky-200'
-        case 'ADJUST': return 'bg-amber-100 text-amber-700 border-amber-200'
-        case 'SCRAP': return 'bg-rose-100 text-rose-700 border-rose-200'
-        default: return 'bg-slate-100 text-slate-700 border-slate-200'
+        case 'IN': return 'bg-emerald-50 text-emerald-600 border-emerald-100'
+        case 'OUT': return 'bg-slate-50 text-slate-600 border-slate-200'
+        case 'RETURN': return 'bg-sky-50 text-sky-600 border-sky-100'
+        case 'ADJUST': return 'bg-orange-50 text-orange-600 border-orange-100'
+        case 'SCRAP': return 'bg-red-50 text-red-600 border-red-100'
+        default: return 'bg-slate-50 text-slate-600 border-slate-200'
     }
-}
-
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return {
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-    }
-}
-
-const LogCard = ({ log, onView, onDelete, isDeleting }: { log: DayLog } & Pick<SubmittedLogsTableProps, 'onView' | 'onDelete' | 'isDeleting'>) => {
-    const { date, time } = formatDate(log.created_at)
-    const creator = log.profiles
-
-    return (
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:border-[var(--color-cashcrow-primary)]/20 transition-all duration-500 overflow-hidden group">
-            <div className="p-8 space-y-6">
-                {/* Header: Date & Time */}
-                <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-4">
-                        <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[var(--color-cashcrow-primary)] group-hover:text-white transition-all duration-500 shadow-inner">
-                            <Clock className="size-6" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{time}</p>
-                            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{date}</h4>
-                        </div>
-                    </div>
-                    <div className="px-4 py-1.5 bg-[var(--color-cashcrow-primary)]/10 text-[var(--color-cashcrow-primary)] rounded-full text-[9px] font-black uppercase tracking-widest border border-[var(--color-cashcrow-primary)]/10">
-                        {log.day_log_items?.length || 0} Entries
-                    </div>
-                </div>
-
-                {/* Creator Section */}
-                <div className="bg-slate-50/50 rounded-[2rem] p-5 flex items-center gap-4 border border-slate-100 transition-colors group-hover:bg-white group-hover:border-[var(--color-cashcrow-primary)]/10">
-                    <div className="size-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center font-black text-sm text-[var(--color-cashcrow-primary)] shadow-sm group-hover:scale-105 transition-transform">
-                        {creator?.first_name?.charAt(0)}{creator?.last_name?.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Authorized Log</p>
-                        <p className="text-sm font-black text-slate-900 truncate">{creator?.first_name} {creator?.last_name}</p>
-                    </div>
-                </div>
-
-                {/* Items Preview */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Inventory Sync</p>
-                        <div className="h-px flex-1 bg-slate-100" />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {log.day_log_items?.slice(0, 4).map((item, idx) => (
-                            <div key={idx} className={`px-3 py-1.5 rounded-xl border text-[10px] font-black shadow-sm transition-transform hover:scale-105 ${getTransactionColor(item.type)}`}>
-                                {item.type} <span className="opacity-30 mx-1">|</span> {item.qty}
-                            </div>
-                        ))}
-                        {log.day_log_items && log.day_log_items.length > 4 && (
-                            <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-100 text-[10px] font-black text-slate-400 hover:text-slate-600 transition-colors">
-                                +{log.day_log_items.length - 4} Others
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-4 pt-4 border-t border-slate-50">
-                    <button 
-                        onClick={() => onView?.(log)}
-                        className="flex-1 h-12 bg-white border border-slate-200 text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2 active:scale-95 shadow-sm"
-                    >
-                        <Eye className="size-4" />
-                        Review
-                    </button>
-                    {onDelete && (
-                        <button 
-                            onClick={() => onDelete(log.id)}
-                            disabled={isDeleting}
-                            className="size-12 bg-white border border-slate-200 rounded-2xl text-slate-400 flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 transition-all active:scale-90 disabled:opacity-50 group/del"
-                        >
-                            {isDeleting ? <Loader2 className="size-4 animate-spin text-rose-500" /> : <Trash2 className="size-5 transition-transform group-hover/del:scale-110" />}
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
-    )
 }
 
 export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting }: SubmittedLogsTableProps) {
-    if (logs.length === 0) return null
+    // Hydration fix
+    const [isClient, setIsClient] = React.useState(false)
+    React.useEffect(() => { setIsClient(true) }, [])
+
+    if (logs.length === 0) {
+        return (
+            <div className="p-20 text-center bg-white rounded-xl border border-slate-200 shadow-sm animate-in fade-in duration-500">
+                <div className="size-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200 border border-slate-100">
+                    <ShieldCheck className="size-8" />
+                </div>
+                <h4 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Zero Trace Identifiers Found</h4>
+            </div>
+        )
+    }
+
+    const formatDate = (dateStr: string) => {
+        if (!isClient) return { date: '...', time: '...' }
+        const d = new Date(dateStr)
+        return {
+            date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            mobile: d.toLocaleDateString([], { month: 'short', day: 'numeric' })
+        }
+    }
 
     return (
-        <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            {/* Section Header */}
-            <div className="flex items-center justify-between px-6 md:px-2">
-                <div className="flex items-center gap-4">
-                    <div className="size-12 rounded-2xl bg-[var(--color-cashcrow-primary)] flex items-center justify-center text-white shadow-xl shadow-[var(--color-cashcrow-primary)]/20">
-                        <FileText className="size-6" />
-                    </div>
-                    <div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Ledger Archives</h3>
-                        <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Immutable proof of all inventory movements</p>
-                    </div>
-                </div>
-                <div className="hidden lg:flex items-center gap-3 px-6 py-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <Package className="size-3 text-[var(--color-cashcrow-primary)]" />
-                    {logs.length} Total Records
-                </div>
-            </div>
+        <div className="w-full space-y-4">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50 text-slate-500 text-[11px] uppercase tracking-[0.15em] font-black border-b border-slate-100">
+                                <th className="px-6 py-5">Timestamp</th>
+                                <th className="px-6 py-5">Item Identifier</th>
+                                <th className="px-6 py-5">Log Buffer</th>
+                                <th className="px-6 py-5">Taken By</th>
+                                <th className="px-6 py-5 text-right w-[140px]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {logs.map((log) => {
+                                const { date, time } = formatDate(log.created_at)
+                                const item = log.day_log_items?.[0]
+                                const product = item?.products
 
-            {/* Mobile View: Vertical Cards */}
-            <div className="grid grid-cols-1 md:hidden gap-8 px-4">
-                {logs.map((log) => (
-                    <LogCard key={log.id} log={log} onView={onView} onDelete={onDelete} isDeleting={isDeleting} />
-                ))}
-            </div>
-
-            {/* Desktop View: Styled Table */}
-            <div className="hidden md:block bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/40 overflow-hidden">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="bg-slate-50/80 border-b border-slate-100">
-                            <th className="px-10 py-7 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] text-left">Transaction Date</th>
-                            <th className="px-10 py-7 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] text-left">Operational Member</th>
-                            <th className="px-10 py-7 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] text-left">Movement Buffer</th>
-                            <th className="px-10 py-7 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] text-left">Verification</th>
-                            <th className="px-10 py-7 text-right w-[140px]"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {logs.map((log) => {
-                            const { date, time } = formatDate(log.created_at)
-                            const creator = log.profiles
-
-                            return (
-                                <tr key={log.id} className="group hover:bg-slate-50/50 transition-all duration-500">
-                                    <td className="px-10 py-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-[var(--color-cashcrow-primary)] group-hover:text-white transition-all duration-500 shadow-sm">
-                                                <Clock className="size-5" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-black text-slate-900">{date}</p>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{time}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="size-11 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center font-black text-[10px] text-[var(--color-cashcrow-primary)] group-hover:scale-105 transition-transform">
-                                                {creator?.first_name?.charAt(0)}{creator?.last_name?.charAt(0)}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-black text-slate-900 truncate max-w-[180px]">
-                                                    {creator?.first_name} {creator?.last_name}
-                                                </p>
-                                                <p className="text-[10px] font-black text-slate-400 truncate max-w-[180px] uppercase tracking-tighter opacity-60">ADMINISTRATOR</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-8">
-                                        <div className="flex flex-wrap gap-2">
-                                            {log.day_log_items?.slice(0, 3).map((item, idx) => (
-                                                <div key={idx} className={`px-3 py-1.5 rounded-xl border text-[10px] font-black shadow-sm transition-colors ${getTransactionColor(item.type)}`}>
-                                                    {item.type} <span className="opacity-30 mx-1">|</span> {item.qty}
+                                return (
+                                    <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                                        <td className="px-6 py-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shrink-0">
+                                                    <Clock className="size-4" />
                                                 </div>
-                                            ))}
-                                            {log.day_log_items && log.day_log_items.length > 3 && (
-                                                <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-100 text-[10px] font-black text-slate-400">
-                                                    +{log.day_log_items.length - 3} Units
+                                                <div>
+                                                    <p className="text-[13px] font-bold text-slate-800 leading-tight">{date}</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{time}</p>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-8">
-                                        <div className="flex items-center gap-3">
-                                            <div className="size-2 rounded-full bg-[var(--color-cashcrow-primary)] animate-pulse shadow-[0_0_10px_rgba(var(--color-cashcrow-primary-rgb),0.5)]" />
-                                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                                                <CheckCircle2 className="size-3 text-[var(--color-cashcrow-primary)]" />
-                                                Verified
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="size-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                                                    {product?.image_url ? (
+                                                        <Image
+                                                            src={product.image_url}
+                                                            alt={product.name}
+                                                            width={40}
+                                                            height={40}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <Package className="size-5 text-slate-300" />
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[14px] font-bold text-slate-900 group-hover:text-[var(--color-cashcrow-primary)] transition-colors leading-tight">{product?.name || 'Unknown Item'}</p>
+                                                    <code className="text-[11px] text-slate-400 font-mono mt-1 block tracking-wider">{product?.sku || 'N/A'}</code>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-6">
+                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-black rounded-full uppercase tracking-wider border ${getTransactionStyles(item?.type || 'OUT')}`}>
+                                                <ArrowRight className="size-3 opacity-50" />
+                                                {item?.type} | {item?.qty} Units
                                             </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-8">
-                                        <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 duration-500">
-                                            {onView && (
-                                                <button 
+                                        </td>
+                                        <td className="px-6 py-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-9 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 border border-white shadow-sm ring-1 ring-slate-100 shrink-0 overflow-hidden">
+                                                    {item?.taken_by_avatar_url ? (
+                                                        <Image 
+                                                            src={item.taken_by_avatar_url} 
+                                                            alt={item?.taken_by_name || 'User'} 
+                                                            width={36} 
+                                                            height={36} 
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        item?.taken_by_name?.charAt(0) || 'U'
+                                                    )}
+                                                </div>
+                                                <p className="text-[13px] font-bold text-slate-800">{item?.taken_by_name || 'System'}</p>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-6 text-right">
+                                            <div className="flex items-center justify-end gap-2 text-slate-400">
+                                                <button
                                                     onClick={() => onView(log)}
-                                                    className="size-11 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-[var(--color-cashcrow-primary)] hover:border-[var(--color-cashcrow-primary)]/40 hover:shadow-2xl hover:shadow-[var(--color-cashcrow-primary)]/20 transition-all flex items-center justify-center active:scale-90"
+                                                    className="size-9 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center"
                                                 >
-                                                    <Eye className="size-5" />
+                                                    <Eye className="size-4" />
                                                 </button>
-                                            )}
-                                            {onDelete && (
-                                                <button 
+                                                <button
                                                     onClick={() => onDelete(log.id)}
                                                     disabled={isDeleting}
-                                                    className="size-11 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-100 transition-all flex items-center justify-center active:scale-90"
+                                                    className="size-9 rounded-lg bg-white border border-slate-200 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center disabled:opacity-50"
                                                 >
-                                                    {isDeleting ? <Loader2 className="size-5 animate-spin" /> : <Trash2 className="size-5" />}
+                                                    {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                                                 </button>
-                                            )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* High-Density Mobile Card View */}
+            <div className="grid grid-cols-1 gap-4 lg:hidden">
+                {logs.map((log) => {
+                    const { date, time } = formatDate(log.created_at)
+                    const item = log.day_log_items?.[0]
+                    const product = item?.products
+
+                    return (
+                        <div key={log.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden active:scale-[0.99] transition-all">
+                            <div className="p-4 space-y-4">
+                                {/* Top Section: Identity */}
+                                <div className="flex gap-4">
+                                    <div className="size-14 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                                        {product?.image_url ? (
+                                            <Image 
+                                                src={product.image_url} 
+                                                alt={product.name} 
+                                                width={56} 
+                                                height={56} 
+                                                className="object-cover w-full h-full"
+                                            />
+                                        ) : (
+                                            <Package className="size-6 text-slate-300" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[14px] font-black text-slate-900 leading-tight truncate">{product?.name || 'Unknown Item'}</p>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 mb-1.5">Electronic Ledger Record</p>
+                                        <code className="text-[10px] bg-slate-50 border border-slate-200 text-slate-500 px-2 py-0.5 rounded font-mono">
+                                            {product?.sku || 'N/A'}
+                                        </code>
+                                    </div>
+                                </div>
+
+                                {/* Middle Section: Transactional Logic */}
+                                <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-50">
+                                    <div className="space-y-1">
+                                        <span className={`px-2 py-0.5 text-[8px] font-black rounded-md uppercase tracking-widest border inline-block mb-1 ${getTransactionStyles(item?.type || 'OUT')}`}>
+                                            {item?.type}
+                                        </span>
+                                        <p className="text-sm font-black text-slate-900 leading-none">
+                                            {item?.qty} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Units</span>
+                                        </p>
+                                    </div>
+                                    <div className="text-right space-y-1">
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Accounted By</p>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <p className="text-[11px] font-black text-slate-700 truncate max-w-[100px]">{item?.taken_by_name || 'System'}</p>
+                                            <div className="size-6 rounded-full bg-slate-100 border border-white shadow-sm ring-1 ring-slate-50 flex items-center justify-center text-[9px] font-black text-slate-400 overflow-hidden">
+                                                {item?.taken_by_avatar_url ? (
+                                                    <Image 
+                                                        src={item.taken_by_avatar_url} 
+                                                        alt={item?.taken_by_name || 'User'} 
+                                                        width={24} 
+                                                        height={24} 
+                                                        className="object-cover w-full h-full"
+                                                    />
+                                                ) : (
+                                                    item?.taken_by_name?.charAt(0) || 'U'
+                                                )}
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
+                                    </div>
+                                </div>
+
+                                {/* Footer Section: Time & Actions */}
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <p className="text-[10px] font-black text-slate-800 leading-none">{date}</p>
+                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{time}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => onView(log)}
+                                            className="h-9 px-3 bg-white border border-slate-200 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                        >
+                                            <Eye className="size-3" />
+                                            Trace
+                                        </button>
+                                        <button 
+                                            onClick={() => onDelete(log.id)}
+                                            disabled={isDeleting}
+                                            className="size-9 bg-red-50 border border-red-100 text-red-500 rounded-lg flex items-center justify-center active:scale-95 disabled:opacity-50"
+                                        >
+                                            {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-3.5" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                })}
             </div>
         </div>
     )
 }
-

@@ -89,20 +89,20 @@ export default function SearchableSelect({
                             <Package className={`w-4 h-4 ${selectedOption ? 'text-slate-400' : 'text-slate-300'}`} />
                         )}
                     </div>
-                    <div className="flex flex-col min-w-0">
+                    <div className="flex flex-col min-w-0 pr-2">
                         {selectedOption ? (
                             <>
-                                <span className="text-sm font-bold text-slate-900 truncate leading-tight">
+                                <span className="text-sm font-bold text-slate-900 leading-tight break-words">
                                     {selectedOption.name}
                                 </span>
                                 {selectedOption.sub && (
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate leading-none mt-0.5">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1 break-words">
                                         {selectedOption.sub}
                                     </span>
                                 )}
                             </>
                         ) : (
-                            <span className="text-sm font-semibold text-slate-400 truncate">
+                            <span className="text-sm font-semibold text-slate-400">
                                 {placeholder}
                             </span>
                         )}
@@ -161,10 +161,10 @@ export default function SearchableSelect({
                                             <Package className={`w-5 h-5 ${option.id === value ? 'text-[var(--color-cashcrow-primary)]' : 'text-slate-300'}`} />
                                         )}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-black truncate transition-colors ${option.id === value ? 'text-[var(--color-cashcrow-primary)]' : 'text-slate-900'}`}>{option.name}</p>
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <p className={`text-sm font-black transition-colors break-words ${option.id === value ? 'text-[var(--color-cashcrow-primary)]' : 'text-slate-900'}`}>{option.name}</p>
                                         {option.sub && (
-                                            <p className="text-[10px] text-slate-400 font-black truncate uppercase tracking-widest mt-0.5">{option.sub}</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5 break-words">{option.sub}</p>
                                         )}
                                     </div>
                                     {option.id === value && (

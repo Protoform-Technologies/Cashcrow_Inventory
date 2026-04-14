@@ -147,352 +147,112 @@ export async function submitDayLog(dayLogId: string): Promise<{ success: boolean
     return { success: true }
 }
 
-export async function getDayLogs(userId: string): Promise<DayLog[]> {
-    const supabase = await createServerSupabaseClient()
 
-    const { data, error } = await supabase
-        .from('day_logs')
-        .select(`
-            *,
-            day_log_items (
-                id,
-                part_id,
-                type,
-                qty,
-                taken_by,
-                purpose,
-                notes,
-                created_at,
-                products:part_id (
-                    name,
-                    sku
-                )
-            )
-        `)
-        .eq('created_by', userId)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error('Error fetching day logs:', error)
-        return []
-    }
-
-    return data || []
-}
-
-export async function getDayLogById(logId: string): Promise<DayLog | null> {
-    const supabase = await createServerSupabaseClient()
-
-    const { data, error } = await supabase
-        .from('day_logs')
-        .select(`
-            *,
-            day_log_items (
-                id,
-                part_id,
-                type,
-                qty,
-                taken_by,
-                purpose,
-                notes,
-                created_at,
-                products:part_id (
-                    name,
-                    sku,
-                    quantity
-                )
-            )
-        `)
-        .eq('id', logId)
-        .single()
-
-    if (error) {
-        console.error('Error fetching day log:', error)
-        return null
-    }
-
-    return data
-}
-
-export async function saveDayLogDraft(
-    dayLogId: string | null,
+/**
+ * ATOMIC SUBMISSION PROTOCOL:
+ * Each entry is now treated as its own independent DayLog.
+ */
+export async function submitAtomicLogs(
     entries: DayLogEntry[],
     userId: string,
     notes?: string
-): Promise<{ id: string } | { error: string }> {
+): Promise<{ success: boolean; count: number } | { error: string }> {
     const supabase = await createServerSupabaseClient()
-
-    let logId = dayLogId
-
-    // If no log exists, create one
-    if (!logId) {
-        const { data, error } = await supabase
-            .from('day_logs')
-            .insert({
-                created_by: userId,
-                status: 'DRAFT',
-                notes: notes || null
-            })
-            .select()
-            .single()
-
-        if (error) {
-            console.error('Error creating day log:', error)
-            return { error: error.message }
-        }
-
-        logId = data.id
-    } else {
-        // Update existing log notes
-        await supabase
-            .from('day_logs')
-            .update({ notes: notes || null })
-            .eq('id', logId)
+    
+    // 1. Validation Logic
+    const validEntries = entries.filter(e => e.productId && e.quantity > 0)
+    if (validEntries.length === 0) {
+        return { error: 'No valid line items found for submission.' }
     }
 
-    // Delete existing items and insert new ones
-    await supabase
-        .from('day_log_items')
-        .delete()
-        .eq('day_log_id', logId)
+    try {
+        let successCount = 0
 
-    if (entries.length > 0) {
-        const itemsToInsert = entries
-            .filter(entry => entry.productId && entry.quantity > 0)
-            .map(entry => ({
-                day_log_id: logId,
-                part_id: entry.productId,
-                type: entry.transactionType,
-                qty: entry.quantity,
-                taken_by: entry.takenBy || null,
-                purpose: entry.purpose || null,
-                notes: entry.notes || null
-            }))
+        for (const entry of validEntries) {
+            // A. Create independent DayLog record
+            const { data: log, error: logError } = await supabase
+                .from('day_logs')
+                .insert({
+                    created_by: userId,
+                    status: 'SUBMITTED',
+                    notes: notes || null
+                })
+                .select()
+                .single()
 
-        if (itemsToInsert.length > 0) {
-            const { error: insertError } = await supabase
+            if (logError) throw new Error(`Log creation failed: ${logError.message}`)
+
+            // B. Create Item record
+            const { error: itemError } = await supabase
                 .from('day_log_items')
-                .insert(itemsToInsert)
-
-            if (insertError) {
-                console.error('Error saving day log items:', insertError)
-                return { error: insertError.message }
-            }
-        }
-    }
-
-    revalidatePath('/admin/daily-log')
-    return { id: logId as string }
-}
-
-export async function getProductRecentLogs(productId: string) {
-    return getProductFullHistory(productId, 1, 5)
-}
-
-export async function getProductFullHistory(productId: string, page: number = 1, limit: number = 20) {
-    const supabase = await createServerSupabaseClient()
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-
-    const { data, error, count } = await supabase
-        .from('day_log_items')
-        .select(`
-            *,
-            day_logs!day_log_items_day_log_id_fkey (
-                created_at,
-                created_by
-            ),
-            products!day_log_items_part_id_fkey (
-                name,
-                sku
-            )
-        `, {
-            count: 'exact',
-            head: false
-        })
-        .eq('part_id', productId)
-        .order('created_at', { ascending: false })
-        .range(from, to)
-
-    if (error) {
-        console.error('Error fetching product history:', error)
-        return { logs: [], total: 0 }
-    }
-
-    const userIds = Array.from(new Set((data || []).map(item => item.taken_by || (item.day_logs && item.day_logs.created_by)).filter(Boolean)))
-    let profileMap: Record<string, any> = {}
-    if (userIds.length > 0) {
-        const adminClient = getSupabaseAdmin()
-        const { data: profiles } = await adminClient
-            .from('profiles')
-            .select('id, first_name, last_name')
-            .in('id', userIds)
-
-        if (profiles) {
-            profileMap = profiles.reduce((acc: any, p: any) => {
-                acc[p.id] = p
-                return acc
-            }, {})
-        }
-    }
-
-    // Format for table
-    const logs = (data || []).map(item => {
-        const takenByUserId = item.taken_by || (item.day_logs ? item.day_logs.created_by : null);
-        const profile = takenByUserId ? profileMap[takenByUserId as string] : null;
-
-        return {
-            time: item.day_logs ? new Date(item.day_logs.created_at).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            }) : 'Unknown',
-            date: item.day_logs ? new Date(item.day_logs.created_at).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            }) : 'Unknown',
-            partName: item.products?.name || item.products?.sku || 'Unknown',
-            quantity: item.qty,
-            type: item.type,
-            sign: (item.type === 'OUT' || item.type === 'SCRAP') ? '-' : '+',
-            takenBy: profile ? `${profile.first_name} ${profile.last_name}`.trim() : 'Unknown',
-            purpose: item.purpose || ''
-        }
-    })
-
-    return { logs, total: count || 0 }
-}
-
-export async function deleteDayLog(logId: string): Promise<{ success: boolean } | { error: string }> {
-    // Use admin client to bypass RLS policies for deletion
-    const supabase = getSupabaseAdmin()
-
-    // Try to delete the log directly. The items should be deleted via CASCADE
-    const { error: deleteLogError } = await supabase
-        .from('day_logs')
-        .delete()
-        .eq('id', logId)
-
-    if (deleteLogError) {
-        console.error('Error deleting day log:', deleteLogError)
-
-        // If direct delete fails, try updating status first
-        const { error: statusError } = await supabase
-            .from('day_logs')
-            .update({ status: 'DRAFT' })
-            .eq('id', logId)
-
-        if (statusError) {
-            // Try using RPC to delete (requires database function to exist)
-            try {
-                const { error: rpcError } = await supabase.rpc('delete_day_log_with_items', {
-                    p_log_id: logId
+                .insert({
+                    day_log_id: log.id,
+                    part_id: entry.productId,
+                    type: entry.transactionType,
+                    qty: entry.quantity,
+                    taken_by: entry.takenBy || null,
+                    purpose: entry.purpose || null,
+                    notes: entry.notes || null
                 })
 
-                if (rpcError) {
-                    console.error('RPC delete failed:', rpcError)
-                    return { error: 'Cannot delete submitted log. The database has a trigger preventing deletion.' }
-                }
+            if (itemError) throw new Error(`Item insertion failed: ${itemError.message}`)
 
-                revalidatePath('/admin/daily-log')
-                return { success: true }
-            } catch (e) {
-                return { error: 'Cannot delete submitted log. Please run the SQL migration to fix this.' }
+            // C. Update Inventory (Validation: Stock Awareness)
+            let quantityChange = 0
+            switch (entry.transactionType) {
+                case 'IN':
+                case 'RETURN':
+                    quantityChange = entry.quantity
+                    break
+                case 'OUT':
+                case 'SCRAP':
+                case 'ADJUST':
+                    quantityChange = -entry.quantity
+                    break
             }
-        }
 
-        // Now try deleting again after status change
-        const { error: retryDeleteError } = await supabase
-            .from('day_logs')
-            .delete()
-            .eq('id', logId)
-
-        if (retryDeleteError) {
-            return { error: retryDeleteError.message }
-        }
-    }
-
-    revalidatePath('/admin/daily-log')
-    return { success: true }
-}
-
-export async function getSubmittedLogsWithDetails() {
-    const adminClient = getSupabaseAdmin()
-
-    // Fetch all submitted day logs using admin client
-    const { data: submittedLogs, error: logsError } = await adminClient
-        .from('day_logs')
-        .select('*')
-        .eq('status', 'SUBMITTED')
-        .order('created_at', { ascending: false })
-
-    if (logsError) {
-        console.warn('Could not fetch submitted logs:', logsError.message)
-        return []
-    }
-
-    if (!submittedLogs || submittedLogs.length === 0) return []
-
-    // Fetch user profiles separately for the logs
-    const logCreatorIds = submittedLogs.map((log: any) => log.created_by).filter(Boolean)
-    const profileMap: Record<string, any> = {}
-
-    if (logCreatorIds.length > 0) {
-        const { data: profiles } = await adminClient
-            .from('profiles')
-            .select('id, first_name, last_name, email')
-            .in('id', logCreatorIds)
-
-        if (profiles) {
-            profiles.forEach((profile: any) => { profileMap[profile.id] = profile })
-        }
-    }
-
-    // Now loop over the logs and fetch the items (could optimize with an 'in' query)
-    const logsWithItems: any[] = []
-
-    for (const log of submittedLogs) {
-        const { data: items } = await adminClient
-            .from('day_log_items')
-            .select('*')
-            .eq('day_log_id', log.id)
-
-        const itemsWithProducts: any[] = []
-        if (items) {
-            for (const item of items) {
-                const { data: product } = await adminClient
+            if (quantityChange !== 0) {
+                const { data: product } = await supabase
                     .from('products')
-                    .select('name, sku, quantity')
-                    .eq('id', item.part_id)
+                    .select('quantity')
+                    .eq('id', entry.productId)
                     .single()
 
-                let takenByName = null
-                if (item.taken_by) {
-                    const { data: tkProfile } = await adminClient
-                        .from('profiles')
-                        .select('first_name, last_name')
-                        .eq('id', item.taken_by)
-                        .single()
-                    if (tkProfile) {
-                        takenByName = `${tkProfile.first_name} ${tkProfile.last_name}`
-                    }
+                if (product) {
+                    const newQuantity = Math.max(0, product.quantity + quantityChange)
+                    await supabase
+                        .from('products')
+                        .update({ quantity: newQuantity })
+                        .eq('id', entry.productId)
                 }
-
-                itemsWithProducts.push({
-                    ...item,
-                    products: product,
-                    taken_by_name: takenByName
-                })
             }
+
+            successCount++
         }
 
-        logsWithItems.push({
-            ...log,
-            day_log_items: itemsWithProducts,
-            profiles: profileMap[log.created_by] || { first_name: 'Unknown', last_name: '', email: '' }
-        })
+        revalidatePath('/admin/daily-log')
+        revalidatePath('/admin/parts')
+        return { success: true, count: successCount }
+    } catch (error: any) {
+        console.error('Atomic Submission Error:', error)
+        return { error: error.message || 'A critical error occurred during atomic submission.' }
     }
+}
 
-    return logsWithItems
+// Deprecated multi-item logic preserved for backward compatibility if needed, but not used by new UI
+export async function deleteDayLog(logId: string) {
+    const { deleteDayLogRecord } = await import('@/lib/day-logs-service')
+    try {
+        await deleteDayLogRecord(logId)
+        revalidatePath('/admin/daily-log')
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message }
+    }
+}
+
+// Re-export lib functions needed by server components
+export async function getSubmittedLogsWithDetails() {
+    const { getSubmittedLogsWithDetails: fetchLogs } = await import('@/lib/day-logs-service')
+    return fetchLogs()
 }

@@ -56,8 +56,10 @@ export interface DayLogItem {
         name: string
         sku: string
         quantity: number
+        image_url?: string | null
     }
     taken_by_name?: string | null
+    taken_by_avatar_url?: string | null
 }
 
 export interface LogEntry {

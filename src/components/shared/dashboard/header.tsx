@@ -197,8 +197,12 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
                                             onClick={() => handleResultClick(item)}
                                             className="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors"
                                         >
-                                            <div className={`p-2 rounded-lg ${item.type === 'product' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
-                                                {item.type === 'product' ? <Package size={18} /> : <Truck size={18} />}
+                                            <div className={`p-1 w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${item.type === 'product' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                                                {item.type === 'product' ? (
+                                                    item.image_url ? (
+                                                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-md" />
+                                                    ) : <Package size={18} />
+                                                ) : <Truck size={18} />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-semibold text-sm truncate">{item.name}</p>

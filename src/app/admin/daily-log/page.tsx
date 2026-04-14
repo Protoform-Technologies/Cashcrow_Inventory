@@ -1,39 +1,35 @@
-import { createServerSupabaseClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
+import { Metadata } from 'next'
 import DashboardLayout from '@/components/shared/dashboard/layout'
-import DailyLogClient from './daily-log-client'
+import DailyLogManager from '@/components/shared/day-logs/daily-log-manager'
 import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'
 import { getMembers } from '@/actions/members'
 import { getSubmittedLogsWithDetails } from '@/actions/day-logs'
 
+export const metadata: Metadata = {
+    title: 'Daily Log Entry | Cashcrow',
+    description: 'Structure laboratory inventory movements and maintain a digital audit trail of product usage.',
+}
+
 export default async function DailyLogPage() {
-    const supabase = await createServerSupabaseClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError) {
-        console.error('Auth error:', authError)
-    }
-
-    if (!user) {
-        console.log('No user found, redirecting to login')
-        redirect('/')
-    }
-
     const profile = await getAdminProfileOrRedirect()
     const fullName = `${profile.first_name} ${profile.last_name}`
 
-    // Fetch products for the dropdown
-    const products = await getProductsForDropdown()
-
-    // Fetch all members from profiles using admin client to bypass RLS
-    const members = await getMembers()
+    // Fetch all required data in parallel for optimal performance
+    const [products, members, logsWithItems] = await Promise.all([
+        getProductsForDropdown(),
+        getMembers(),
+        getSubmittedLogsWithDetails()
+    ])
     
     // Fallback if members fetch fails deeply or is empty
-    const finalMembers = members.length > 0 ? members : [{ id: profile.id, first_name: profile.first_name || 'User', last_name: profile.last_name || '' }]
-
-    // Fetch all submitted day logs with items properly
-    const logsWithItems = await getSubmittedLogsWithDetails()
+    const finalMembers = members.length > 0 ? members : [{ 
+        id: profile.id, 
+        first_name: profile.first_name || 'Member', 
+        last_name: profile.last_name || '',
+        role: profile.role || 'Admin' 
+    }]
 
     return (
         <DashboardLayout 
@@ -43,7 +39,7 @@ export default async function DailyLogPage() {
             avatarUrl={profile.avatar_url}
             title="Daily Log Entry"
         >
-            <DailyLogClient 
+            <DailyLogManager 
                 userName={fullName}
                 userId={profile.id}
                 products={products}

@@ -1,29 +1,9 @@
 'use server'
 
+import { DayLogEntry, DayLog, TransactionType } from '@/lib/day-logs'
+
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
-
-export interface DayLogEntry {
-    id?: string
-    productId: string
-    productName: string
-    productSku: string
-    quantity: number
-    transactionType: 'IN' | 'OUT' | 'RETURN' | 'ADJUST' | 'SCRAP'
-    takenBy: string
-    takenByName: string
-    purpose: string
-    notes?: string
-}
-
-export interface DayLog {
-    id: string
-    created_by: string
-    status: 'DRAFT' | 'SUBMITTED'
-    notes?: string
-    created_at: string
-    items?: DayLogEntry[]
-}
 
 export async function createDayLog(userId: string): Promise<{ id: string } | { error: string }> {
     const supabase = await createServerSupabaseClient()
@@ -326,9 +306,9 @@ export async function getProductFullHistory(productId: string, page: number = 1,
                 name,
                 sku
             )
-        `, { 
+        `, {
             count: 'exact',
-            head: false 
+            head: false
         })
         .eq('part_id', productId)
         .order('created_at', { ascending: false })
@@ -347,7 +327,7 @@ export async function getProductFullHistory(productId: string, page: number = 1,
             .from('profiles')
             .select('id, first_name, last_name')
             .in('id', userIds)
-        
+
         if (profiles) {
             profileMap = profiles.reduce((acc: any, p: any) => {
                 acc[p.id] = p
@@ -362,13 +342,13 @@ export async function getProductFullHistory(productId: string, page: number = 1,
         const profile = takenByUserId ? profileMap[takenByUserId as string] : null;
 
         return {
-            time: item.day_logs ? new Date(item.day_logs.created_at).toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
+            time: item.day_logs ? new Date(item.day_logs.created_at).toLocaleTimeString('en-US', {
+                hour: '2-digit',
                 minute: '2-digit',
-                hour12: false 
+                hour12: false
             }) : 'Unknown',
-            date: item.day_logs ? new Date(item.day_logs.created_at).toLocaleDateString('en-US', { 
-                month: 'short', 
+            date: item.day_logs ? new Date(item.day_logs.created_at).toLocaleDateString('en-US', {
+                month: 'short',
                 day: 'numeric',
                 year: 'numeric'
             }) : 'Unknown',
@@ -396,38 +376,38 @@ export async function deleteDayLog(logId: string): Promise<{ success: boolean } 
 
     if (deleteLogError) {
         console.error('Error deleting day log:', deleteLogError)
-        
+
         // If direct delete fails, try updating status first
         const { error: statusError } = await supabase
             .from('day_logs')
             .update({ status: 'DRAFT' })
             .eq('id', logId)
-            
+
         if (statusError) {
             // Try using RPC to delete (requires database function to exist)
             try {
-                const { error: rpcError } = await supabase.rpc('delete_day_log_with_items', { 
-                    p_log_id: logId 
+                const { error: rpcError } = await supabase.rpc('delete_day_log_with_items', {
+                    p_log_id: logId
                 })
-                
+
                 if (rpcError) {
                     console.error('RPC delete failed:', rpcError)
                     return { error: 'Cannot delete submitted log. The database has a trigger preventing deletion.' }
                 }
-                
+
                 revalidatePath('/admin/daily-log')
                 return { success: true }
             } catch (e) {
                 return { error: 'Cannot delete submitted log. Please run the SQL migration to fix this.' }
             }
         }
-        
+
         // Now try deleting again after status change
         const { error: retryDeleteError } = await supabase
             .from('day_logs')
             .delete()
             .eq('id', logId)
-            
+
         if (retryDeleteError) {
             return { error: retryDeleteError.message }
         }
@@ -457,13 +437,13 @@ export async function getSubmittedLogsWithDetails() {
     // Fetch user profiles separately for the logs
     const logCreatorIds = submittedLogs.map((log: any) => log.created_by).filter(Boolean)
     const profileMap: Record<string, any> = {}
-    
+
     if (logCreatorIds.length > 0) {
         const { data: profiles } = await adminClient
             .from('profiles')
             .select('id, first_name, last_name, email')
             .in('id', logCreatorIds)
-        
+
         if (profiles) {
             profiles.forEach((profile: any) => { profileMap[profile.id] = profile })
         }
@@ -471,13 +451,13 @@ export async function getSubmittedLogsWithDetails() {
 
     // Now loop over the logs and fetch the items (could optimize with an 'in' query)
     const logsWithItems: any[] = []
-    
+
     for (const log of submittedLogs) {
         const { data: items } = await adminClient
             .from('day_log_items')
             .select('*')
             .eq('day_log_id', log.id)
-            
+
         const itemsWithProducts: any[] = []
         if (items) {
             for (const item of items) {
@@ -486,7 +466,7 @@ export async function getSubmittedLogsWithDetails() {
                     .select('name, sku, quantity')
                     .eq('id', item.part_id)
                     .single()
-                
+
                 let takenByName = null
                 if (item.taken_by) {
                     const { data: tkProfile } = await adminClient
@@ -498,15 +478,15 @@ export async function getSubmittedLogsWithDetails() {
                         takenByName = `${tkProfile.first_name} ${tkProfile.last_name}`
                     }
                 }
-                
-                itemsWithProducts.push({ 
-                    ...item, 
+
+                itemsWithProducts.push({
+                    ...item,
                     products: product,
                     taken_by_name: takenByName
                 })
             }
         }
-        
+
         logsWithItems.push({
             ...log,
             day_log_items: itemsWithProducts,

@@ -60,7 +60,7 @@ export const fetchProductsForDropdown = cache(async () => {
     const supabase = await createServerSupabaseClient()
     const { data, error } = await supabase
         .from('products')
-        .select('id, name, sku, category, quantity')
+        .select('id, name, sku, category, quantity, image_url')
         .order('name', { ascending: true })
 
     if (error) {

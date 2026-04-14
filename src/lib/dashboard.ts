@@ -181,7 +181,7 @@ export const searchGlobalInventory = cache(async (query: string) => {
 
     const { data: products } = await supabase
         .from('products')
-        .select('id, name, sku, category, quantity') 
+        .select('id, name, sku, category, quantity, image_url') 
         .or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
         .limit(5)
 
@@ -198,6 +198,7 @@ export const searchGlobalInventory = cache(async (query: string) => {
             sub: `${p.sku} • ${p.category}`,
             info: `${p.quantity} units`,
             type: 'product' as const,
+            image_url: p.image_url,
             status: p.quantity === 0 ? 'Out of Stock' : p.quantity <= 10 ? 'Low Stock' : 'In Stock'
         })),
         ...(suppliers || []).map(s => ({

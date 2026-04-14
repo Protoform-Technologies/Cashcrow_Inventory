@@ -16,13 +16,14 @@ export const metadata = {
 export default async function ReportsPage({
   searchParams
 }: {
-  searchParams: { month?: string, year?: string }
+  searchParams: Promise<{ month?: string, year?: string }>
 }) {
+  const resolvedParams = await searchParams;
   const profile = await getAdminProfileOrRedirect();
   const fullName = `${profile.first_name} ${profile.last_name}`;
 
-  const month = searchParams.month ? parseInt(searchParams.month) : undefined;
-  const year = searchParams.year ? parseInt(searchParams.year) : undefined;
+  const month = resolvedParams.month ? parseInt(resolvedParams.month) : undefined;
+  const year = resolvedParams.year ? parseInt(resolvedParams.year) : undefined;
 
   // Fetch dynamic analytics
   const reportData = await getReportAnalytics(month, year);
@@ -42,23 +43,29 @@ export default async function ReportsPage({
       avatarUrl={profile.avatar_url}
       title="Reports & Analytics"
     >
-      {/* Reports Header and Actions */}
-      <ReportsHeader reportData={exportData} />
-
-      <div className="px-4 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8 max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Reports Header and Actions */}
+        <ReportsHeader reportData={exportData} />
 
         {/* Key Metrics Grid */}
         <ReportStats stats={reportData.stats as any} />
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <StockMovementChart data={reportData.stockMovement} />
-          <InventoryByCategoryChart data={reportData.inventoryByCategory} />
+          <StockMovementChart 
+            data={reportData.stockMovement} 
+            initialMonth={month}
+            initialYear={year}
+          />
+          <InventoryByCategoryChart 
+            data={reportData.inventoryByCategory} 
+            initialMonth={month}
+            initialYear={year}
+          />
         </div>
 
         {/* Table Section */}
         <TopUsedParts parts={reportData.topParts as any} />
-
       </div>
     </DashboardLayout>
   );

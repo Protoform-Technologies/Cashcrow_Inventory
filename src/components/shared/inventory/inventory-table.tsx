@@ -99,25 +99,25 @@ export default function InventoryTable({
                         <tbody className="divide-y divide-slate-100">
                             {items.length > 0 ? items.slice(0, 5).map((item, i) => (
                                 <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-6 py-6.5">
+                                    <td className="px-6 py-4">
                                         <p className="font-bold text-slate-800 group-hover:text-[var(--color-cashcrow-primary)] transition-colors text-sm">{item.name}</p>
                                     </td>
-                                    <td className="px-6 py-6.5">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <span className="text-[12px] text-slate-500 font-bold bg-slate-100/80 px-3 py-1 rounded-lg uppercase tracking-wide">{item.category}</span>
                                     </td>
-                                    <td className="px-6 py-6.5">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <code className="text-[13px] text-slate-400 font-mono">
                                             {item.sku}
                                         </code>
                                     </td>
-                                    <td className="px-5 py-3 text-right">
+                                    <td className="px-6 py-4 text-right whitespace-nowrap">
                                         <span className={`font-black text-xs ${item.status === 'Low Stock' ? 'text-orange-600' :
                                             item.status === 'Out of Stock' ? 'text-red-600' :
                                                 'text-slate-900'
                                             }`}>{item.qty}</span>
                                     </td>
-                                    <td className="px-6 py-6.5 text-center">
-                                        <span className={`px-3 py-1.5 text-[10px] font-black rounded-full uppercase tracking-wider ${item.status === 'In Stock' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                                        <span className={`px-3 py-1.5 text-[10px] font-black rounded-full uppercase tracking-wider inline-block ${item.status === 'In Stock' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
                                             item.status === 'Low Stock' ? 'bg-orange-50 text-orange-600 border border-orange-100' :
                                                 'bg-red-50 text-red-600 border border-red-100'
                                             }`}>

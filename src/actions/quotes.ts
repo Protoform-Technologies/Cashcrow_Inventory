@@ -26,6 +26,7 @@ export async function createQuote(quoteData: {
     notes: string
     status: QuoteStatus
     request_id?: string
+    details?: any
 }) {
     try {
         const data = await dbCreateQuote(quoteData)
@@ -50,18 +51,33 @@ export async function updateQuoteStatus(id: string, status: QuoteStatus) {
     }
 }
 
-export async function getNextRequestId() {
+export async function getNextRequestId(vertical: string = 'RFQ') {
     try {
-        return await dbGetNextRequestId()
+        return await dbGetNextRequestId(vertical)
     } catch (error) {
         const year = new Date().getFullYear()
         const monthString = (new Date().getMonth() + 1).toString().padStart(2, '0')
         const random = Math.floor(1000 + Math.random() * 9000)
-        return `RFQ-${year}-${monthString}-${random}`
+        return `${vertical}-${year}-${monthString}-${random}`
     }
 }
+
+import fs from 'fs'
+import path from 'path'
 
 export async function getRecentQuotes() {
     const { quotes } = await getQuotes(1, 10)
     return quotes
+}
+
+export async function getRFQTemplate(vertical: 'PF' | 'CC') {
+    const fileName = vertical === 'PF' ? 'protoform-rfq-template.html' : 'cashcrow-rfq-template.html'
+    const filePath = path.join(process.cwd(), 'src', 'components', 'admin', 'quotes', fileName)
+    
+    try {
+        return fs.readFileSync(filePath, 'utf8')
+    } catch (error) {
+        console.error('Error reading RFQ template:', error)
+        throw new Error('Could not load RFQ template')
+    }
 }

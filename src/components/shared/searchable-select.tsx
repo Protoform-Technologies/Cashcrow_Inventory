@@ -78,38 +78,39 @@ export default function SearchableSelect({
                 type="button"
                 disabled={disabled}
                 onClick={() => !disabled && setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border transition-all text-left group ${isOpen
-                    ? 'border-[var(--color-cashcrow-primary)] ring-4 ring-[var(--color-cashcrow-primary)]/10 bg-white shadow-lg'
-                    : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 hover:shadow-sm'
+                className={`w-full flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border transition-all text-left group ${isOpen
+                    ? 'border-emerald-600 ring-8 ring-emerald-600/5 bg-white shadow-xl'
+                    : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 hover:shadow-md'
                     } ${error ? 'border-rose-400 ring-rose-50' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`w-10 h-10 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 transition-all ${selectedOption ? 'ring-2 ring-slate-100' : 'bg-slate-100'}`}>
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className={`size-11 rounded-2xl bg-white border border-slate-100 overflow-hidden flex items-center justify-center shrink-0 transition-all shadow-sm ${selectedOption ? 'ring-4 ring-slate-100' : 'bg-slate-50'}`}>
                         {selectedOption && 'image_url' in selectedOption && selectedOption.image_url ? (
                             <img src={selectedOption.image_url} alt={selectedOption.name} className="w-full h-full object-cover" />
                         ) : (
-                            <Package className={`w-5 h-5 ${selectedOption ? 'text-slate-400' : 'text-slate-300'}`} />
+                            <Package className={`size-5 transition-colors ${selectedOption ? 'text-emerald-600' : 'text-slate-300 group-hover:text-slate-400'}`} />
                         )}
                     </div>
                     <div className="flex flex-col min-w-0 pr-2">
                         {selectedOption ? (
                             <>
-                                <span className="text-sm font-bold text-slate-900 leading-tight break-words">
+                                <span className="text-sm font-black text-slate-900 leading-tight break-words">
                                     {selectedOption.name}
                                 </span>
                                 {('sub' in selectedOption && selectedOption.sub) && (
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1 break-words">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1 break-words opacity-70">
                                         {selectedOption.sub}
                                     </span>
                                 )}
                                 {selectedOption.id === 'custom' && (
-                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none mt-1">
+                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-none mt-1.5 flex items-center gap-1">
+                                        <div className="size-1 rounded-full bg-amber-500" />
                                         Guest Entry
                                     </span>
                                 )}
                             </>
                         ) : (
-                            <span className="text-sm font-semibold text-slate-400">
+                            <span className="text-sm font-bold text-slate-400 group-hover:text-slate-500 transition-colors">
                                 {placeholder}
                             </span>
                         )}
@@ -120,26 +121,28 @@ export default function SearchableSelect({
                     {selectedOption && !disabled && (
                         <div
                             onClick={clearSelection}
-                            className="p-1 rounded-md hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
+                            className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="size-4" />
                         </div>
                     )}
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[var(--color-cashcrow-primary)]' : 'group-hover:text-slate-600'}`} />
+                    <div className={`p-1 rounded-lg transition-colors ${isOpen ? 'bg-emerald-50 text-emerald-600' : 'text-slate-300 group-hover:text-slate-400'}`}>
+                        <ChevronDown className={`size-4 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
+                    </div>
                 </div>
             </button>
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top">
+                <div className="absolute top-full left-0 right-0 mt-3 bg-white border border-slate-200 rounded-[2rem] shadow-2xl z-[9999] overflow-hidden animate-in fade-in zoom-in-95 duration-300 origin-top p-2">
                     {/* Search Input */}
-                    <div className="p-3 border-b border-slate-100 sticky top-0 bg-white z-10">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <div className="p-2 mb-2 sticky top-0 bg-white z-10">
+                        <div className="relative group/search">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within/search:text-emerald-600 transition-colors" />
                             <input
                                 ref={inputRef}
                                 type="text"
-                                className="w-full pl-9 pr-4 py-3 bg-slate-50 border-none focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 rounded-xl text-sm font-bold placeholder:text-slate-400 transition-all"
+                                className="w-full pl-11 pr-5 py-4 bg-slate-50/50 border border-slate-100 focus:ring-8 focus:ring-emerald-600/5 focus:border-emerald-500 focus:bg-white rounded-2xl text-sm font-black placeholder:text-slate-400 transition-all outline-none"
                                 placeholder={creatable ? "Search or type new name..." : "Filter options..."}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -154,34 +157,34 @@ export default function SearchableSelect({
                     </div>
 
                     {/* Options List */}
-                    <div className="max-h-[380px] overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                    <div className="max-h-[384px] overflow-y-auto px-1 space-y-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 transition-colors">
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map((option) => (
                                 <button
                                     key={option.id}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all group/opt ${option.id === value
-                                        ? 'bg-[var(--color-cashcrow-primary)]/10 text-[var(--color-cashcrow-primary)] shadow-sm'
+                                    className={`w-full flex items-center gap-4 px-3 py-3 rounded-2xl text-left transition-all group/opt ${option.id === value
+                                        ? 'bg-emerald-50 text-emerald-700 shadow-sm'
                                         : 'hover:bg-slate-50 text-slate-700 active:bg-slate-100'
                                         }`}
                                 >
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover/opt:scale-105">
+                                    <div className={`size-11 rounded-2xl bg-white border border-slate-100 overflow-hidden flex items-center justify-center shrink-0 shadow-sm transition-all group-hover/opt:scale-105 ${option.id === value ? 'ring-4 ring-emerald-600/10' : ''}`}>
                                         {'image_url' in option && option.image_url ? (
                                             <img src={option.image_url} alt={option.name} className="w-full h-full object-cover" />
                                         ) : (
-                                            <Package className={`w-5 h-5 ${option.id === value ? 'text-[var(--color-cashcrow-primary)]' : 'text-slate-300'}`} />
+                                            <Package className={`size-5 transition-colors ${option.id === value ? 'text-emerald-600' : 'text-slate-300'}`} />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0 pr-2">
-                                        <p className={`text-sm font-black transition-colors break-words ${option.id === value ? 'text-[var(--color-cashcrow-primary)]' : 'text-slate-900'}`}>{option.name}</p>
+                                        <p className={`text-sm font-black transition-colors break-words ${option.id === value ? 'text-emerald-900' : 'text-slate-900'}`}>{option.name}</p>
                                         {'sub' in option && option.sub && (
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5 break-words">{option.sub}</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5 break-words opacity-70">{option.sub}</p>
                                         )}
                                     </div>
                                     {option.id === value && (
-                                        <div className="size-6 rounded-full bg-[var(--color-cashcrow-primary)] flex items-center justify-center shadow-lg shadow-[var(--color-cashcrow-primary)]/20 animate-in zoom-in duration-300">
-                                            <Check className="w-3.5 h-3.5 text-white" />
+                                        <div className="size-7 rounded-full bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/30 animate-in zoom-in duration-500">
+                                            <Check className="size-4 text-white" />
                                         </div>
                                     )}
                                 </button>
@@ -190,21 +193,24 @@ export default function SearchableSelect({
                             <button
                                 type="button"
                                 onClick={() => handleSelect({ id: search, name: search })}
-                                className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 rounded-xl transition-all group"
+                                className="w-full flex items-center gap-4 p-5 hover:bg-amber-50/50 rounded-[2rem] border border-transparent hover:border-amber-100 transition-all group"
                             >
-                                <div className="size-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shrink-0">
-                                    <Plus className="size-5" />
+                                <div className="size-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shrink-0 group-hover:scale-110 transition-transform">
+                                    <Plus className="size-6" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-sm font-black text-slate-900">Add &quot;{search}&quot;</p>
-                                    <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-0.5">Custom Entry</p>
+                                    <p className="text-sm font-black text-slate-900 tracking-tight">Add &quot;{search}&quot;</p>
+                                    <p className="text-[10px] text-amber-500 font-black uppercase tracking-widest mt-1">Initialize as New Provider</p>
                                 </div>
                             </button>
                         ) : (
-                            <div className="p-10 text-center bg-slate-50/50 rounded-2xl mx-1 my-1">
-                                <Search className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest leading-loose">
-                                    No results found
+                            <div className="py-16 px-10 text-center bg-slate-50/50 rounded-[2rem] mx-1 my-1 border border-slate-100/50">
+                                <div className="size-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-slate-100">
+                                    <Search className="size-8 text-slate-200" />
+                                </div>
+                                <h4 className="text-sm font-black text-slate-800 mb-2 uppercase tracking-tight">No results matched</h4>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-loose max-w-[200px] mx-auto">
+                                    Try adjusting your search filters or add a new entry
                                 </p>
                             </div>
                         )}

@@ -43,12 +43,14 @@ export const fetchProductById = cache(async (id: string) => {
         .from('products')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
     if (error) {
         console.error("Fetch product detail error:", error)
         return null
     }
+
+    if (!data) return null
 
     return {
         ...data,

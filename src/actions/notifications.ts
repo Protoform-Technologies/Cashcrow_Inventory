@@ -47,6 +47,7 @@ export async function getNotifications(userRole: string, userId: string) {
         .from('notifications')
         .select('*')
         .or(`target_role.eq.ALL,target_role.eq.${role},user_id.eq.${userId}`)
+        .eq('is_read', false)
         .order('created_at', { ascending: false })
         .limit(20)
 

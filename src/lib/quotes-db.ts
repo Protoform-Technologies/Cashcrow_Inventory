@@ -70,6 +70,7 @@ export async function dbCreateQuote(quoteData: {
     notes: string
     status: QuoteStatus
     request_id?: string
+    details?: any
 }) {
     const supabase = getSupabaseAdmin()
     const requestId = quoteData.request_id || `RFQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
@@ -80,7 +81,10 @@ export async function dbCreateQuote(quoteData: {
             ...quoteData,
             status: quoteData.status || QuoteStatus.PENDING,
             request_id: requestId,
-            total_amount: quoteData.total_amount || 0
+            total_amount: quoteData.total_amount || 0,
+            // If details is provided, we store it in notes as JSON for now to avoid schema breakage
+            // unless we are sure the details column exists.
+            notes: quoteData.details ? JSON.stringify(quoteData.details) : quoteData.notes
         }])
         .select()
 
@@ -116,16 +120,18 @@ export async function dbUpdateQuoteStatus(id: string, status: QuoteStatus) {
     return data ? data[0] : null
 }
 
-export async function dbGetNextRequestId() {
+export async function dbGetNextRequestId(prefix: string = 'RFQ') {
     const supabase = await createServerSupabaseClient()
     const now = new Date()
     const year = now.getFullYear()
     const monthString = (now.getMonth() + 1).toString().padStart(2, '0')
     const monthStart = new Date(year, now.getMonth(), 1).toISOString()
     
+    // Count quotes with the same prefix for this month
     const { count, error } = await supabase
         .from('quotes')
         .select('*', { count: 'exact', head: true })
+        .ilike('request_id', `${prefix}-${year}-${monthString}-%`)
         .gte('created_at', monthStart)
 
     if (error) {
@@ -136,5 +142,5 @@ export async function dbGetNextRequestId() {
     const nextSerial = (count || 0) + 1
     const serialString = nextSerial.toString().padStart(4, '0')
     
-    return `RFQ-${year}-${monthString}-${serialString}`
+    return `${prefix}-${year}-${monthString}-${serialString}`
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
 import {
@@ -13,6 +13,7 @@ import {
 
 export async function addProduct(formData: FormData) {
     const supabase = await createServerSupabaseClient()
+    const adminClient = getSupabaseAdmin()
 
     // 1. Get file and upload to bucket if it exists (Logic stays in Action)
     const file = formData.get('photo') as File | null;
@@ -23,7 +24,7 @@ export async function addProduct(formData: FormData) {
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await adminClient.storage
             .from('products')
             .upload(filePath, file, {
                 cacheControl: '3600',
@@ -31,7 +32,7 @@ export async function addProduct(formData: FormData) {
             });
 
         if (!uploadError) {
-            const { data: publicUrlData } = supabase.storage
+            const { data: publicUrlData } = adminClient.storage
                 .from('products')
                 .getPublicUrl(filePath);
             image_url = publicUrlData.publicUrl;
@@ -46,7 +47,7 @@ export async function addProduct(formData: FormData) {
         const fileExt = dataSheetFile.name.split('.').pop();
         const fileName = `ds_${Math.random().toString(36).substring(2, 10)}_${Date.now()}.${fileExt}`;
 
-        const { error: dsError } = await supabase.storage
+        const { error: dsError } = await adminClient.storage
             .from('data_sheets')
             .upload(fileName, dataSheetFile, {
                 cacheControl: '3600',
@@ -54,7 +55,7 @@ export async function addProduct(formData: FormData) {
             });
 
         if (!dsError) {
-            const { data: dsUrlData } = supabase.storage
+            const { data: dsUrlData } = adminClient.storage
                 .from('data_sheets')
                 .getPublicUrl(fileName);
             data_sheet_url = dsUrlData.publicUrl;
@@ -69,6 +70,29 @@ export async function addProduct(formData: FormData) {
         const vendorsStr = formData.get('vendors') as string;
         if (vendorsStr) vendors = JSON.parse(vendorsStr);
     } catch (e) { /* ignore parse error */ }
+
+    // --- AUTO-CREATE SUPPLIERS ---
+    if (vendors.length > 0) {
+        const vendorNames = vendors.map(v => v.name);
+        const { data: existingSuppliers } = await supabase
+            .from('suppliers')
+            .select('company_name')
+            .in('company_name', vendorNames);
+            
+        const existingNames = new Set(existingSuppliers?.map(s => s.company_name) || []);
+        const newSuppliers = vendors
+            .filter(v => !existingNames.has(v.name))
+            .map(v => ({ 
+                company_name: v.name,
+                payment_terms: 'Prepaid',
+                category: 'GENERAL'
+            }));
+
+        if (newSuppliers.length > 0) {
+            const uniqueNewSuppliers = Array.from(new Map(newSuppliers.map(item => [item.company_name, item])).values());
+            await adminClient.from('suppliers').insert(uniqueNewSuppliers);
+        }
+    }
 
     // 2. Call LIB for pure DB insert
     const { error: insertError } = await createProduct({
@@ -112,6 +136,7 @@ export async function addProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
     const supabase = await createServerSupabaseClient()
+    const adminClient = getSupabaseAdmin()
 
     // 1. Storage logic (Stays in Action)
     const file = formData.get('photo') as File | null;
@@ -122,7 +147,7 @@ export async function updateProduct(id: string, formData: FormData) {
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await adminClient.storage
             .from('products')
             .upload(filePath, file, {
                 cacheControl: '3600',
@@ -134,7 +159,7 @@ export async function updateProduct(id: string, formData: FormData) {
             return { error: 'Failed to upload photo.' }
         }
 
-        const { data: publicUrlData } = supabase.storage
+        const { data: publicUrlData } = adminClient.storage
             .from('products')
             .getPublicUrl(filePath);
 
@@ -149,7 +174,7 @@ export async function updateProduct(id: string, formData: FormData) {
         const fileExt = dataSheetFile.name.split('.').pop();
         const fileName = `ds_${Math.random().toString(36).substring(2, 10)}_${Date.now()}.${fileExt}`;
 
-        const { error: dsError } = await supabase.storage
+        const { error: dsError } = await adminClient.storage
             .from('data_sheets')
             .upload(fileName, dataSheetFile, {
                 cacheControl: '3600',
@@ -157,7 +182,7 @@ export async function updateProduct(id: string, formData: FormData) {
             });
 
         if (!dsError) {
-            const { data: dsUrlData } = supabase.storage
+            const { data: dsUrlData } = adminClient.storage
                 .from('data_sheets')
                 .getPublicUrl(fileName);
             data_sheet_url = dsUrlData.publicUrl;
@@ -197,6 +222,29 @@ export async function updateProduct(id: string, formData: FormData) {
         try {
             updateData.vendors = JSON.parse(formData.get('vendors') as string);
         } catch (e) { /* ignore parse error */ }
+    }
+
+    // --- AUTO-CREATE SUPPLIERS ---
+    if (updateData.vendors && updateData.vendors.length > 0) {
+        const vendorNames = updateData.vendors.map((v: any) => v.name);
+        const { data: existingSuppliers } = await supabase
+            .from('suppliers')
+            .select('company_name')
+            .in('company_name', vendorNames);
+            
+        const existingNames = new Set(existingSuppliers?.map(s => s.company_name) || []);
+        const newSuppliers = updateData.vendors
+            .filter((v: any) => !existingNames.has(v.name))
+            .map((v: any) => ({ 
+                company_name: v.name,
+                payment_terms: 'Prepaid',
+                category: 'GENERAL'
+            }));
+
+        if (newSuppliers.length > 0) {
+            const uniqueNewSuppliers = Array.from(new Map(newSuppliers.map((item: any) => [item.company_name, item])).values());
+            await adminClient.from('suppliers').insert(uniqueNewSuppliers);
+        }
     }
 
     const { error: updateError } = await updateProductById(id, updateData);

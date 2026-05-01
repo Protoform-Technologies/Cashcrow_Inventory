@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react"
 import { updateProduct } from "@/actions/products"
-import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2, Loader2 } from "lucide-react"
+import { getAllSupplierNames } from "@/actions/suppliers"
+import { PlusCircle, Image as ImageIcon, CheckCircle2, AlertCircle, Store, Trash2, Loader2, Info, MapPin, BarChart3, StickyNote, ScanBarcode, HelpCircle, Globe } from "lucide-react"
 import { toast } from "sonner"
 
 interface Vendor {
+    mode?: 'online' | 'offline'
     name: string
     fund: string
     link: string
@@ -36,12 +38,20 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(product.image_url || null)
 
-    const [vendors, setVendors] = useState<Vendor[]>(product.vendors || [{ name: '', fund: '', link: '' }])
+    const [vendors, setVendors] = useState<Vendor[]>(product.vendors?.length ? product.vendors.map(v => ({...v, mode: v.mode || 'online'})) : [{ mode: 'online', name: '', fund: '', link: '' }])
+
+    const [supplierNames, setSupplierNames] = useState<string[]>([])
 
     useEffect(() => {
         if (product.vendors && product.vendors.length > 0) {
-            setVendors(product.vendors)
+            setVendors(product.vendors.map(v => ({...v, mode: v.mode || 'online'})))
         }
+
+        const fetchSuppliers = async () => {
+            const names = await getAllSupplierNames()
+            setSupplierNames(names)
+        }
+        fetchSuppliers()
     }, [product.vendors])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +66,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
     }
 
     const addVendor = () => {
-        setVendors([...vendors, { name: '', fund: '', link: '' }])
+        setVendors([...vendors, { mode: 'online', name: '', fund: '', link: '' }])
     }
 
     const removeVendor = (index: number) => {
@@ -65,7 +75,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
         setVendors(newVendors)
     }
 
-    const updateVendor = (index: number, field: keyof Vendor, value: string) => {
+    const updateVendor = (index: number, field: keyof Vendor, value: any) => {
         const newVendors = [...vendors]
         newVendors[index][field] = value
         setVendors(newVendors)
@@ -97,7 +107,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
 
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">image</span>
+                    <ImageIcon className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Product Photo</h3>
                 </div>
                 <div className="p-6">
@@ -109,19 +119,19 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                 <ImageIcon className="w-8 h-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
                             )}
                             <input
+                                id="photo_upload"
                                 type="file"
                                 name="photo"
                                 accept="image/*"
                                 onChange={handleImageChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                className="hidden"
                             />
                         </div>
                         <div className="flex-1">
                             <h4 className="font-bold text-slate-800 text-sm mb-1">Update Photo</h4>
                             <p className="text-slate-500 text-xs mb-3">Upload a clear photo of the product. PNG, JPG up to 5MB.</p>
-                            <label className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer inline-block">
+                            <label htmlFor="photo_upload" className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors cursor-pointer inline-block">
                                 Browse Files
-                                <input type="file" name="photo" accept="image/*" onChange={handleImageChange} className="hidden" />
                             </label>
                         </div>
                     </div>
@@ -131,7 +141,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
             {/* Section 1: General Info */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">info</span>
+                    <Info className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">General Information</h3>
                 </div>
                 <div className="p-6">
@@ -162,7 +172,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                     placeholder="Scan or enter code" 
                                     type="text" 
                                 />
-                                <span className="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 cursor-pointer hover:text-[var(--color-cashcrow-primary)]">barcode_scanner</span>
+                                <ScanBarcode className="absolute right-3 top-2.5 text-slate-400 cursor-pointer hover:text-[var(--color-cashcrow-primary)] w-5 h-5" />
                             </div>
                         </div>
                         <div className="col-span-2 md:col-span-1">
@@ -190,7 +200,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                 {/* Section 2: Storage Location */}
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">location_on</span>
+                        <MapPin className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Storage Location</h3>
                     </div>
                     <div className="p-6 space-y-5">
@@ -226,7 +236,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                 {/* Section 3: Inventory Details */}
                 <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                     <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">inventory</span>
+                        <BarChart3 className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Inventory Details</h3>
                     </div>
                     <div className="p-6 space-y-5">
@@ -247,7 +257,9 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                         <div>
                             <label className="flex items-center gap-1.5 text-xs font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                 Min. Stock Level (Alert)<span className="text-red-500 ml-1 font-bold">*</span>
-                                <span className="material-symbols-outlined text-[14px] text-slate-400 cursor-help" title="System will alert you when stock falls below this number">help</span>
+                                <span title="System will alert you when stock falls below this number">
+                                    <HelpCircle className="w-4 h-4 text-slate-400 cursor-help" />
+                                </span>
                             </label>
                             <input 
                                 required 
@@ -292,8 +304,27 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
+                                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">Mode</label>
+                                    <div className="flex bg-white rounded-lg p-1 border border-slate-200">
+                                        <button
+                                            type="button"
+                                            onClick={() => updateVendor(index, 'mode', 'online')}
+                                            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-[10px] font-bold transition-all ${vendor.mode === 'online' ? 'bg-[var(--color-cashcrow-primary)] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <Globe className="w-3 h-3" /> Online
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => updateVendor(index, 'mode', 'offline')}
+                                            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-[10px] font-bold transition-all ${vendor.mode === 'offline' ? 'bg-[var(--color-cashcrow-primary)] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            <MapPin className="w-3 h-3" /> Offline
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-1">
                                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                         Vendor Name
                                     </label>
@@ -303,7 +334,13 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                         className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
                                         placeholder="e.g. Thermo Fisher"
                                         type="text"
+                                        list="supplier-names"
                                     />
+                                    <datalist id="supplier-names">
+                                        {supplierNames.map(name => (
+                                            <option key={name} value={name} />
+                                        ))}
+                                    </datalist>
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
@@ -317,14 +354,15 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                         type="text"
                                     />
                                 </div>
-                                <div>
+                                <div className={vendor.mode === 'offline' ? 'opacity-30 pointer-events-none' : ''}>
                                     <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-tight mb-1.5">
                                         Vendor Link
                                     </label>
                                     <input
                                         value={vendor.link}
                                         onChange={(e) => updateVendor(index, 'link', e.target.value)}
-                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
+                                        disabled={vendor.mode === 'offline'}
+                                        className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white disabled:bg-slate-50"
                                         placeholder="https://..."
                                         type="url"
                                     />
@@ -338,7 +376,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
             {/* Section 5: Notes */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm mb-8 overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[var(--color-cashcrow-primary)] text-[20px]">notes</span>
+                    <StickyNote className="w-5 h-5 text-[var(--color-cashcrow-primary)]" />
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">Additional Notes</h3>
                 </div>
                 <div className="p-6">
@@ -353,7 +391,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 mt-10">
+            <div className="flex flex-wrap items-center justify-end gap-3 mt-10">
                 <button 
                     type="button" 
                     className="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
@@ -364,7 +402,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                 <button 
                     type="submit" 
                     disabled={isLoading}
-                    className="px-10 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center gap-2.5 disabled:opacity-70"
+                    className="px-8 py-2.5 rounded-lg bg-[var(--color-cashcrow-primary)] text-white font-bold text-xs uppercase tracking-widest hover:bg-[var(--color-cashcrow-lightgreen)] transition-all shadow-lg shadow-[var(--color-cashcrow-primary)]/25 flex items-center justify-center gap-2.5 disabled:opacity-70 whitespace-nowrap"
                 >
                     {isLoading ? (
                         <>

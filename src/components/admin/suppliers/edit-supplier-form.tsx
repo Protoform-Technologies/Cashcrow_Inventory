@@ -89,6 +89,14 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
+        
+        // Special handling for phone to restrict to 10 digits numeric only
+        if (name === 'phone') {
+            const numericVal = value.replace(/\D/g, '').slice(0, 10)
+            setFormData(prev => ({ ...prev, [name]: numericVal }))
+            return
+        }
+
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
@@ -134,7 +142,6 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
                             onChange={handleChange}
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
                             placeholder="e.g. Global Logistics Inc."
-                            required
                             type="text"
                         />
                     </div>
@@ -196,8 +203,8 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
                             value={formData.phone}
                             onChange={handleChange}
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
-                            placeholder="+91 9876543210"
-                            type="tel"
+                            placeholder="9876543210"
+                            type="text"
                         />
                     </div>
                 </div>
@@ -219,7 +226,6 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
                             value={formData.category}
                             onChange={handleChange}
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
-                            required
                         >
                             <option value="" disabled>Select Category</option>
                             {categories.map((cat) => (
@@ -237,7 +243,6 @@ export default function EditSupplierForm({ supplier, onSuccess, onCancel }: Edit
                             value={formData.payment_terms}
                             onChange={handleChange}
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
-                            required
                         >
                             <option value="" disabled>Select Terms</option>
                             <option value="immediate">Immediate</option>

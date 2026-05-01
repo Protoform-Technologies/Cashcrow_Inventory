@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from "react"
+import { z } from "zod"
 import { addProduct } from "@/actions/products"
 import { 
     PlusCircle, 
@@ -15,7 +16,8 @@ import {
     Loader2,
     Trash2,
     Globe,
-    UserCircle2
+    UserCircle2,
+    X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -38,10 +40,47 @@ interface AddPartFormProps {
     onCancel?: () => void
 }
 
+const partSchema = z.object({
+    name: z.string().min(1, "Part name is required"),
+    sku: z.string().min(1, "SKU / Item Code is required"),
+    category: z.string().min(1, "Category is required"),
+    shelf_code: z.string().min(1, "Shelf code is required"),
+    box_code: z.string().min(1, "Box code is required"),
+    initial_quantity: z.number().nonnegative("Quantity cannot be negative"),
+    min_stock_level: z.number().nonnegative("Min stock cannot be negative"),
+    vendors: z.array(z.object({
+        mode: z.enum(['online', 'offline']),
+        name: z.string().min(1, "Shop name is required"),
+        fund: z.number().min(0.01, "Price must be at least 0.01"),
+        link: z.string().optional()
+    })).min(1, "At least one vendor is required")
+}).refine(data => {
+    const qty = data.initial_quantity ?? 0;
+    return data.min_stock_level <= qty;
+}, {
+    message: "Min stock level cannot be greater than quantity",
+    path: ["min_stock_level"]
+});
+
 export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [datasheetFileName, setDatasheetFileName] = useState<string | null>(null)
+    const datasheetInputRef = useRef<HTMLInputElement>(null)
+
+    const handleDatasheetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) setDatasheetFileName(file.name)
+        else setDatasheetFileName(null)
+    }
+
+    const clearDatasheet = () => {
+        setDatasheetFileName(null)
+        if (datasheetInputRef.current) {
+            datasheetInputRef.current.value = ''
+        }
+    }
 
     // Vendor Management State
     const [vendors, setVendors] = useState<VendorEntry[]>([
@@ -92,7 +131,33 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
         
         // Filter out empty vendors and format link
         const formattedVendors = vendors.filter(v => v.name.trim() !== '')
-        formData.append('vendors', JSON.stringify(formattedVendors))
+        
+        const payload = {
+            name: formData.get('name') as string,
+            sku: formData.get('sku') as string,
+            category: formData.get('category') as string,
+            shelf_code: formData.get('shelf_code') as string,
+            box_code: formData.get('box_code') as string,
+            initial_quantity: formData.get('initial_quantity') ? Number(formData.get('initial_quantity')) : 0,
+            min_stock_level: formData.get('min_stock_level') ? Number(formData.get('min_stock_level')) : 0,
+            vendors: formattedVendors.map(v => ({
+                mode: v.mode,
+                name: v.name,
+                fund: Number(v.fund),
+                link: v.link
+            }))
+        };
+
+        const resultZod = partSchema.safeParse(payload);
+        if (!resultZod.success) {
+            toast.error(resultZod.error.issues[0].message);
+            setIsLoading(false);
+            return;
+        }
+
+        formData.set('initial_quantity', resultZod.data.initial_quantity?.toString() || '0');
+        formData.set('min_stock_level', resultZod.data.min_stock_level.toString());
+        formData.append('vendors', JSON.stringify(resultZod.data.vendors));
 
         const result = await addProduct(formData)
 
@@ -102,6 +167,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
             toast.success('Part added successfully!')
             formRef.current?.reset()
             setImagePreview(null)
+            setDatasheetFileName(null)
             setVendors([{ mode: 'online', name: '', fund: '', link: '' }])
             if (onSuccess) {
                 setTimeout(() => onSuccess(), 1000)
@@ -122,24 +188,62 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                 
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                     {/* Photo Upload - Centered on mobile */}
-                    <div className="flex flex-col items-center md:items-start shrink-0">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Part Photo</label>
-                        <div className={`w-36 h-36 rounded-2xl border-2 border-dashed ${imagePreview ? 'border-[#265136]' : 'border-slate-200'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden group transition-all`}>
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="text-center">
-                                    <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                                    <span className="text-[10px] font-bold text-slate-400">UPLOAD</span>
+                    <div className="flex flex-col items-center md:items-start shrink-0 space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Part Photo</label>
+                            <div className={`w-36 h-36 rounded-2xl border-2 border-dashed ${imagePreview ? 'border-[#265136]' : 'border-slate-200'} bg-slate-50 flex flex-col items-center justify-center relative overflow-hidden group transition-all`}>
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="text-center">
+                                        <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                        <span className="text-[10px] font-bold text-slate-400">UPLOAD</span>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    name="photo"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="w-full">
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Datasheet</label>
+                            <div className="relative flex flex-col md:block gap-3">
+                                <div className="relative w-full md:w-36">
+                                    <Button 
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full md:w-36 h-10 border-dashed border-2 border-slate-200 text-slate-500 hover:border-[#265136] hover:text-[#265136] transition-all"
+                                    >
+                                        <span className="text-xs">Upload File</span>
+                                    </Button>
+                                    <input
+                                        ref={datasheetInputRef}
+                                        type="file"
+                                        name="data_sheet"
+                                        accept=".pdf,.doc,.docx,image/*"
+                                        onChange={handleDatasheetChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
                                 </div>
-                            )}
-                            <input
-                                type="file"
-                                name="photo"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            />
+                                {datasheetFileName && (
+                                    <div className="mt-3 md:mt-0 md:absolute md:left-[156px] md:top-1/2 md:-translate-y-1/2 flex items-center justify-between gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-full md:w-auto md:max-w-[200px]">
+                                        <span className="text-xs text-slate-600 truncate flex-1">{datasheetFileName}</span>
+                                        <button
+                                            type="button"
+                                            onClick={clearDatasheet}
+                                            className="text-slate-400 hover:text-rose-500 transition-colors shrink-0 flex items-center justify-center p-1"
+                                            title="Remove File"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -226,7 +330,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Quantity</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Quantity <span className="text-rose-500">*</span></label>
                             <input
                                 required
                                 name="initial_quantity"
@@ -237,7 +341,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Min Stock</label>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Min Stock <span className="text-rose-500">*</span></label>
                             <input
                                 required
                                 name="min_stock_level"
@@ -309,7 +413,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
 
                                 {/* Vendor Name */}
                                 <div className="md:col-span-1">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Shop Name</label>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Shop Name <span className="text-rose-500">*</span></label>
                                     <div className="relative">
                                         <UserCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                         <input
@@ -317,14 +421,20 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                                             onChange={(e) => updateVendor(index, { name: e.target.value })}
                                             className="w-full h-12 pl-11 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
                                             placeholder="Supplier name"
+                                            list={`suppliers-list-${index}`}
                                             required
                                         />
+                                        <datalist id={`suppliers-list-${index}`}>
+                                            {suppliers.map(sup => (
+                                                <option key={sup.id} value={sup.company_name} />
+                                            ))}
+                                        </datalist>
                                     </div>
                                 </div>
 
                                 {/* MRP / Amount */}
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">MRP / Amount</label>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">MRP / Amount <span className="text-rose-500">*</span></label>
                                     <div className="relative">
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
                                         <input
@@ -334,6 +444,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                                             placeholder="0.00"
                                             type="number"
                                             step="0.01"
+                                            min="0.01"
                                             required
                                         />
                                     </div>

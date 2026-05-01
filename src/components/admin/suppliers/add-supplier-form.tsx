@@ -20,6 +20,8 @@ import { useRouter } from 'next/navigation'
 export default function AddSupplierForm() {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [phone, setPhone] = useState('')
+    const [upiMobile, setUpiMobile] = useState('')
     
     const [categories] = useState<string[]>([
         "Electronics", 
@@ -70,7 +72,6 @@ export default function AddSupplierForm() {
                             name="company_name"
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
                             placeholder="e.g. Global Logistics Inc."
-                            required
                             type="text"
                         />
                     </div>
@@ -123,9 +124,14 @@ export default function AddSupplierForm() {
                         </label>
                         <input
                             name="phone"
+                            value={phone}
+                            onInput={(e) => {
+                                const val = e.currentTarget.value.replace(/\D/g, '').slice(0, 10)
+                                setPhone(val)
+                            }}
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none"
-                            placeholder="+91 9876543210"
-                            type="tel"
+                            placeholder="9876543210"
+                            type="text"
                         />
                     </div>
                 </div>
@@ -145,7 +151,6 @@ export default function AddSupplierForm() {
                         <select
                             name="category"
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
-                            required
                             defaultValue=""
                         >
                             <option value="" disabled>Select Category</option>
@@ -162,7 +167,6 @@ export default function AddSupplierForm() {
                         <select
                             name="payment_terms"
                             className="w-full rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] px-4 py-3 transition-all outline-none appearance-none"
-                            required
                             defaultValue=""
                         >
                             <option value="" disabled>Select Terms</option>

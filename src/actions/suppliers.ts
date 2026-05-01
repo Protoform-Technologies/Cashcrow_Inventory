@@ -207,3 +207,17 @@ export async function getOrCreateSupplierByName(name: string) {
 
     return created.id
 }
+export async function getAllSupplierNames() {
+    const supabase = await createServerSupabaseClient()
+    const { data, error } = await supabase
+        .from('suppliers')
+        .select('company_name')
+        .order('company_name', { ascending: true })
+
+    if (error) {
+        console.error("Fetch supplier names error:", error)
+        return []
+    }
+
+    return data.map(s => s.company_name)
+}

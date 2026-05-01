@@ -70,7 +70,7 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
 
     const handleMarkAllRead = async () => {
         await markAllAsRead(userRole, userId)
-        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+        setNotifications([])
     }
 
     const handleDeleteNotif = async (id: string, e: React.MouseEvent) => {
@@ -282,7 +282,7 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
                                             </div>
                                             <button 
                                                 onClick={(e) => handleDeleteNotif(n.id, e)}
-                                                className="absolute top-4 right-4 p-1 rounded-full hover:bg-slate-200 opacity-0 group-hover:opacity-100 transition-all text-slate-400"
+                                                className="absolute top-4 right-4 p-1.5 rounded-full bg-rose-50 hover:bg-rose-100 opacity-0 group-hover:opacity-100 transition-all text-rose-500"
                                             >
                                                 <X size={12} />
                                             </button>

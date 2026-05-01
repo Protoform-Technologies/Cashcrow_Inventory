@@ -3,6 +3,7 @@ import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'
 import { getSuppliers } from '@/actions/suppliers'
 import { getRecentQuotes } from '@/actions/quotes'
+import { getMembers } from '@/actions/members'
 import RequestQuoteForm from '@/components/admin/quotes/request-quote-form'
 import DashboardLayout from '@/components/shared/dashboard/layout'
 
@@ -14,10 +15,11 @@ export const metadata: Metadata = {
 export default async function RequestQuotePage() {
     const profile = await getAdminProfileOrRedirect()
 
-    const [products, suppliersData, recentQuotes] = await Promise.all([
+    const [products, suppliersData, recentQuotes, members] = await Promise.all([
         getProductsForDropdown(),
         getSuppliers(1, 100),
-        getRecentQuotes()
+        getRecentQuotes(),
+        getMembers()
     ])
 
     const suppliers = suppliersData.suppliers || []
@@ -35,6 +37,7 @@ export default async function RequestQuotePage() {
                 <RequestQuoteForm
                     products={products}
                     suppliers={suppliers}
+                    members={members}
                     initialRecentQuotes={recentQuotes}
                 />
             </div>

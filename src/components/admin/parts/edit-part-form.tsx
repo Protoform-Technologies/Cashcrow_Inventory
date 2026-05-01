@@ -2,15 +2,16 @@
 
 import { useState, useRef, useEffect } from "react"
 import { updateProduct } from "@/actions/products"
-import { 
-    Save, 
-    Image as ImageIcon, 
-    CheckCircle2, 
-    AlertCircle, 
-    Store, 
-    Info, 
-    MapPin, 
-    BarChart3, 
+import { getAllSupplierNames } from "@/actions/suppliers"
+import {
+    Save,
+    Image as ImageIcon,
+    CheckCircle2,
+    AlertCircle,
+    Store,
+    Info,
+    MapPin,
+    BarChart3,
     StickyNote,
     Loader2,
     Trash2,
@@ -56,16 +57,26 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
 
     // Vendor Management State (Initialized from part.vendors)
     const [vendors, setVendors] = useState<Vendor[]>(
-        (part.vendors && part.vendors.length > 0) 
-            ? part.vendors.map(v => ({ ...v, mode: v.mode || 'online' })) 
+        (part.vendors && part.vendors.length > 0)
+            ? part.vendors.map(v => ({ ...v, mode: v.mode || 'online' }))
             : [{ mode: 'online', name: '', fund: '', link: '' }]
     )
 
+    const [supplierNames, setSupplierNames] = useState<string[]>([])
+
+    useEffect(() => {
+        const fetchSuppliers = async () => {
+            const names = await getAllSupplierNames()
+            setSupplierNames(names)
+        }
+        fetchSuppliers()
+    }, [])
+
     const categories = [
-        "Electronics", 
-        "Hardware", 
-        "Consumables", 
-        "Lab Equipment", 
+        "Electronics",
+        "Hardware",
+        "Consumables",
+        "Lab Equipment",
         "IT Services",
         "Office Supplies",
         "Manufacturing",
@@ -103,7 +114,7 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
 
         const formData = new FormData(e.currentTarget)
         formData.append('existing_image_url', part.image_url || '')
-        
+
         // Filter out empty vendors and parse current state
         const formattedVendors = vendors.filter(v => v.name.trim() !== '')
         formData.append('vendors', JSON.stringify(formattedVendors))
@@ -130,7 +141,7 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
                     <Info className="w-5 h-5 text-[#265136]" />
                     <h3 className="font-bold text-slate-800">General Information</h3>
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                     {/* Photo Update - Centered on mobile */}
                     <div className="flex flex-col items-center md:items-start shrink-0">
@@ -334,8 +345,14 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
                                             onChange={(e) => updateVendor(index, { name: e.target.value })}
                                             className="w-full h-12 pl-11 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
                                             placeholder="Supplier name"
+                                            list={`suppliers-list-${index}`}
                                             required
                                         />
+                                        <datalist id={`suppliers-list-${index}`}>
+                                            {(supplierNames.length > 0 ? supplierNames : (suppliers || []).map(s => s.company_name)).map(name => (
+                                                <option key={name} value={name} />
+                                            ))}
+                                        </datalist>
                                     </div>
                                 </div>
 
@@ -394,7 +411,7 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
 
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-8 border-t border-slate-100">
-                <Button 
+                <Button
                     type="button"
                     variant="outline"
                     onClick={onCancel}
@@ -402,7 +419,7 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
                 >
                     Cancel
                 </Button>
-                <Button 
+                <Button
                     type="submit"
                     disabled={isLoading}
                     className="w-full sm:w-auto bg-[#265136] hover:bg-[#1f422b] text-white h-12 px-10 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#265136]/10 transition-all active:scale-95 disabled:opacity-70"

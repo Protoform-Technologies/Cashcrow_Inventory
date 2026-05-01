@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protoform RFQ &mdash; {{rfqNumber}}</title>
+<style>
+    :root {
+      --primary: #111827;
+      --secondary: #265035;
+      --light-bg: #F8FAF9;
+      --border: #D9E2DD;
+      --text: #111827;
+      --muted: #4b5563;
+      --th-bg: #111827;
+      --th-color: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: #f3f4f6;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 16px auto;
+      background: #ffffff;
+      padding: 18mm 16mm 22mm 16mm;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    /* Header */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--primary);
+      margin-bottom: 18px;
+    }
+    .brand-block .brand-main {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .brand-block .brand-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .brand-block .brand-tagline {
+      margin-top: 6px;
+      font-size: 10.5px;
+      color: var(--secondary);
+      font-style: italic;
+    }
+    .doc-title-block {
+      text-align: right;
+    }
+    .doc-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1.5px;
+      margin: 0;
+    }
+    .doc-meta {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .doc-meta div { margin-top: 2px; }
+    .doc-meta strong { color: var(--text); }
+
+    /* Two-column cards */
+    .party-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .party-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .party-card .card-header {
+      background: var(--light-bg);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .party-card .card-body {
+      padding: 10px 12px;
+      font-size: 11.5px;
+    }
+    .party-card .name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+    .party-card .row {
+      display: flex;
+      gap: 6px;
+      padding: 2px 0;
+    }
+    .party-card .row .label {
+      width: 78px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .party-card .row .value {
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    /* Sections */
+    .block {
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .block-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: var(--primary);
+      padding: 7px 12px;
+      margin: 0 0 8px 0;
+      border-radius: 3px 3px 0 0;
+    }
+    .prose {
+      margin: 0;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-top: none;
+      background: #ffffff;
+      font-size: 12px;
+      color: var(--text);
+      min-height: 32px;
+    }
+    .declaration {
+      background: var(--light-bg);
+      font-style: italic;
+      color: var(--text);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .kv-table th, .kv-table td {
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      font-size: 11.5px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .kv-table th {
+      background: var(--light-bg);
+      color: var(--text);
+      font-weight: 600;
+      width: 22%;
+    }
+    .kv-table th.total-label {
+      background: var(--primary);
+      color: #fff;
+    }
+    .kv-table td.total-value {
+      font-weight: 700;
+      background: var(--light-bg);
+      color: var(--primary);
+    }
+    .data-table thead th {
+      background: var(--th-bg);
+      color: var(--th-color);
+      font-size: 11px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      padding: 8px 8px;
+      text-align: left;
+      border: 1px solid var(--th-bg);
+    }
+    .data-table tbody td {
+      border: 1px solid var(--border);
+      padding: 7px 8px;
+      font-size: 11.5px;
+      vertical-align: top;
+    }
+    .data-table tbody tr:nth-child(even) td {
+      background: var(--light-bg);
+    }
+
+    /* Terms */
+    .terms-list {
+      margin: 0;
+      padding: 10px 12px 10px 30px;
+      border: 1px solid var(--border);
+      border-top: none;
+      background: #fff;
+    }
+    .terms-list li {
+      margin-bottom: 4px;
+      font-size: 11.5px;
+    }
+
+    /* Authorization */
+    .auth-block { page-break-inside: avoid; break-inside: avoid; }
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .auth-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 14px;
+      background: #ffffff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .auth-heading {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .auth-sub {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sign-area {
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      margin: 16px 0 10px 0;
+    }
+    .auth-line {
+      font-size: 11.5px;
+      padding: 3px 0;
+    }
+    .auth-line span {
+      color: var(--muted);
+      display: inline-block;
+      min-width: 90px;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 22px;
+      padding-top: 10px;
+      border-top: 2px solid var(--primary);
+      font-size: 10.5px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .doc-footer .footer-brand {
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+    .doc-footer .footer-meta {
+      margin-top: 2px;
+    }
+    .doc-footer .footer-confidential {
+      margin-top: 6px;
+      font-size: 9.5px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    @media print {
+      html, body { background: #ffffff; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+        padding: 14mm 14mm 18mm 14mm;
+      }
+      @page { size: A4; margin: 0; }
+      .block, .party-card, .auth-card, table, .auth-grid {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+    }
+    </style>
+</head>
+<body>
+  <div class="page">
+    <!-- 1. HEADER -->
+    <header class="doc-header">
+      <div class="brand-block">
+        <div class="brand-main">PROTOFORM</div>
+        <div class="brand-sub">TECHNOLOGIES Pvt Ltd</div>
+        <div class="brand-tagline" style="margin-top:6px;font-size:11.5px;color:var(--muted);font-style:italic;letter-spacing:0.5px;">Where ideas take form.</div>
+        <div class="brand-tagline">Engineering &middot; Hardware &middot; Software Solutions</div>
+      </div>
+      <div class="doc-title-block">
+        <h1 class="doc-title">REQUEST FOR QUOTATION</h1>
+        <div class="doc-meta">
+          <div><strong>RFQ No:</strong> {{rfqNumber}}</div>
+          <div><strong>RFQ Date:</strong> {{rfqDate}}</div>
+          <div><strong>Response Deadline:</strong> {{responseDeadline}}</div>
+          <div><strong>Vertical:</strong> {{selectedVertical}}</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. COMPANY & SUPPLIER -->
+    <section class="party-grid">
+      <div class="party-card">
+        <div class="card-header">Issued By &mdash; Buyer</div>
+        <div class="card-body">
+          <div class="name">Protoform Technologies Pvt Ltd</div>
+          <div class="row"><span class="label">GSTIN</span><span class="value">{{companyGstin}}</span></div>
+          <div class="row"><span class="label">Address</span><span class="value">{{companyAddress}}</span></div>
+          <div class="row"><span class="label">Email</span><span class="value">{{companyEmail}}</span></div>
+          <div class="row"><span class="label">Phone</span><span class="value">{{companyPhone}}</span></div>
+          <div class="row"><span class="label">Website</span><span class="value">{{companyWebsite}}</span></div>
+        </div>
+      </div>
+      <div class="party-card">
+        <div class="card-header">Addressed To &mdash; Supplier</div>
+        <div class="card-body">
+          <div class="name">{{supplierName}}</div>
+          <div class="row"><span class="label">Contact</span><span class="value">{{supplierContactPerson}}</span></div>
+          <div class="row"><span class="label">GSTIN</span><span class="value">{{supplierGstin}}</span></div>
+          <div class="row"><span class="label">Email</span><span class="value">{{supplierEmail}}</span></div>
+          <div class="row"><span class="label">Phone</span><span class="value">{{supplierPhone}}</span></div>
+          <div class="row"><span class="label">Address</span><span class="value">{{supplierAddress}}</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RFQ SUMMARY -->
+    <section class="block">
+      <h2 class="block-title">RFQ Summary</h2>
+      <table class="kv-table">
+        <tr><th>Project Name</th><td>{{projectName}}</td><th>RFQ Type</th><td>{{rfqType}}</td></tr>
+        <tr><th>Selected Vertical</th><td>{{selectedVertical}}</td><th>Priority</th><td>{{priority}}</td></tr>
+        <tr><th>Created By</th><td>{{createdBy}}</td><th>Department</th><td>{{department}}</td></tr>
+        <tr><th>Response Deadline</th><td colspan="3">{{responseDeadline}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 4. SCOPE -->
+    <section class="block">
+      <h2 class="block-title">Scope of Requirement</h2>
+      <p class="prose">{{scopeOfRequirement}}</p>
+    </section>
+
+    <!-- 5. ITEM DETAILS -->
+    <section class="block">
+      <h2 class="block-title">Item Details</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:5%">Sl. No.</th>
+            <th style="width:16%">Item Name</th>
+            <th style="width:26%">Description</th>
+            <th style="width:13%">Category</th>
+            <th style="width:8%">Qty</th>
+            <th style="width:8%">Unit</th>
+            <th style="width:14%">Expected Delivery</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#items}}
+          <tr>
+            <td>{{slNo}}</td>
+            <td>{{itemName}}</td>
+            <td>{{itemDescription}}</td>
+            <td>{{itemCategory}}</td>
+            <td>{{quantity}}</td>
+            <td>{{unit}}</td>
+            <td>{{expectedDeliveryDate}}</td>
+          </tr>
+          {{/items}}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 6. TECHNICAL SPECS -->
+    <section class="block">
+      <h2 class="block-title">Technical Specifications</h2>
+      <table class="kv-table">
+        <tr><th>Material</th><td>{{material}}</td></tr>
+        <tr><th>Thickness / Rating / Capacity</th><td>{{thicknessOrRating}}</td></tr>
+        <tr><th>Dimensions</th><td>{{dimensions}}</td></tr>
+        <tr><th>Finish / Color / Coating</th><td>{{finish}}</td></tr>
+        <tr><th>Tolerance</th><td>{{tolerance}}</td></tr>
+        <tr><th>Required Standards / Certifications</th><td>{{requiredCertifications}}</td></tr>
+        <tr><th>Technical Notes</th><td>{{technicalNotes}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 7. COMMERCIAL -->
+    <section class="block">
+      <h2 class="block-title">Commercial Requirements</h2>
+      <table class="kv-table">
+        <tr><th>Unit Price</th><td>{{unitPrice}}</td><th>Total Price</th><td>{{totalPrice}}</td></tr>
+        <tr><th>GST %</th><td>{{gstPercentage}}</td><th>Freight Charges</th><td>{{freightCharges}}</td></tr>
+        <tr><th>Installation Charges</th><td>{{installationCharges}}</td><th>Payment Terms</th><td>{{paymentTerms}}</td></tr>
+        <tr><th>Quotation Validity</th><td>{{quoteValidity}}</td><th>Warranty Period</th><td>{{warrantyPeriod}}</td></tr>
+        <tr><th>Production Lead Time</th><td colspan="3">{{productionLeadTime}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 8. COST BREAKDOWN -->
+    <section class="block">
+      <h2 class="block-title">Cost Breakdown Required</h2>
+      <table class="kv-table">
+        <tr><th>Material Cost</th><td>{{materialCost}}</td><th>Labour / Fabrication Cost</th><td>{{labourCost}}</td></tr>
+        <tr><th>Assembly / Testing Cost</th><td>{{assemblyTestingCost}}</td><th>Packaging Cost</th><td>{{packagingCost}}</td></tr>
+        <tr><th>Logistics Cost</th><td>{{logisticsCost}}</td><th>Vendor Margin</th><td>{{vendorMargin}}</td></tr>
+        <tr><th>Other Charges</th><td>{{otherCharges}}</td><th class="total-label">Total Quote Value</th><td class="total-value">{{totalQuoteValue}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 9. DELIVERY -->
+    <section class="block">
+      <h2 class="block-title">Delivery & Logistics</h2>
+      <table class="kv-table">
+        <tr><th>Delivery Location</th><td colspan="3">{{deliveryLocation}}</td></tr>
+        <tr><th>Required Delivery Date</th><td>{{requiredDeliveryDate}}</td><th>Vendor Proposed Delivery Date</th><td>{{vendorProposedDeliveryDate}}</td></tr>
+        <tr><th>Packaging Requirements</th><td>{{packagingRequirements}}</td><th>Transport Responsibility</th><td>{{transportResponsibility}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 10. QUALITY -->
+    <section class="block">
+      <h2 class="block-title">Quality, Warranty & Compliance</h2>
+      <table class="kv-table">
+        <tr><th>Quality Assurance Process</th><td>{{qualityAssuranceProcess}}</td></tr>
+        <tr><th>Inspection Method</th><td>{{inspectionMethod}}</td></tr>
+        <tr><th>Warranty Terms</th><td>{{warrantyTerms}}</td></tr>
+        <tr><th>Replacement / Repair Terms</th><td>{{replacementTerms}}</td></tr>
+        <tr><th>Compliance Documents Required</th><td>{{complianceDocuments}}</td></tr>
+      </table>
+    </section>
+
+    <!-- 11. ATTACHMENTS -->
+    <section class="block">
+      <h2 class="block-title">Attachments / References</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:8%">Sl. No.</th>
+            <th style="width:34%">Document Name</th>
+            <th style="width:24%">Document Type</th>
+            <th style="width:34%">Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#attachments}}
+          <tr>
+            <td>{{slNo}}</td>
+            <td>{{documentName}}</td>
+            <td>{{documentType}}</td>
+            <td>{{remarks}}</td>
+          </tr>
+          {{/attachments}}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 12. TERMS -->
+    <section class="block">
+      <h2 class="block-title">Terms & Conditions</h2>
+      <ol class="terms-list">
+        <li>The quotation must clearly mention all applicable taxes.</li>
+        <li>Any deviation from the requested specifications must be clearly mentioned.</li>
+        <li>Protoform Technologies Pvt Ltd reserves the right to accept or reject any quotation without assigning any reason.</li>
+        <li>Submission of a quotation does not guarantee purchase order confirmation.</li>
+        <li>Final purchase decision will be based on price, quality, delivery timeline, vendor reliability, and technical compliance.</li>
+        <li>All supplied items or services must meet agreed technical specifications and quality standards.</li>
+        <li>Warranty and support terms must be clearly mentioned by the vendor.</li>
+        <li>Any hidden charges not mentioned in the quotation may not be accepted later.</li>
+      </ol>
+    </section>
+
+    <!-- 13. DECLARATION -->
+    <section class="block">
+      <h2 class="block-title">Declaration</h2>
+      <p class="prose declaration">
+        &ldquo;We request you to submit your quotation as per the above specifications and commercial requirements.
+        All details provided in the quotation must be accurate and complete. Any deviations, assumptions, or
+        exclusions must be clearly stated.&rdquo;
+      </p>
+    </section>
+
+    <!-- 14. AUTHORIZATION -->
+    <section class="block auth-block">
+      <h2 class="block-title">Authorization & Vendor Acknowledgement</h2>
+      <div class="auth-grid">
+        <div class="auth-card">
+          <div class="auth-heading">For Protoform Technologies Pvt Ltd</div>
+          <div class="auth-sub">Authorized Signatory</div>
+          <div class="sign-area"></div>
+          <div class="auth-line"><span>Name:</span> {{authorizedPersonName}}</div>
+          <div class="auth-line"><span>Designation:</span> {{authorizedPersonDesignation}}</div>
+          <div class="auth-line"><span>Date:</span> {{authorizationDate}}</div>
+        </div>
+        <div class="auth-card">
+          <div class="auth-heading">Vendor Acknowledgement</div>
+          <div class="auth-sub">Authorized Signatory</div>
+          <div class="sign-area"></div>
+          <div class="auth-line"><span>Name:</span></div>
+          <div class="auth-line"><span>Designation:</span></div>
+          <div class="auth-line"><span>Date:</span></div>
+          <div class="auth-line"><span>Company Seal:</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15. FOOTER -->
+    <footer class="doc-footer">
+      <div class="footer-brand">Protoform Technologies Pvt Ltd</div>
+      <div class="footer-meta">
+        Website: {{companyWebsite}} &nbsp;|&nbsp;
+        Email: {{companyEmail}} &nbsp;|&nbsp;
+        Phone: {{companyPhone}}
+      </div>
+      <div class="footer-confidential">
+        This document is confidential and issued for the sole purpose of inviting a quotation.
+        Unauthorized use, distribution, or reproduction is prohibited.
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

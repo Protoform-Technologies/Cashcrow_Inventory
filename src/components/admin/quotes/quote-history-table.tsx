@@ -65,8 +65,20 @@ export default function QuoteHistoryTable({ quotes, onStatusUpdate }: QuoteHisto
         }
     }
 
-    const handleDownload = (quote: any) => {
-        generateQuotePDF({
+    const handleDownload = async (quote: any) => {
+        let rfqDetails = null;
+        try {
+            rfqDetails = typeof quote.notes === 'string' ? JSON.parse(quote.notes) : quote.notes;
+        } catch (e) {
+            console.error("Failed to parse RFQ details:", e);
+        }
+
+        if (!rfqDetails) {
+            toast.error("Cannot generate PDF: RFQ data is missing or corrupt.");
+            return;
+        }
+
+        const promise = generateQuotePDF({
             requestId: quote.request_id || 'RFQ-TRACE',
             date: quote.created_at,
             productName: quote.products?.name || 'Item',
@@ -74,11 +86,21 @@ export default function QuoteHistoryTable({ quotes, onStatusUpdate }: QuoteHisto
             supplierName: quote.suppliers?.company_name || 'N/A',
             contactName: quote.suppliers?.contact_name,
             email: quote.suppliers?.email,
+            phone: quote.suppliers?.phone,
+            gstin: quote.suppliers?.gst_no,
+            address: quote.suppliers?.address,
             quantity: quote.quantity,
             totalAmount: quote.total_amount,
             expectedDate: quote.expected_date,
-            notes: quote.notes || ''
-        })
+            notes: rfqDetails.technicalSpecs?.notes || '',
+            details: rfqDetails
+        });
+
+        toast.promise(promise, {
+            loading: 'Generating Audit Report...',
+            success: 'Report downloaded successfully',
+            error: 'Failed to generate report'
+        });
     }
 
     return (
@@ -219,59 +241,66 @@ export default function QuoteHistoryTable({ quotes, onStatusUpdate }: QuoteHisto
             </div>
 
             {/* Mobile Separate Cards View */}
-            <div className="lg:hidden space-y-4 p-4 bg-slate-50/30 relative">
+            <div className="lg:hidden space-y-6 p-2 md:p-4 bg-slate-50/30 relative">
                 {paginatedQuotes.length > 0 ? (
                     paginatedQuotes.map((quote: any) => (
-                        <div key={quote.id} className={`p-4 bg-white rounded-2xl shadow-sm border border-slate-200/60 transition-all relative ${openDropdownId === quote.id ? 'z-[60] border-emerald-200 ring-4 ring-emerald-500/5' : 'z-auto'}`}>
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <div className="size-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">{quote.request_id}</p>
+                        <div key={quote.id} className={`p-5 bg-white rounded-2xl shadow-sm border border-slate-200/60 transition-all relative ${openDropdownId === quote.id ? 'z-[60] border-emerald-200 ring-8 ring-emerald-500/5' : 'z-auto'}`}>
+                            <div className="flex justify-between items-start gap-4 mb-6">
+                                <div className="space-y-2 flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="size-2 bg-emerald-500 rounded-full animate-pulse" />
+                                        <p className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em]">{quote.request_id || 'RFQ-TRACE'}</p>
                                     </div>
-                                    <p className="text-sm font-black text-slate-900 transition-colors uppercase leading-tight">
+                                    <p className="text-base font-black text-slate-900 transition-colors uppercase leading-tight">
                                         {quote.suppliers?.company_name || 'Anonymous Partner'}
                                     </p>
-                                    <p className="text-[9px] text-slate-400 font-bold tracking-tight uppercase">
+                                    <p className="text-[10px] text-slate-400 font-bold tracking-[0.15em] uppercase">
                                         {quote.products?.name || 'Item'}
                                     </p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] font-black text-slate-500 font-mono tracking-tighter">
+                                <div className="text-right shrink-0">
+                                    <p className="text-[11px] font-black text-slate-500 font-mono tracking-tighter bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
                                         {new Date(quote.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }).toUpperCase()}
                                     </p>
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4 py-3 border-y border-slate-100 mb-4">
-                                <div className="space-y-1">
+                            <div className="grid grid-cols-2 gap-6 py-5 border-y border-slate-100/80 mb-6">
+                                <div className="space-y-1.5 border-r border-slate-100 pr-4">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing Trace</p>
-                                    <p className="text-base font-black text-slate-900">
-                                        {quote.total_amount && quote.total_amount > 0 ? `₹${quote.total_amount}` : 'Nil'}
+                                    <p className="text-lg font-black text-slate-900 tracking-tight">
+                                        {quote.total_amount && quote.total_amount > 0 ? (
+                                            <span className="flex items-baseline gap-0.5">
+                                                <span className="text-xs text-slate-300">₹</span>
+                                                {quote.total_amount}
+                                            </span>
+                                        ) : 'Nil'}
                                     </p>
                                 </div>
-                                <div className="text-right space-y-1">
+                                <div className="text-right space-y-1.5 pl-4">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inventory Qty</p>
-                                    <p className="text-base font-black text-slate-900 uppercase">
-                                        {quote.quantity} <span className="text-[11px] text-slate-400 font-bold uppercase">Units</span>
+                                    <p className="text-lg font-black text-slate-900 uppercase tracking-tight">
+                                        {quote.quantity || 0} <span className="text-xs text-slate-400 font-bold">Units</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center bg-slate-50/80 p-3 rounded-xl border border-slate-100">
-                                <StatusDropdown 
-                                    quote={quote} 
-                                    updatingId={updatingId} 
-                                    onUpdate={handleStatusUpdate}
-                                    isOpen={openDropdownId === quote.id}
-                                    setIsOpen={(open) => setOpenDropdownId(open ? quote.id : null)}
-                                />
+                            <div className="flex flex-col xs:flex-row justify-between items-stretch xs:items-center gap-4">
+                                <div className="flex-1">
+                                    <StatusDropdown 
+                                        quote={quote} 
+                                        updatingId={updatingId} 
+                                        onUpdate={handleStatusUpdate}
+                                        isOpen={openDropdownId === quote.id}
+                                        setIsOpen={(open) => setOpenDropdownId(open ? quote.id : null)}
+                                    />
+                                </div>
                                 <button 
                                     onClick={() => handleDownload(quote)}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-emerald-600 bg-white border border-slate-200 shadow-sm transition-all active:scale-95 hover:border-emerald-200 active:bg-slate-50"
+                                    className="flex items-center justify-center gap-3 px-5 py-3 rounded-xl text-emerald-700 bg-emerald-50/50 border border-emerald-100 shadow-sm transition-all active:scale-95 hover:bg-emerald-100/50"
                                 >
-                                    <Download className="size-3.5" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest">PDF</span>
+                                    <Download className="size-4" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Audit Report</span>
                                 </button>
                             </div>
                         </div>

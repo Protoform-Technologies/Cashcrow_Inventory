@@ -55,9 +55,6 @@ export default function LogFilters({
                     </button>
                 )}
                 
-                <div className="p-2.5 bg-slate-50 border border-slate-100 text-slate-400 rounded-lg hidden md:block">
-                    <Filter className="w-4 h-4" />
-                </div>
             </div>
         </div>
     )

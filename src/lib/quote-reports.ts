@@ -15,6 +15,8 @@ export interface QuotePDFData {
     gstin?: string
     address?: string
     quantity: number | string
+    unit: string
+    category: string
     totalAmount: number | string
     expectedDate: string
     notes: string
@@ -29,7 +31,7 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
         // 2. Prepare Template Data
         const templateData: Record<string, string> = {
             rfqNumber: data.requestId,
-            rfqDate: new Date(data.date).toLocaleDateString(),
+            rfqDate: new Date(data.date).toLocaleDateString('en-IN'),
             responseDeadline: data.details.responseDeadline || 'N/A',
             selectedVertical: data.details.vertical === 'PF' ? 'Protoform' : 'Cashcrow',
             
@@ -50,6 +52,7 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             
             // Summary
             projectName: data.details.documentName || 'N/A',
+            projectDetails: data.details.projectDetails || 'N/A',
             rfqType: 'Standard Procurement',
             priority: data.details.priority,
             createdBy: data.details.createdBy || 'Authorized Agent',
@@ -68,7 +71,7 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             technicalNotes: data.details.technicalSpecs.notes || 'N/A',
             
             // Commercial
-            unitPrice: 'TBD', // Often filled by vendor
+            unitPrice: 'TBD',
             totalPrice: data.totalAmount.toString(),
             gstPercentage: data.details.gstPercentage.toString(),
             freightCharges: 'Extra as applicable',
@@ -102,10 +105,13 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             replacementTerms: data.details.quality.replacement || 'Within 7 days',
             complianceDocuments: 'Required',
             
+            // Reference
+            referenceLink: data.details.reference || 'N/A',
+
             // Authorization
             authorizedPersonName: data.details.createdBy || 'Procurement Head',
             authorizedPersonDesignation: 'Admin',
-            authorizationDate: new Date().toLocaleDateString()
+            authorizationDate: new Date().toLocaleDateString('en-IN')
         }
 
         // 3. Simple Placeholder Replacement
@@ -116,15 +122,15 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             finalHtml = finalHtml.replace(regex, safeValue)
         })
 
-        // Handle the items loop (simplified for now since we usually have 1 main item)
+        // Handle the items loop
         const itemHtml = `
             <tr>
                 <td>1</td>
                 <td>${data.productName}</td>
-                <td>${data.notes || 'N/A'}</td>
-                <td>SKU: ${data.sku}</td>
+                <td>${data.notes || 'N/A'} <br/><small>SKU: ${data.sku}</small></td>
+                <td>${data.category}</td>
                 <td>${data.quantity}</td>
-                <td>Units</td>
+                <td>${data.unit}</td>
                 <td>${data.expectedDate}</td>
             </tr>
         `
@@ -133,37 +139,68 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
         // Handle attachments loop
         finalHtml = finalHtml.replace(/{{#attachments}}[\s\S]*?{{\/attachments}}/, '<tr><td colspan="4">Refer to reference link below</td></tr>')
 
-        // 4. Render to PDF
-        // Note: For complex HTML, jspdf.html() is better but requires a DOM element.
-        // On client-side, we can use a hidden div.
-        const container = document.createElement('div')
-        container.style.width = '210mm'
-        container.style.position = 'absolute'
-        container.style.left = '-9999px'
-        container.innerHTML = finalHtml
-        document.body.appendChild(container)
+        // 4. Render to PDF using a more robust method
+        // We create a hidden iframe to render the full HTML correctly
+        const iframe = document.createElement('iframe')
+        iframe.style.position = 'fixed'
+        iframe.style.top = '0'
+        iframe.style.left = '0'
+        iframe.style.width = '210mm'
+        iframe.style.height = '1000mm' // Tall enough to avoid clipping
+        iframe.style.visibility = 'visible'
+        iframe.style.zIndex = '-1000'
+        document.body.appendChild(iframe)
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+        if (!iframeDoc) throw new Error('Could not create iframe document')
+
+        iframeDoc.open()
+        iframeDoc.write(finalHtml)
+        iframeDoc.close()
+
+        // Wait for images and styles to load
+        await new Promise((resolve) => {
+            if (iframeDoc.readyState === 'complete') {
+                setTimeout(() => resolve(true), 500) // Small extra delay for good measure
+            } else {
+                iframe.onload = () => setTimeout(() => resolve(true), 500)
+            }
+            // Fallback timeout
+            setTimeout(resolve, 3000)
+        })
 
         // Inject logo if Cashcrow
         if (data.details.vertical === 'CC') {
-            const logoImg = container.querySelector('img[alt="Cashcrow logo"]') as HTMLImageElement
+            const logoImg = iframeDoc.querySelector('img[alt="Cashcrow logo"]') as HTMLImageElement
             if (logoImg) logoImg.src = '/Cashcrow_Logo_Branding.png'
         }
 
         const doc = new jsPDF({
             orientation: 'p',
             unit: 'mm',
-            format: 'a4'
+            format: 'a4',
+            compress: true
         })
 
-        await doc.html(container, {
-            callback: function (doc) {
-                doc.save(`${data.requestId}_RFQ.pdf`)
-                document.body.removeChild(container)
-            },
+        const content = iframeDoc.body
+
+        await doc.html(content, {
             x: 0,
             y: 0,
             width: 210,
-            windowWidth: 794 // A4 width in px at 96dpi
+            windowWidth: 794,
+            autoPaging: 'text',
+            html2canvas: {
+                scale: 0.28, // 794px / 210mm ≈ 3.78, 1/3.78 ≈ 0.26. 0.28 is a safe scale for A4
+                useCORS: true,
+                logging: false,
+                letterRendering: true,
+                allowTaint: true
+            },
+            callback: function (doc) {
+                doc.save(`${data.requestId}_RFQ.pdf`)
+                document.body.removeChild(iframe)
+            }
         })
 
     } catch (error) {

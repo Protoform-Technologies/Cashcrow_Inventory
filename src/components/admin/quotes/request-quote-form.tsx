@@ -61,6 +61,7 @@ export default function RequestQuoteForm({
     const [selectedSupplierId, setSelectedSupplierId] = useState('')
     const [selectedSupplierName, setSelectedSupplierName] = useState('')
     const [quantity, setQuantity] = useState('')
+    const [unit, setUnit] = useState('Units')
     const [expectedDate, setExpectedDate] = useState('')
     const [estimatedTotal, setEstimatedTotal] = useState('')
     const [notes, setNotes] = useState('')
@@ -108,6 +109,27 @@ export default function RequestQuoteForm({
     const [requestId, setRequestId] = useState<string>('')
     const [recentQuotes, setRecentQuotes] = useState(initialRecentQuotes)
     const [isSaving, setIsSaving] = useState(false)
+
+    // Partner Patching State
+    const [supplierPatch, setSupplierPatch] = useState({
+        contact_name: '',
+        email: '',
+        gst_no: '',
+        address: ''
+    })
+
+    // Update patch when supplier selection changes
+    useEffect(() => {
+        const selected = suppliers.find(s => s.id === selectedSupplierId)
+        if (selected) {
+            setSupplierPatch({
+                contact_name: selected.contact_name || '',
+                email: selected.email || '',
+                gst_no: selected.gst_no || '',
+                address: selected.address || ''
+            })
+        }
+    }, [selectedSupplierId, suppliers])
 
     const refreshRequestId = async (vertical: string) => {
         const id = await getNextRequestId(vertical)
@@ -178,12 +200,14 @@ export default function RequestQuoteForm({
                     productName: selectedProductName,
                     sku: selectedProduct?.sku || 'N/A',
                     supplierName: selectedSupplierName || selectedSupplier?.company_name || 'N/A',
-                    contactName: selectedSupplier?.contact_name,
-                    email: selectedSupplier?.email,
+                    contactName: supplierPatch.contact_name || selectedSupplier?.contact_name,
+                    email: supplierPatch.email || selectedSupplier?.email,
                     phone: selectedSupplier?.phone,
-                    gstin: selectedSupplier?.gst_no,
-                    address: selectedSupplier?.address,
+                    gstin: supplierPatch.gst_no || selectedSupplier?.gst_no,
+                    address: supplierPatch.address || selectedSupplier?.address,
                     quantity: quantity,
+                    unit: unit,
+                    category: selectedProduct?.category || 'Hardware',
                     totalAmount: estimatedTotal || '0.00',
                     expectedDate: expectedDate,
                     notes: notes,
@@ -300,12 +324,16 @@ export default function RequestQuoteForm({
                     setSelectedSupplierName={setSelectedSupplierName}
                     quantity={quantity}
                     setQuantity={setQuantity}
+                    unit={unit}
+                    setUnit={setUnit}
                     expectedDate={expectedDate}
                     setExpectedDate={setExpectedDate}
                     estimatedTotal={estimatedTotal}
                     setEstimatedTotal={setEstimatedTotal}
                     notes={notes}
                     setNotes={setNotes}
+                    supplierPatch={supplierPatch}
+                    setSupplierPatch={setSupplierPatch}
                 />
 
                 {/* Final Action Section - Moved to Bottom */}

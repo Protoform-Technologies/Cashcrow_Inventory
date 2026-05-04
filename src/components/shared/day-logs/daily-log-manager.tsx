@@ -48,7 +48,22 @@ export default function DailyLogManager({ userId, userName, products, members, s
     const updateEntry = (id: string, field: keyof LogEntry, value: string | number) => {
         setEntries(prevEntries => prevEntries.map(entry => {
             if (entry.id === id) {
-                return { ...entry, [field]: value }
+                const updatedEntry = { ...entry, [field]: value }
+
+                // Stock Validation logic
+                if (updatedEntry.productId && updatedEntry.quantity > 0) {
+                    const product = products.find(p => p.id === updatedEntry.productId)
+                    const isOutbound = ['OUT', 'SCRAP', 'ADJUST'].includes(updatedEntry.transactionType)
+
+                    if (isOutbound && product && updatedEntry.quantity > product.quantity) {
+                        toast.error(`Logical Error: Only ${product.quantity} ${product.name} available. Adjusting to max.`, {
+                            id: `stock-warn-${id}` 
+                        })
+                        updatedEntry.quantity = product.quantity
+                    }
+                }
+
+                return updatedEntry
             }
             return entry
         }))
@@ -58,6 +73,19 @@ export default function DailyLogManager({ userId, userName, products, members, s
         const validEntries = entries.filter(e => e.productId && e.quantity > 0)
         if (validEntries.length === 0) {
             toast.error('Please include at least one valid inventory movement.')
+            return
+        }
+
+        // Validate stock levels for outbound transactions
+        const stockViolation = validEntries.find(e => {
+            const product = products.find(p => p.id === e.productId)
+            const isOutbound = ['OUT', 'SCRAP', 'ADJUST'].includes(e.transactionType)
+            return isOutbound && product && e.quantity > product.quantity
+        })
+
+        if (stockViolation) {
+            const product = products.find(p => p.id === stockViolation.productId)
+            toast.error(`Transaction for ${product?.name} exceeds available stock (${product?.quantity}).`)
             return
         }
 

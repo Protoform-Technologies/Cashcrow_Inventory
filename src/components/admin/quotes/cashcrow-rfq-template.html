@@ -19,7 +19,7 @@
     html, body {
       margin: 0; padding: 0;
       background: #f3f4f6;
-      color: var(--text);
+      color: #111827;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       font-size: 12px;
       line-height: 1.5;
@@ -46,7 +46,7 @@
       font-size: 28px;
       font-weight: 800;
       letter-spacing: 2px;
-      color: var(--primary);
+      color: #265035;
       line-height: 1;
     }
     .brand-block .brand-logo {
@@ -75,7 +75,7 @@
     .doc-title {
       font-size: 22px;
       font-weight: 800;
-      color: var(--primary);
+      color: #265035;
       letter-spacing: 1.5px;
       margin: 0;
     }
@@ -89,17 +89,20 @@
 
     /* Two-column cards */
     .party-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      display: table;
+      width: 100%;
+      border-spacing: 12px 0;
+      margin-left: -12px;
+      margin-right: -12px;
       margin-bottom: 18px;
     }
     .party-card {
+      display: table-cell;
+      width: 50%;
       border: 1px solid var(--border);
       border-radius: 4px;
       overflow: hidden;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      vertical-align: top;
     }
     .party-card .card-header {
       background: var(--light-bg);
@@ -148,7 +151,7 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       color: #ffffff;
-      background: var(--primary);
+      background: #265035;
       padding: 7px 12px;
       margin: 0 0 8px 0;
       border-radius: 3px 3px 0 0;
@@ -234,17 +237,20 @@
     /* Authorization */
     .auth-block { page-break-inside: avoid; break-inside: avoid; }
     .auth-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      display: table;
+      width: 100%;
+      border-spacing: 12px 0;
+      margin-left: -12px;
+      margin-right: -12px;
     }
     .auth-card {
+      display: table-cell;
+      width: 50%;
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: 12px 14px;
       background: #ffffff;
-      page-break-inside: avoid;
-      break-inside: avoid;
+      vertical-align: top;
     }
     .auth-heading {
       font-size: 12px;
@@ -370,6 +376,7 @@
       <h2 class="block-title">RFQ Summary</h2>
       <table class="kv-table">
         <tr><th>Project Name</th><td>{{projectName}}</td><th>RFQ Type</th><td>{{rfqType}}</td></tr>
+        <tr><th>Project Details</th><td colspan="3">{{projectDetails}}</td></tr>
         <tr><th>Selected Vertical</th><td>{{selectedVertical}}</td><th>Priority</th><td>{{priority}}</td></tr>
         <tr><th>Created By</th><td>{{createdBy}}</td><th>Department</th><td>{{department}}</td></tr>
         <tr><th>Response Deadline</th><td colspan="3">{{responseDeadline}}</td></tr>
@@ -493,6 +500,11 @@
             <td>{{remarks}}</td>
           </tr>
           {{/attachments}}
+          <tr>
+            <td>Ref</td>
+            <td colspan="2">Reference Links / Notes</td>
+            <td>{{referenceLink}}</td>
+          </tr>
         </tbody>
       </table>
     </section>

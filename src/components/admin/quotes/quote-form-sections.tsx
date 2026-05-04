@@ -20,12 +20,21 @@ interface QuoteEntryDetailsProps {
     setSelectedSupplierName: (name: string) => void
     quantity: string
     setQuantity: (q: string) => void
+    unit: string
+    setUnit: (u: string) => void
     expectedDate: string
     setExpectedDate: (d: string) => void
     estimatedTotal: string
     setEstimatedTotal: (t: string) => void
     notes: string
     setNotes: (n: string) => void
+    supplierPatch: {
+        contact_name: string
+        email: string
+        gst_no: string
+        address: string
+    }
+    setSupplierPatch: (patch: any) => void
 }
 
 export function QuoteEntryDetails({
@@ -42,33 +51,20 @@ export function QuoteEntryDetails({
     setSelectedSupplierName,
     quantity,
     setQuantity,
+    unit,
+    setUnit,
     expectedDate,
     setExpectedDate,
     estimatedTotal,
     setEstimatedTotal,
     notes,
-    setNotes
+    setNotes,
+    supplierPatch,
+    setSupplierPatch
 }: QuoteEntryDetailsProps) {
     const [isEditingSupplier, setIsEditingSupplier] = useState(false)
-    const [supplierFormData, setSupplierFormData] = useState({
-        contact_name: '',
-        email: '',
-        gst_no: '',
-        address: ''
-    })
 
     const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId)
-
-    useEffect(() => {
-        if (selectedSupplier) {
-            setSupplierFormData({
-                contact_name: selectedSupplier.contact_name || '',
-                email: selectedSupplier.email || '',
-                gst_no: selectedSupplier.gst_no || '',
-                address: selectedSupplier.address || ''
-            })
-        }
-    }, [selectedSupplierId, suppliers])
 
     const handleSupplierUpdate = async () => {
         if (!selectedSupplierId) return
@@ -78,10 +74,10 @@ export function QuoteEntryDetails({
 
         const formData = new FormData()
         formData.append('company_name', currentSupplier.company_name)
-        formData.append('contact_name', supplierFormData.contact_name)
-        formData.append('email', supplierFormData.email)
-        formData.append('gst_no', supplierFormData.gst_no)
-        formData.append('address', supplierFormData.address)
+        formData.append('contact_name', supplierPatch.contact_name)
+        formData.append('email', supplierPatch.email)
+        formData.append('gst_no', supplierPatch.gst_no)
+        formData.append('address', supplierPatch.address)
         
         try {
             const promise = updateSupplier(selectedSupplierId, formData)
@@ -143,27 +139,27 @@ export function QuoteEntryDetails({
                             key={v.value}
                             type="button"
                             onClick={() => updateDetails({ vertical: v.value as any })}
-                            className={`flex-1 py-4 md:py-6 px-4 rounded-2xl border-2 transition-all flex flex-row sm:flex-col items-center gap-4 sm:gap-3 relative group ${
+                            className={`flex-1 py-5 md:py-7 px-4 rounded-3xl border-2 transition-all flex flex-row sm:flex-col items-center gap-4 sm:gap-3 relative group ${
                                 details.vertical === v.value 
-                                ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 shadow-lg shadow-emerald-600/5 ring-4 ring-emerald-600/5' 
+                                ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 shadow-xl shadow-emerald-600/10 ring-4 ring-emerald-600/5' 
                                 : 'border-slate-100 bg-white text-slate-400 hover:border-slate-300 hover:bg-slate-50/30'
                             }`}
                         >
                             {details.vertical === v.value && (
-                                <div className="absolute top-2 right-2 md:top-3 md:right-3">
-                                    <div className="size-3 md:size-4 bg-emerald-600 rounded-full flex items-center justify-center">
-                                        <ShieldCheck className="size-2 md:size-2.5 text-white" />
+                                <div className="absolute top-3 right-3 md:top-4 md:right-4">
+                                    <div className="size-4 md:size-5 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+                                        <ShieldCheck className="size-2.5 md:size-3 text-white" />
                                     </div>
                                 </div>
                             )}
-                            <div className={`size-8 md:size-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+                            <div className={`size-10 md:size-12 rounded-2xl flex items-center justify-center transition-all shrink-0 shadow-sm ${
                                 details.vertical === v.value ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
                             }`}>
-                                <User className="size-4 md:size-5" />
+                                <User className="size-5 md:size-6" />
                             </div>
                             <div className="text-left sm:text-center">
-                                <span className="block text-[10px] md:text-xs font-black uppercase tracking-[0.15em] mb-0.5 md:mb-1">{v.label}</span>
-                                <span className="block text-[8px] md:text-[9px] font-bold opacity-60 uppercase tracking-tight leading-none">
+                                <span className="block text-[10px] md:text-xs font-black uppercase tracking-[0.2em] mb-1">{v.label}</span>
+                                <span className="block text-[8px] md:text-[9px] font-bold opacity-60 uppercase tracking-widest leading-none">
                                     {v.value === 'PF' ? 'Advanced Engineering' : 'Supply Chain Solutions'}
                                 </span>
                             </div>
@@ -248,8 +244,8 @@ export function QuoteEntryDetails({
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Contact Reference</label>
                                         <input 
                                             type="text"
-                                            value={supplierFormData.contact_name}
-                                            onChange={(e) => setSupplierFormData(prev => ({ ...prev, contact_name: e.target.value }))}
+                                            value={supplierPatch.contact_name}
+                                            onChange={(e) => setSupplierPatch((prev: any) => ({ ...prev, contact_name: e.target.value }))}
                                             className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all shadow-sm"
                                             placeholder="Enter contact person..."
                                         />
@@ -258,8 +254,8 @@ export function QuoteEntryDetails({
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Partner Email</label>
                                         <input 
                                             type="email"
-                                            value={supplierFormData.email}
-                                            onChange={(e) => setSupplierFormData(prev => ({ ...prev, email: e.target.value }))}
+                                            value={supplierPatch.email}
+                                            onChange={(e) => setSupplierPatch((prev: any) => ({ ...prev, email: e.target.value }))}
                                             className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all shadow-sm"
                                             placeholder="partner@company.com"
                                         />
@@ -268,8 +264,8 @@ export function QuoteEntryDetails({
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">GST Identification</label>
                                         <input 
                                             type="text"
-                                            value={supplierFormData.gst_no}
-                                            onChange={(e) => setSupplierFormData(prev => ({ ...prev, gst_no: e.target.value.toUpperCase() }))}
+                                            value={supplierPatch.gst_no}
+                                            onChange={(e) => setSupplierPatch((prev: any) => ({ ...prev, gst_no: e.target.value.toUpperCase() }))}
                                             className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-black tracking-[0.1em] outline-none focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all shadow-sm"
                                             placeholder="Enter GSTIN..."
                                         />
@@ -279,19 +275,21 @@ export function QuoteEntryDetails({
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Registered Address</label>
                                     <input 
                                         type="text"
-                                        value={supplierFormData.address}
-                                        onChange={(e) => setSupplierFormData(prev => ({ ...prev, address: e.target.value }))}
+                                        value={supplierPatch.address}
+                                        onChange={(e) => setSupplierPatch((prev: any) => ({ ...prev, address: e.target.value }))}
                                         className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all shadow-sm"
                                         placeholder="Full legal business address..."
                                     />
                                 </div>
-                                <div className="flex justify-end pt-4 border-t border-slate-100">
+                                <div className="flex justify-end pt-6 border-t border-slate-200/60">
                                     <button 
                                         type="button"
                                         onClick={handleSupplierUpdate}
-                                        className="bg-cashcrow-primary text-white text-[10px] font-black px-10 py-4 rounded-2xl uppercase tracking-[0.2em] hover:opacity-90 transition-all shadow-xl shadow-cashcrow-primary/20 active:scale-95 flex items-center gap-3"
+                                        className="bg-emerald-700 text-white text-[11px] font-black px-12 py-5 rounded-2xl uppercase tracking-[0.25em] hover:bg-emerald-800 transition-all shadow-xl shadow-emerald-700/20 active:scale-95 flex items-center gap-4 group"
                                     >
-                                        <ShieldCheck className="size-4" />
+                                        <div className="p-1.5 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                            <ShieldCheck className="size-4 text-emerald-100" />
+                                        </div>
                                         Sync with Master Registry
                                     </button>
                                 </div>
@@ -335,6 +333,35 @@ export function QuoteEntryDetails({
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Department</label>
+                            <select 
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none transition-all shadow-inner"
+                                value={details.department}
+                                onChange={(e) => updateDetails({ department: e.target.value })}
+                            >
+                                <option value="Operations">Operations</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Procurement">Procurement</option>
+                                <option value="Quality">Quality</option>
+                                <option value="Logistics">Logistics</option>
+                            </select>
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Priority Level</label>
+                            <select 
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none transition-all shadow-inner"
+                                value={details.priority}
+                                onChange={(e) => updateDetails({ priority: e.target.value as any })}
+                            >
+                                <option value="Low">Low Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="High">High Priority</option>
+                                <option value="Critical">Critical Priority</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Scope of Requirement</label>
                             <textarea 
                                 rows={3}
@@ -369,7 +396,7 @@ export function QuoteEntryDetails({
                     </h3>
                 </div>
                 <div className="p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                         <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Material</label>
                             <input 
@@ -381,10 +408,10 @@ export function QuoteEntryDetails({
                             />
                         </div>
                         <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Thickness / Rating</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Thickness</label>
                             <input 
                                 type="text"
-                                placeholder="5mm / 500W, etc."
+                                placeholder="5mm, etc."
                                 className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white shadow-inner"
                                 value={details.technicalSpecs.thickness}
                                 onChange={(e) => updateTechSpecs({ thickness: e.target.value })}
@@ -398,6 +425,26 @@ export function QuoteEntryDetails({
                                 className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white shadow-inner"
                                 value={details.technicalSpecs.dimensions}
                                 onChange={(e) => updateTechSpecs({ dimensions: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Finish / Color</label>
+                            <input 
+                                type="text"
+                                placeholder="Matte, RAL 9005, etc."
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white shadow-inner"
+                                value={details.technicalSpecs.finish}
+                                onChange={(e) => updateTechSpecs({ finish: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Tolerance</label>
+                            <input 
+                                type="text"
+                                placeholder="+/- 0.1mm, etc."
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white shadow-inner"
+                                value={details.technicalSpecs.tolerance}
+                                onChange={(e) => updateTechSpecs({ tolerance: e.target.value })}
                             />
                         </div>
                     </div>
@@ -437,7 +484,7 @@ export function QuoteEntryDetails({
                     </h3>
                 </div>
                 <div className="p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                         <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Required Qty</label>
                             <input 
@@ -449,6 +496,21 @@ export function QuoteEntryDetails({
                                 onChange={(e) => setQuantity(e.target.value)}
                                 onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                             />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Unit</label>
+                            <select 
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none transition-all shadow-inner"
+                                value={unit}
+                                onChange={(e) => setUnit(e.target.value)}
+                            >
+                                <option value="Units">Units</option>
+                                <option value="Pcs">Pcs</option>
+                                <option value="Kg">Kg</option>
+                                <option value="Mtrs">Mtrs</option>
+                                <option value="Sets">Sets</option>
+                                <option value="Nos">Nos</option>
+                            </select>
                         </div>
                         <div className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">GST %</label>
@@ -597,14 +659,28 @@ export function QuoteEntryDetails({
                         </div>
                     </div>
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Inspection Method</label>
-                        <textarea 
-                            rows={2}
-                            placeholder="Visual, Functional Testing, Sampling plan..."
-                            className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none resize-none transition-all shadow-inner"
-                            value={details.quality.inspection}
-                            onChange={(e) => updateQuality({ inspection: e.target.value })}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Inspection Method</label>
+                            <textarea 
+                                rows={2}
+                                placeholder="Visual, Functional Testing, Sampling plan..."
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none resize-none transition-all shadow-inner"
+                                value={details.quality.inspection}
+                                onChange={(e) => updateQuality({ inspection: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Replacement Terms</label>
+                            <textarea 
+                                rows={2}
+                                placeholder="Within 7 days of delivery, etc."
+                                className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 focus:ring-8 focus:ring-emerald-500/5 focus:border-emerald-500 focus:bg-white outline-none resize-none transition-all shadow-inner"
+                                value={details.quality.replacement}
+                                onChange={(e) => updateQuality({ replacement: e.target.value })}
+                            />
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -700,12 +776,12 @@ export function QuoteFinalSummary({
                             type="button"
                             onClick={onSave}
                             disabled={isSaving || disabled}
-                            className="w-full sm:w-auto bg-cashcrow-lightgreen hover:opacity-90 text-white font-black px-10 py-5 rounded-2xl flex items-center justify-center gap-4 hover:scale-[1.05] active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100 text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-cashcrow-lightgreen/20 group/btn"
+                            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black px-12 py-5 rounded-2xl flex items-center justify-center gap-5 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100 text-[11px] uppercase tracking-[0.25em] shadow-2xl shadow-emerald-600/30 group/btn"
                         >
-                            <div className="p-2 bg-white/20 rounded-xl group-hover/btn:bg-white/30 transition-colors">
-                                <Archive className="size-5" />
+                            <div className="p-2.5 bg-white/15 rounded-xl group-hover/btn:bg-white/25 transition-colors shadow-inner">
+                                <Archive className="size-5 text-emerald-50" />
                             </div>
-                            {isSaving ? 'Establishing Trace...' : 'Generate Quote'}
+                            {isSaving ? 'Establishing Trace...' : 'Generate Quote & Save'}
                         </button>
                     </div>
                 </div>

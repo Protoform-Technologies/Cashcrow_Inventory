@@ -70,7 +70,7 @@ export default function DayLogForm({
                             <div className="space-y-6">
                                 {/* Line 1: Primary Inventory Data */}
                                 <div className="grid grid-cols-12 gap-8 items-end">
-                                    <div className="col-span-7 space-y-3">
+                                    <div className="col-span-6 space-y-3">
                                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
                                             <Package className="w-3 h-3 text-[var(--color-cashcrow-primary)]" />
                                             Product Reference (Full Details Visible)
@@ -87,13 +87,13 @@ export default function DayLogForm({
                                             }}
                                         />
                                     </div>
-                                    <div className="col-span-1 space-y-3 relative">
+                                    <div className="col-span-2 space-y-3 relative">
                                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
                                             QTY
                                         </label>
                                         <div className="relative">
                                             <input
-                                                className={`w-full bg-slate-50 border border-slate-100 focus:bg-white focus:border-[var(--color-cashcrow-primary)] focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-sm font-black transition-all px-2 py-3 text-center ${isOutbound && index_entry.quantity > maxStock ? 'border-rose-500 text-rose-600 focus:border-rose-500 focus:ring-rose-500/10' : ''}`}
+                                                className={`w-full bg-slate-50 border border-slate-100 focus:bg-white focus:border-[var(--color-cashcrow-primary)] focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-sm font-black transition-all px-4 py-4 text-center ${isOutbound && index_entry.quantity > maxStock ? 'border-rose-500 text-rose-600 focus:border-rose-500 focus:ring-rose-500/10' : ''}`}
                                                 type="number"
                                                 min="0"
                                                 max={isOutbound ? maxStock : undefined}
@@ -131,7 +131,7 @@ export default function DayLogForm({
                                         </label>
                                         <div className="relative group/select">
                                             <select
-                                                className={`w-full border shadow-sm focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-[11px] font-black transition-all px-5 py-3 appearance-none cursor-pointer tracking-wider ${getTransactionColor(index_entry.transactionType)}`}
+                                                className={`w-full border shadow-sm focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-[11px] font-black transition-all px-5 py-4 appearance-none cursor-pointer tracking-wider ${getTransactionColor(index_entry.transactionType)}`}
                                                 value={index_entry.transactionType}
                                                 onChange={(e) => onUpdateEntry(index_entry.id, 'transactionType', e.target.value as TransactionType)}
                                             >
@@ -169,7 +169,7 @@ export default function DayLogForm({
                                             Context / Transaction Purpose
                                         </label>
                                         <input
-                                            className="w-full bg-slate-50 border border-slate-100 focus:bg-white focus:border-[var(--color-cashcrow-primary)] focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-sm font-medium transition-all px-5 py-3"
+                                            className="w-full bg-slate-50 border border-slate-100 focus:bg-white focus:border-[var(--color-cashcrow-primary)] focus:ring-4 focus:ring-[var(--color-cashcrow-primary)]/10 rounded-xl text-sm font-medium transition-all px-5 py-4"
                                             placeholder="Reason for movement or project reference..."
                                             type="text"
                                             value={index_entry.purpose}

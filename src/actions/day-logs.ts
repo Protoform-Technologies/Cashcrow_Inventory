@@ -4,6 +4,7 @@ import { DayLogEntry, DayLog, TransactionType } from '@/types/day-logs'
 
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
+import { createNotification } from './notifications'
 
 export async function createDayLog(userId: string): Promise<{ id: string } | { error: string }> {
     const supabase = await createServerSupabaseClient()
@@ -224,6 +225,27 @@ export async function submitAtomicLogs(
                         .from('products')
                         .update({ quantity: newQuantity })
                         .eq('id', entry.productId)
+
+                    // 🔔 LOW STOCK NOTIFICATION
+                    const { data: pData } = await supabase
+                        .from('products')
+                        .select('name, min_stock_level')
+                        .eq('id', entry.productId)
+                        .single()
+
+                    if (pData && newQuantity <= pData.min_stock_level) {
+                        try {
+                            await createNotification({
+                                title: 'Low Stock Alert',
+                                message: `${pData.name} is now at ${newQuantity} units (Min: ${pData.min_stock_level}).`,
+                                type: 'LOW_STOCK',
+                                link: `/admin/parts/${entry.productId}`,
+                                target_role: 'ADMIN'
+                            })
+                        } catch (e) {
+                            console.error("Low stock notification error:", e)
+                        }
+                    }
                 }
             }
 

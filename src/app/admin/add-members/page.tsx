@@ -80,7 +80,7 @@ export default async function AddMembersPage() {
                         <h3 className="text-lg font-bold text-slate-800 px-1">Directory</h3>
                     </div>
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <MembersList members={members} />
+                        <MembersList members={members} currentUserId={profile.id} />
                     </div>
                 </div>
             </div>

@@ -61,10 +61,11 @@ export async function dbAddMemberAuth(email: string, firstName: string, lastName
         email: email,
         password: 'Cashcrow@123',
         email_confirm: true,
-        user_metadata: {
+        app_metadata: {
             first_name: firstName,
             last_name: lastName,
-            role: role
+            role: role,
+            is_active: false
         }
     })
 
@@ -117,7 +118,7 @@ export async function dbUpdateMemberAuth(id: string, metadata: Record<string, an
     const adminClient = getSupabaseAdmin()
     
     const { error } = await adminClient.auth.admin.updateUserById(id, {
-        user_metadata: metadata
+        app_metadata: metadata
     })
 
     if (error) {

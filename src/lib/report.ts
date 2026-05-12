@@ -4,9 +4,11 @@ import { createServerSupabaseClient } from './supabase'
  * 🛠️ HELPER: PARSE PRICE FROM FUND STRING
  * Extracts numeric value from strings like "₹500.50" or "$100"
  */
-function parsePrice(fund: string | null | undefined): number {
-    if (!fund) return 0;
-    const match = fund.replace(/,/g, '').match(/\d+(\.\d+)?/);
+function parsePrice(fund: string | number | null | undefined): number {
+    if (fund === null || fund === undefined) return 0;
+    if (typeof fund === 'number') return fund;
+    const strFund = String(fund);
+    const match = strFund.replace(/,/g, '').match(/\d+(\.\d+)?/);
     return match ? parseFloat(match[0]) : 0;
 }
 

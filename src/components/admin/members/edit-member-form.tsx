@@ -92,12 +92,19 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
                 </div>
 
                 <div className="space-y-2">
-                    <Label className="text-slate-700 font-bold ml-1">Email Address</Label>
+                    <div className="flex justify-between items-center ml-1">
+                        <Label className="text-slate-700 font-bold">Email Address</Label>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 bg-slate-100 px-2 py-0.5 rounded-md">
+                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Locked
+                        </span>
+                    </div>
                     <Input
                         value={member.email}
                         disabled
-                        className="h-12 rounded-xl border-slate-100 bg-slate-50 text-slate-500 font-medium"
+                        className="h-12 rounded-xl border-slate-100 bg-slate-50 text-slate-500 font-medium cursor-not-allowed"
                     />
+                    <p className="text-[10px] text-slate-400 font-medium ml-1 italic">Email cannot be changed after registration</p>
                 </div>
 
                 <div className="space-y-2">

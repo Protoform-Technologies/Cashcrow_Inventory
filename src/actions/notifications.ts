@@ -3,7 +3,7 @@
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
-export type NotificationType = 'PRODUCT_ADDED' | 'SUPPLIER_ADDED' | 'OUT_OF_STOCK'
+export type NotificationType = 'PRODUCT_ADDED' | 'SUPPLIER_ADDED' | 'OUT_OF_STOCK' | 'MEMBER_ADDED' | 'LOW_STOCK'
 export type TargetRole = 'ADMIN' | 'MEMBER' | 'ALL'
 
 export interface CreateNotificationParams {
@@ -13,6 +13,7 @@ export interface CreateNotificationParams {
     link: string
     target_role: TargetRole
     user_id?: string
+    creator_id?: string
 }
 
 export async function createNotification(params: CreateNotificationParams) {
@@ -27,6 +28,7 @@ export async function createNotification(params: CreateNotificationParams) {
             link: params.link,
             target_role: params.target_role,
             user_id: params.user_id || null,
+            creator_id: params.creator_id || null,
             is_read: false
         })
 
@@ -47,6 +49,7 @@ export async function getNotifications(userRole: string, userId: string) {
         .from('notifications')
         .select('*')
         .or(`target_role.eq.ALL,target_role.eq.${role},user_id.eq.${userId}`)
+        .not('creator_id', 'eq', userId)
         .eq('is_read', false)
         .order('created_at', { ascending: false })
         .limit(20)

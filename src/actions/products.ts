@@ -13,6 +13,7 @@ import {
 
 export async function addProduct(formData: FormData) {
     const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const adminClient = getSupabaseAdmin()
 
     // 1. Get file and upload to bucket if it exists (Logic stays in Action)
@@ -125,7 +126,8 @@ export async function addProduct(formData: FormData) {
             message: `${name} has been added to the inventory.`,
             type: 'PRODUCT_ADDED',
             link: `/admin/parts?q=${encodeURIComponent(name)}`,
-            target_role: 'ALL'
+            target_role: 'ALL',
+            creator_id: user?.id
         });
     } catch (e) {
         console.error("Notification trigger error:", e);
@@ -136,6 +138,7 @@ export async function addProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
     const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const adminClient = getSupabaseAdmin()
 
     // 1. Storage logic (Stays in Action)
@@ -259,18 +262,40 @@ export async function updateProduct(id: string, formData: FormData) {
     revalidatePath(`/admin/parts/${id}`)
     revalidatePath('/admin')
 
-    // 🔔 OUT OF STOCK NOTIFICATION
-    if (updateData.quantity === 0) {
-        try {
-            await createNotification({
-                title: 'Item Out of Stock',
-                message: `ALERT: ${name} is now out of stock.`,
-                type: 'OUT_OF_STOCK',
-                link: `/admin/parts/${id}`,
-                target_role: 'ALL'
-            });
-        } catch (e) {
-            console.error("Notification trigger error:", e);
+    // 🔔 INVENTORY ALERTS (OUT OF STOCK & LOW STOCK)
+    const { data: pData } = await supabase
+        .from('products')
+        .select('name, quantity, min_stock_level')
+        .eq('id', id)
+        .single()
+
+    if (pData) {
+        if (pData.quantity === 0) {
+            try {
+                await createNotification({
+                    title: 'Item Out of Stock',
+                    message: `ALERT: ${pData.name} is now out of stock.`,
+                    type: 'OUT_OF_STOCK',
+                    link: `/admin/parts/${id}`,
+                    target_role: 'ADMIN',
+                    creator_id: user?.id
+                });
+            } catch (e) {
+                console.error("Out of stock notification error:", e);
+            }
+        } else if (pData.quantity <= pData.min_stock_level) {
+            try {
+                await createNotification({
+                    title: 'Low Stock Alert',
+                    message: `${pData.name} is at low stock (${pData.quantity} left).`,
+                    type: 'LOW_STOCK',
+                    link: `/admin/parts/${id}`,
+                    target_role: 'ADMIN',
+                    creator_id: user?.id
+                });
+            } catch (e) {
+                console.error("Low stock notification error:", e);
+            }
         }
     }
 

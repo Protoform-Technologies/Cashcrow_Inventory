@@ -33,6 +33,12 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
+    // 1. Instant Logout for Deactivated Users
+    if (user && user.app_metadata?.is_active === false) {
+        await supabase.auth.signOut()
+        return NextResponse.redirect(new URL('/', request.url))
+    }
+
     // Protected Routes Logic
     const isLoginPage = request.nextUrl.pathname === '/'
     const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')

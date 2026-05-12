@@ -3,6 +3,7 @@
 import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { createNotification } from './notifications'
+import { getAdminProfileOrRedirect } from './auth'
 
 function toTitleCase(str: string) {
     if (!str) return ''
@@ -12,6 +13,7 @@ function toTitleCase(str: string) {
 }
 
 export async function addSupplier(formData: FormData) {
+    const admin = await getAdminProfileOrRedirect()
     const supabase = getSupabaseAdmin()
 
     const company_name = formData.get('company_name') as string
@@ -59,7 +61,8 @@ export async function addSupplier(formData: FormData) {
             message: `${company_name} has been added to our supplier list.`,
             type: 'SUPPLIER_ADDED',
             link: `/admin/suppliers?q=${encodeURIComponent(company_name)}`,
-            target_role: 'ADMIN' // Only admins receive this as requested
+            target_role: 'ADMIN',
+            creator_id: admin.id
         });
     } catch (e) {
         console.error("Notification trigger error:", e);

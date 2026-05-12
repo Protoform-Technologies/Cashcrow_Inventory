@@ -36,6 +36,7 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             selectedVertical: data.details.vertical === 'PF' ? 'Protoform' : 'Cashcrow',
             
             // Buyer Details (Fixed)
+            companyName: BUYER_DETAILS.companyName,
             companyGstin: BUYER_DETAILS.gstin,
             companyAddress: BUYER_DETAILS.address,
             companyEmail: BUYER_DETAILS.email,
@@ -117,7 +118,8 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
         // 3. Simple Placeholder Replacement
         let finalHtml = htmlTemplate
         Object.entries(templateData).forEach(([key, value]) => {
-            const regex = new RegExp(`{{${key}}}`, 'g')
+            // Escape curly braces for regex compatibility
+            const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g')
             const safeValue = (value === null || value === undefined) ? 'N/A' : String(value)
             finalHtml = finalHtml.replace(regex, safeValue)
         })
@@ -134,10 +136,10 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
                 <td>${data.expectedDate}</td>
             </tr>
         `
-        finalHtml = finalHtml.replace(/{{#items}}[\s\S]*?{{\/items}}/, itemHtml)
+        finalHtml = finalHtml.replace(/\{\{#items\}\}[\s\S]*?\{\{\/items\}\}/, itemHtml)
         
         // Handle attachments loop
-        finalHtml = finalHtml.replace(/{{#attachments}}[\s\S]*?{{\/attachments}}/, '<tr><td colspan="4">Refer to reference link below</td></tr>')
+        finalHtml = finalHtml.replace(/\{\{#attachments\}\}[\s\S]*?\{\{\/attachments\}\}/, '<tr><td colspan="4">Refer to reference link below</td></tr>')
 
         // 4. Render to PDF using a more robust method
         // We create a hidden iframe to render the full HTML correctly

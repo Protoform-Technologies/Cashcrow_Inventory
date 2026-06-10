@@ -18,6 +18,7 @@ export interface RFQDetails {
     department: string
     priority: 'Low' | 'Medium' | 'High' | 'Critical'
     responseDeadline: string
+    rfqType: string
     
     // Technical Specs
     technicalSpecs: {
@@ -31,11 +32,26 @@ export interface RFQDetails {
     }
     
     // Commercial / Cost
-    costBreakdown: CostBreakdownItem[]
-    totalQuoteValue: string | number
-    gstPercentage: string | number
-    paymentTerms: string
-    validity: string
+    commercial: {
+        unitPrice: string | number
+        totalPrice: string | number
+        gstPercentage: string | number
+        freightCharges: string | number
+        installationCharges: string | number
+        paymentTerms: string
+        validity: string
+        warrantyPeriod: string
+        productionLeadTime: string
+        // Phase 3 Cost Breakdown
+        materialCost: string | number
+        labourCost: string | number
+        assemblyTestingCost: string | number
+        packagingCost: string | number
+        logisticsCost: string | number
+        vendorMargin: string | number
+        otherCharges: string | number
+        totalQuoteValue: string | number
+    }
     
     // Delivery
     delivery: {
@@ -43,6 +59,7 @@ export interface RFQDetails {
         packaging: string
         transport: string
         expectedDate: string
+        vendorProposedDate: string
     }
     
     // Quality
@@ -51,8 +68,13 @@ export interface RFQDetails {
         inspection: string
         warranty: string
         replacement: string
+        complianceDocuments: string
     }
     
     attachments: RFQAttachment[]
     reference: string
+    // Authorization (Phase 4)
+    authorizedPersonName?: string
+    authorizedPersonDesignation?: string
+    authorizationDate?: string
 }

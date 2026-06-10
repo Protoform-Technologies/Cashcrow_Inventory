@@ -74,11 +74,11 @@ export const generateQuotePDF = async (data: QuotePDFData) => {
             // Commercial
             unitPrice: 'TBD',
             totalPrice: data.totalAmount.toString(),
-            gstPercentage: data.details.gstPercentage.toString(),
+            gstPercentage: data.details.commercial?.gstPercentage?.toString() || '18',
             freightCharges: 'Extra as applicable',
             installationCharges: 'Extra as applicable',
-            paymentTerms: data.details.paymentTerms || 'As per policy',
-            quoteValidity: data.details.validity || '30 Days',
+            paymentTerms: data.details.commercial?.paymentTerms || 'As per policy',
+            quoteValidity: data.details.commercial?.validity || '30 Days',
             warrantyPeriod: data.details.quality.warranty || '1 Year',
             productionLeadTime: 'TBD',
             

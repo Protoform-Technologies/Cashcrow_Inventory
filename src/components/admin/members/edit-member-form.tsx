@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { updateMember, deleteMember } from "@/actions/members"
+import { updateMember } from "@/actions/members"
 import { ArrowRight, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"

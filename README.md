@@ -1,4 +1,4 @@
-# Cashcrow Inventory
+# Cashcrow Inventory 
 
 Cashcrow Inventory is a specialized, high-performance web application tailored for laboratory environment operations. It offers complete lifecycle tracking for parts, comprehensive supplier management, fine-grained access control for team members, and an atomic daily movement registry.
 
@@ -61,4 +61,4 @@ RESEND_API_KEY=your_resend_api_key
 
 ## License
 
-Powered by Protoform Technologies.
+Powered by Protoform Technologies( Parent company of Cashcrow).

@@ -1,59 +1,42 @@
-import { getMemberProfileOrRedirect } from '@/actions/auth'
-import DashboardLayout from '@/components/shared/dashboard/layout'
+import { getAdminProfileOrRedirect } from '@/actions/auth'
 import StatsGrid from '@/components/shared/dashboard/stats-grid'
 import InventoryTable from '@/components/shared/inventory/inventory-table'
 import DailyLogFeed from '@/components/shared/dashboard/daily-log-feed'
 import WelcomeBanner from '@/components/shared/dashboard/welcome-banner'
-import { getDashboardStats, getInventory, getRecentActivity, isTodayLogFilled } from '@/actions/dashboard'
+import { fetchDashboardStats, fetchInventoryData, fetchRecentActivityFeed, checkTodayLogSubmission } from '@/lib/dashboard'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Member Dashboard | Cashcrow Lab',
-    description: 'Track inventory, record daily logs, and monitor laboratory stock levels from your personal member dashboard.',
+    title: 'Admin Dashboard | Cashcrow',
+    description: 'Manage inventory, track stock levels, and monitor laboratory activities from the central admin command center.',
 }
 
-export default async function MemberPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ page?: string }>
-}) {
-    const profile = await getMemberProfileOrRedirect()
+import { Suspense } from 'react'
+import PageLoader from '@/components/shared/loaders/page-loader'
 
-    // Fetch dynamic data
-    const resolvedSearchParams = await searchParams as any
-    const page = parseInt(resolvedSearchParams.page || '1', 10)
-    
-    // Concurrently fetch all dashboard data
+async function DashboardContent({ profile, page }: { profile: any, page: number }) {
+    // Concurrently fetch all dashboard data bypassing Server Action overhead
     const [stats, inventoryData, recentLogs, logSubmitted] = await Promise.all([
-        getDashboardStats(),
-        getInventory(page, 5),
-        getRecentActivity(4),
-        isTodayLogFilled(profile.id)
+        fetchDashboardStats(),
+        fetchInventoryData(page, 5),
+        fetchRecentActivityFeed(4),
+        checkTodayLogSubmission(profile.id)
     ])
 
-    const fullName = `${profile.first_name} ${profile.last_name}`
     const today = new Date().toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
     })
 
     return (
-        <DashboardLayout 
-            userName={fullName} 
-            userRole={profile.role} 
-            userId={profile.id}
-            avatarUrl={profile.avatar_url}
-            title="Member Dashboard"
-        >
-            
+        <>
             {/* Conditional Welcome Banner */}
-            <WelcomeBanner 
+            <WelcomeBanner
                 firstName={profile.first_name}
                 today={today}
-                role="MEMBER"
-                logPath="/member/daily-log"
+                role="ADMIN"
+                logPath="/admin/daily-log"
                 isLogSubmitted={logSubmitted}
             />
 
@@ -68,7 +51,7 @@ export default async function MemberPage({
                         items={inventoryData.products}
                         totalCount={inventoryData.count}
                         currentPage={page}
-                        basePath="/member/parts"
+                        basePath="/admin/parts"
                         isDashboard={true}
                     />
                 </div>
@@ -78,6 +61,24 @@ export default async function MemberPage({
                     <DailyLogFeed logs={recentLogs} />
                 </div>
             </div>
-        </DashboardLayout>
+        </>
+    )
+}
+
+export default async function AdminPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>
+}) {
+    const profile = await getAdminProfileOrRedirect()
+
+    // Fetch dynamic data
+    const resolvedSearchParams = await searchParams as any
+    const page = parseInt(resolvedSearchParams.page || '1', 10)
+
+    return (
+        <Suspense fallback={<PageLoader />}>
+            <DashboardContent profile={profile} page={page} />
+        </Suspense>
     )
 }

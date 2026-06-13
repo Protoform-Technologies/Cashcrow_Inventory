@@ -1,5 +1,4 @@
-import { getAdminProfileOrRedirect } from '@/actions/auth'
-import DashboardLayout from '@/components/shared/dashboard/layout'
+import { getMemberProfileOrRedirect } from '@/actions/auth'
 import StatsGrid from '@/components/shared/dashboard/stats-grid'
 import InventoryTable from '@/components/shared/inventory/inventory-table'
 import DailyLogFeed from '@/components/shared/dashboard/daily-log-feed'
@@ -8,21 +7,14 @@ import { getDashboardStats, getInventory, getRecentActivity, isTodayLogFilled } 
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Admin Dashboard | Cashcrow',
-    description: 'Manage inventory, track stock levels, and monitor laboratory activities from the central admin command center.',
+    title: 'Member Dashboard | Cashcrow Lab',
+    description: 'Track inventory, record daily logs, and monitor laboratory stock levels from your personal member dashboard.',
 }
 
-export default async function AdminPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ page?: string }>
-}) {
-    const profile = await getAdminProfileOrRedirect()
+import { Suspense } from 'react'
+import PageLoader from '@/components/shared/loaders/page-loader'
 
-    // Fetch dynamic data
-    const resolvedSearchParams = await searchParams as any
-    const page = parseInt(resolvedSearchParams.page || '1', 10)
-
+async function DashboardContent({ profile, page }: { profile: any, page: number }) {
     // Concurrently fetch all dashboard data
     const [stats, inventoryData, recentLogs, logSubmitted] = await Promise.all([
         getDashboardStats(),
@@ -31,7 +23,6 @@ export default async function AdminPage({
         isTodayLogFilled(profile.id)
     ])
 
-    const fullName = `${profile.first_name} ${profile.last_name}`
     const today = new Date().toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -40,20 +31,13 @@ export default async function AdminPage({
     })
 
     return (
-        <DashboardLayout
-            userName={fullName}
-            userRole={profile.role}
-            userId={profile.id}
-            avatarUrl={profile.avatar_url}
-            title="Admin Dashboard"
-        >
-
+        <>
             {/* Conditional Welcome Banner */}
             <WelcomeBanner
                 firstName={profile.first_name}
                 today={today}
-                role="ADMIN"
-                logPath="/admin/daily-log"
+                role="MEMBER"
+                logPath="/member/daily-log"
                 isLogSubmitted={logSubmitted}
             />
 
@@ -68,7 +52,7 @@ export default async function AdminPage({
                         items={inventoryData.products}
                         totalCount={inventoryData.count}
                         currentPage={page}
-                        basePath="/admin/parts"
+                        basePath="/member/parts"
                         isDashboard={true}
                     />
                 </div>
@@ -78,6 +62,24 @@ export default async function AdminPage({
                     <DailyLogFeed logs={recentLogs} />
                 </div>
             </div>
-        </DashboardLayout>
+        </>
+    )
+}
+
+export default async function MemberPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>
+}) {
+    const profile = await getMemberProfileOrRedirect()
+
+    // Fetch dynamic data
+    const resolvedSearchParams = await searchParams as any
+    const page = parseInt(resolvedSearchParams.page || '1', 10)
+
+    return (
+        <Suspense fallback={<PageLoader />}>
+            <DashboardContent profile={profile} page={page} />
+        </Suspense>
     )
 }

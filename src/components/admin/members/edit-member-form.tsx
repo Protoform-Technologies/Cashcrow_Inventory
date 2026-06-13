@@ -17,7 +17,7 @@ interface Profile {
 
 interface EditMemberFormProps {
     member: Profile
-    onSuccess: () => void
+    onSuccess: (updatedData: { first_name: string, last_name: string, role: string, is_active: boolean }) => void
     onCancel: () => void
 }
 
@@ -52,7 +52,12 @@ export default function EditMemberForm({ member, onSuccess, onCancel }: EditMemb
         } else if (result?.success) {
             toast.success('Member updated successfully!')
             setTimeout(() => {
-                onSuccess()
+                onSuccess({
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    role: formData.role,
+                    is_active: formData.isActive
+                })
             }, 800)
         }
         setIsPending(false)

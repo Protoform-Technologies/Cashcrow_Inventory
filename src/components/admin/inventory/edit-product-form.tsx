@@ -87,7 +87,11 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
 
         const formData = new FormData(e.currentTarget)
         formData.append('existing_image_url', product.image_url || '')
-        formData.append('vendors', JSON.stringify(vendors.filter(v => v.name.trim() !== '')))
+        const formattedVendors = vendors.filter(v => v.name.trim() !== '').map(v => ({
+            ...v,
+            fund: Number(v.fund.toString().replace(',', '.'))
+        }))
+        formData.append('vendors', JSON.stringify(formattedVendors))
 
         const result = await updateProduct(product.id, formData)
 
@@ -95,9 +99,7 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
             toast.error(result.error)
         } else if (result?.success) {
             toast.success('Product updated successfully!')
-            setTimeout(() => {
-                onSuccess()
-            }, 1000)
+            onSuccess()
         }
         setIsLoading(false)
     }
@@ -348,7 +350,10 @@ export default function EditProductForm({ product, onSuccess, onCancel }: EditPr
                                     </label>
                                     <input
                                         value={vendor.fund}
-                                        onChange={(e) => updateVendor(index, 'fund', e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^0-9.,]/g, '');
+                                            updateVendor(index, 'fund', val);
+                                        }}
                                         className="w-full rounded-lg border-slate-200 focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] px-3 py-2 text-sm transition-all outline-none bg-white"
                                         placeholder="e.g. Grant NIH-2026"
                                         type="text"

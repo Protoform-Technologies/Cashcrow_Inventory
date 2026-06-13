@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Instant Logout for Deactivated Users
-    if (user && user.app_metadata?.is_active === false) {
+    // 1. Instant Logout for Deactivated Users or Forced Logouts
+    if (user && (user.app_metadata?.is_active === false || user.app_metadata?.force_logout === true)) {
         await supabase.auth.signOut()
         return NextResponse.redirect(new URL('/', request.url))
     }

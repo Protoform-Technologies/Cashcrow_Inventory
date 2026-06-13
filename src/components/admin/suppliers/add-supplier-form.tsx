@@ -47,10 +47,8 @@ export default function AddSupplierForm() {
             setIsSubmitting(false)
         } else {
             toast.success('Supplier added successfully!')
-            setTimeout(() => {
-                router.push('/admin/suppliers')
-                router.refresh()
-            }, 1000)
+            router.push('/admin/suppliers')
+            router.refresh()
         }
     }
 

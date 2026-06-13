@@ -128,7 +128,7 @@ export default function InventoryGrid({
                                 {query ? `No parts match "${query}".` : "You haven't added any parts to the inventory yet."}
                             </p>
                             {!query && (
-                                <Link href="/admin/add-parts" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors">
+                                <Link href="/admin/add-parts" className="inline-flex items-center gap-2 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors">
                                     <PlusCircle className="w-4 h-4" />
                                     Add First Part
                                 </Link>

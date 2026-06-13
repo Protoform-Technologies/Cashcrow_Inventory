@@ -98,7 +98,9 @@ export const fetchRecentActivityFeed = cache(async (limit: number = 5) => {
 
     if (error || !items) return []
 
-    const userIds = Array.from(new Set(items.map(item => item.day_logs?.created_by).filter(Boolean)))
+    const userIds = Array.from(new Set(
+        items.flatMap(item => [item.day_logs?.created_by, item.taken_by]).filter(Boolean)
+    ))
     
     let profileMap: Record<string, any> = {}
     if (userIds.length > 0) {
@@ -117,9 +119,10 @@ export const fetchRecentActivityFeed = cache(async (limit: number = 5) => {
     }
 
     return items.map(item => {
-        const profile = item.day_logs?.created_by ? profileMap[item.day_logs.created_by] : null
-        const userName = profile 
-            ? `${profile.first_name} ${profile.last_name}`.trim()
+        const creatorProfile = item.day_logs?.created_by ? profileMap[item.day_logs.created_by] : null
+        const actorProfile = item.taken_by ? profileMap[item.taken_by] : creatorProfile
+        const userName = actorProfile 
+            ? `${actorProfile.first_name} ${actorProfile.last_name}`.trim()
             : 'Unknown User'
         
         let title = "Stock Updated"
@@ -144,8 +147,8 @@ export const fetchRecentActivityFeed = cache(async (limit: number = 5) => {
             description = `${userName} returned ${item.qty} units of ${item.products?.name}`
             color = "bg-purple-600"
         } else if (type === 'SCRAP') {
-            title = "Stock Warning"
-            description = `${userName} marked ${item.products?.name} as scrap (${item.qty} units)`
+            title = "Stock Scrapped"
+            description = `${userName} scrapped ${item.qty} units of ${item.products?.name}`
             color = "bg-rose-600"
         }
 

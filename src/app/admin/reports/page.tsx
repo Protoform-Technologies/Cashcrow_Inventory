@@ -1,12 +1,10 @@
 import React from "react";
-import DashboardLayout from "@/components/shared/dashboard/layout";
-import { getAdminProfileOrRedirect } from "@/actions/auth";
+import { getReportAnalytics } from "@/actions/reports";
 import ReportsHeader from "@/components/admin/reports/reports-header";
 import ReportStats from "@/components/admin/reports/report-stats";
 import StockMovementChart from "@/components/admin/reports/stock-movement-chart";
 import InventoryByCategoryChart from "@/components/admin/reports/inventory-category-chart";
 import TopUsedParts from "@/components/admin/reports/top-used-parts";
-import { getReportAnalytics } from "@/actions/reports";
 
 export const metadata = {
   title: "Reports & Analytics | Cashcrow Lab",
@@ -19,8 +17,6 @@ export default async function ReportsPage({
   searchParams: Promise<{ month?: string, year?: string }>
 }) {
   const resolvedParams = await searchParams;
-  const profile = await getAdminProfileOrRedirect();
-  const fullName = `${profile.first_name} ${profile.last_name}`;
 
   const month = resolvedParams.month ? parseInt(resolvedParams.month) : undefined;
   const year = resolvedParams.year ? parseInt(resolvedParams.year) : undefined;
@@ -36,13 +32,7 @@ export default async function ReportsPage({
   };
 
   return (
-    <DashboardLayout
-      userName={fullName}
-      userRole={profile.role}
-      userId={profile.id}
-      avatarUrl={profile.avatar_url}
-      title="Reports & Analytics"
-    >
+    <>
       <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Reports Header and Actions */}
         <ReportsHeader reportData={exportData} />
@@ -52,13 +42,13 @@ export default async function ReportsPage({
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          <StockMovementChart 
-            data={reportData.stockMovement} 
+          <StockMovementChart
+            data={reportData.stockMovement}
             initialMonth={month}
             initialYear={year}
           />
-          <InventoryByCategoryChart 
-            data={reportData.inventoryByCategory} 
+          <InventoryByCategoryChart
+            data={reportData.inventoryByCategory}
             initialMonth={month}
             initialYear={year}
           />
@@ -67,6 +57,6 @@ export default async function ReportsPage({
         {/* Table Section */}
         <TopUsedParts parts={reportData.topParts as any} />
       </div>
-    </DashboardLayout>
+    </>
   );
 }

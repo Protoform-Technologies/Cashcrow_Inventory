@@ -447,7 +447,6 @@ export default function SupplierDetailModal({ supplier, onClose }: SupplierDetai
                                             toast.success('Supplier deleted successfully')
                                             setShowDeleteConfirm(false)
                                             onClose()
-                                            router.refresh()
                                         } else {
                                             setIsDeleting(false)
                                             toast.error(result.error || 'Failed to delete supplier')

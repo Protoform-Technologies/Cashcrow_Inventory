@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import DashboardLayout from '@/components/shared/dashboard/layout'
 import DailyLogManager from '@/components/shared/day-logs/daily-log-manager'
 import { getAdminProfileOrRedirect } from '@/actions/auth'
 import { getProductsForDropdown } from '@/actions/products'
@@ -22,30 +21,25 @@ export default async function DailyLogPage() {
         getMembers(),
         getSubmittedLogsWithDetails()
     ])
-    
+
+    const activeMembers = members.filter(m => m.is_active !== false)
+
     // Fallback if members fetch fails deeply or is empty
-    const finalMembers = members.length > 0 ? members : [{ 
-        id: profile.id, 
-        first_name: profile.first_name || 'Member', 
+    const finalMembers = activeMembers.length > 0 ? activeMembers : [{
+        id: profile.id,
+        first_name: profile.first_name || 'Member',
         last_name: profile.last_name || '',
-        role: profile.role || 'Admin' 
+        role: profile.role || 'Admin'
     }]
 
     return (
-        <DashboardLayout 
-            userName={fullName} 
-            userRole={profile.role} 
+        <DailyLogManager
+            userName={fullName}
             userId={profile.id}
-            avatarUrl={profile.avatar_url}
-            title="Daily Log Entry"
-        >
-            <DailyLogManager 
-                userName={fullName}
-                userId={profile.id}
-                products={products}
-                members={finalMembers}
-                submittedLogs={logsWithItems}
-            />
-        </DashboardLayout>
+            userRole={profile.role}
+            products={products}
+            members={finalMembers}
+            submittedLogs={logsWithItems}
+        />
     )
 }

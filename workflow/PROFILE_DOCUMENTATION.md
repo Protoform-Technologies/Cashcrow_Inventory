@@ -48,9 +48,10 @@ The platform implements a **"No-Photo" Fallback** logic to ensure a professional
 
 ---
 
-## 📱 Mobile Responsiveness
+## 📱 Layout & Responsiveness
 
-The profile interface is fully optimized for mobile devices:
+The profile interface is fully optimized for mobile devices and unified across roles:
+- **Unified Clean Layout**: Both Admin and Member profiles share a unified, clean layout focused solely on account information. Redundant "Account Actions" (like logout) have been removed from the profile page as they are already accessible via the main navigation sidebar.
 - **Adaptive Header**: Transitions from a left-aligned layout on desktop to a centered, ergonomic view on mobile.
 - **Touch Targets**: Management buttons (Camera, Trash, Edit) are scaled and repositioned for easier thumb-interactability.
 - **Responsive Form**: Profile fields switch from a two-column grid to a single-column stack on smaller viewports.

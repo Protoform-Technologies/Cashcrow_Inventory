@@ -101,7 +101,7 @@ export default function InventoryByCategoryChart({
             <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest mt-1">Sectors</p>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
             <Pie
               data={data}

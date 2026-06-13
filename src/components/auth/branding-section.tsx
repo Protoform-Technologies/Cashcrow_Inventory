@@ -4,6 +4,19 @@ export default function BrandingSection() {
     return (
         <div className="relative hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-[var(--color-cashcrow-primary)] p-12 overflow-hidden">
 
+            {/* Background Image */}
+            <div className="absolute inset-0 opacity-20">
+                <Image
+                    src="/lab_background.png"
+                    alt="Background"
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="50vw"
+                />
+                <div className="absolute inset-0 bg-[var(--color-cashcrow-primary)] opacity-40 mix-blend-multiply"></div>
+            </div>
+
             {/* Background Decoration */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--color-cashcrow-accent)] blur-[120px]"></div>

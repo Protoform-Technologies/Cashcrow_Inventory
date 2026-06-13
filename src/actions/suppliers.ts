@@ -30,7 +30,7 @@ export async function addSupplier(formData: FormData) {
     const branch = formData.get('branch') as string
     const payment_id = formData.get('payment_id') as string
 
-    const { error: insertError } = await supabase
+    const insertPromise = supabase
         .from('suppliers')
         .insert({
             company_name,
@@ -47,26 +47,27 @@ export async function addSupplier(formData: FormData) {
             branch: branch || null,
             payment_id: payment_id || null
         })
+
+    const notificationPromise = createNotification({
+        title: 'New Supplier Added',
+        message: `${company_name} has been added to our supplier list.`,
+        type: 'SUPPLIER_ADDED',
+        link: `/admin/suppliers?q=${encodeURIComponent(company_name)}`,
+        target_role: 'ADMIN',
+        creator_id: admin.id
+    })
+
+    const [{ error: insertError }] = await Promise.all([
+        insertPromise,
+        notificationPromise.catch(e => console.error("Notification trigger error:", e))
+    ])
+
     if (insertError) {
         console.error("Insert error:", insertError)
         return { error: insertError.message || 'Failed to add supplier.' }
     }
     
     revalidatePath('/admin/suppliers')
-
-    // 🔔 CREATE NOTIFICATION
-    try {
-        await createNotification({
-            title: 'New Supplier Added',
-            message: `${company_name} has been added to our supplier list.`,
-            type: 'SUPPLIER_ADDED',
-            link: `/admin/suppliers?q=${encodeURIComponent(company_name)}`,
-            target_role: 'ADMIN',
-            creator_id: admin.id
-        });
-    } catch (e) {
-        console.error("Notification trigger error:", e);
-    }
 
     return { success: true }
 }

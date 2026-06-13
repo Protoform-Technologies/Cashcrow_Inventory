@@ -52,9 +52,14 @@ Components are designed to be high-fidelity and responsive:
 | :--- | :--- | :--- |
 | **Inventory Table** | List browsing | Hybrid view (Desktop Table / Mobile Cards) with built-in pagination. |
 | **Part Card** | Grid visualization | High-density information display including stock progress bars. |
-| **Detail History** | Audit trail | Lists all movements (IN, OUT, ADJUST) specific to a single part. |
+| **Detail History** | Audit trail | Lists all movements (IN, OUT, RETURN) with precise date mapping, actor profiles, and quantity indicators (+/-). Built-in pagination handles up to 6 items per page. |
 | **Detail Stats** | Performance metrics | Quick-view cards showing lifetime usage and current stock metrics. |
 | **Onboarding Form** | Data Entry | Premium sectioned UI with **Multi-Vendor** (Online/Offline) support. |
+
+---
+
+## 🎨 Layout & Composition Integrity
+The `[id]/page.tsx` routes intentionally abstain from double-wrapping layouts. While the top-level `admin/layout.tsx` or `member/layout.tsx` provides the macro `DashboardLayout` (sidebar/header), the specific product detail pages inject their grid systems directly into the content pane, avoiding nested "inception" sidebars and maintaining a clean visual hierarchy.
 
 ---
 

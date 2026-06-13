@@ -48,9 +48,15 @@ Components are built to handle batch operations and clear audit visualizations:
 
 | Component | Purpose | Key Features |
 | :--- | :--- | :--- |
-| **Log Submission** | Data Entry | Multi-row interactive form with part search and type selection. |
-| **Audit Registry** | Historical View | High-density list with profile-enhanced "Taken By" info and transaction tags. |
+| **Log Submission** | Data Entry | Multi-row interactive form with part search and type selection. Includes a **Finalize Record Confirmation Modal** to prevent accidental submissions. |
+| **Audit Registry** | Historical View | High-density list with profile-enhanced "Taken By" info and transaction tags. Includes a **Delete Confirmation Modal** for administrators to safely remove logs. |
 | **Log Summary** | Quick Stats | View of today's total movements and most active parts. |
+
+---
+
+## 👤 Dynamic Actor Tracking
+
+When physical inventory movements are submitted, the system automatically tags the log with the **Current Logged-in User** acting as the "Actor" (the person entering the data). This replaces generic or "Unknown" placeholders, ensuring an accurate and indisputable audit trail of who performed the digital transaction vs who physically took the part ("Taken By").
 
 ---
 

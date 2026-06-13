@@ -8,12 +8,15 @@ import { useRouter } from 'next/navigation'
 import DayLogForm from './day-log-form'
 import SubmittedLogsTable from './submitted-logs-table'
 import LogDetailModal from './log-detail-modal'
+import FinalizeModal from './finalize-modal'
+import DeleteModal from './delete-modal'
 import LogFilters from './log-filters'
 import { Product, Member, DayLog, LogEntry, INITIAL_ENTRY, generateEntryId } from '@/types/day-logs'
 
 interface DailyLogManagerProps {
     userId: string
     userName: string
+    userRole: string
     products: Product[]
     members: Member[]
     submittedLogs: DayLog[]
@@ -21,9 +24,11 @@ interface DailyLogManagerProps {
 
 const ITEMS_PER_PAGE = 10
 
-export default function DailyLogManager({ userId, userName, products, members, submittedLogs }: DailyLogManagerProps) {
+export default function DailyLogManager({ userId, userName, userRole, products, members, submittedLogs }: DailyLogManagerProps) {
     const [entries, setEntries] = useState<LogEntry[]>([{ ...INITIAL_ENTRY, id: generateEntryId() }])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showConfirmModal, setShowConfirmModal] = useState(false)
+    const [validEntriesToSubmit, setValidEntriesToSubmit] = useState<LogEntry[]>([])
 
     // Filtering & Pagination State
     const [searchTerm, setSearchTerm] = useState('')
@@ -34,6 +39,7 @@ export default function DailyLogManager({ userId, userName, products, members, s
     const [showViewModal, setShowViewModal] = useState(false)
     const [selectedLog, setSelectedLog] = useState<DayLog | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [logToDelete, setLogToDelete] = useState<string | null>(null)
 
     const addNewRow = () => {
         setEntries([...entries, { ...INITIAL_ENTRY, id: generateEntryId() }])
@@ -89,12 +95,15 @@ export default function DailyLogManager({ userId, userName, products, members, s
             return
         }
 
-        if (!confirm(`Initialize atomic submission for ${validEntries.length} lines? This will verify and update stock individually.`)) return
+        setValidEntriesToSubmit(validEntries)
+        setShowConfirmModal(true)
+    }
 
+    const executeSubmit = async () => {
         setIsSubmitting(true)
-
+        // Keep modal open to show loading state
         try {
-            const result = await submitAtomicLogs(validEntries, userId)
+            const result = await submitAtomicLogs(validEntriesToSubmit, userId)
 
             if ('error' in result) {
                 toast.error(`Submission Error: ${result.error}`)
@@ -108,6 +117,26 @@ export default function DailyLogManager({ userId, userName, products, members, s
             toast.error('A critical error occurred during submission.')
         } finally {
             setIsSubmitting(false)
+            setShowConfirmModal(false)
+        }
+    }
+
+    const executeDelete = async () => {
+        if (!logToDelete) return
+        setIsDeleting(true)
+        try {
+            const result = await deleteDayLog(logToDelete)
+            if ('error' in result) {
+                toast.error(result.error)
+            } else {
+                toast.success('Record deleted successfully')
+                router.refresh()
+            }
+        } catch (error) {
+            toast.error('Failed to delete log')
+        } finally {
+            setIsDeleting(false)
+            setLogToDelete(null)
         }
     }
 
@@ -241,18 +270,12 @@ export default function DailyLogManager({ userId, userName, products, members, s
                     />
 
                     <div className="overflow-visible">
-                        <SubmittedLogsTable
-                            logs={paginatedLogs}
+                        <SubmittedLogsTable 
+                            logs={paginatedLogs} 
                             onView={(log) => { setSelectedLog(log); setShowViewModal(true); }}
-                            onDelete={async (id) => {
-                                if (confirm('Permanently delete this atomic record? This cannot be undone and provides immutable proof.')) {
-                                    setIsDeleting(true);
-                                    await deleteDayLog(id);
-                                    toast.success('Record deleted successfully');
-                                    router.refresh();
-                                }
-                            }}
+                            onDelete={(id) => setLogToDelete(id)}
                             isDeleting={isDeleting}
+                            userRole={userRole}
                         />
 
                         {/* Pagination Controls */}
@@ -282,6 +305,21 @@ export default function DailyLogManager({ userId, userName, products, members, s
                     </div>
                 </div>
             </div>
+
+            <FinalizeModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={executeSubmit}
+                isSubmitting={isSubmitting}
+                entryCount={validEntriesToSubmit.length}
+            />
+
+            <DeleteModal
+                isOpen={!!logToDelete}
+                onClose={() => setLogToDelete(null)}
+                onConfirm={executeDelete}
+                isDeleting={isDeleting}
+            />
 
             {/* Modals */}
             {showViewModal && selectedLog && (

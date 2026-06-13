@@ -33,7 +33,7 @@ export async function sendOnboardingEmail(email: string, firstName: string, last
                     <p style="color: #ef4444; font-size: 14px; font-weight: 600;">Important: You will be required to change your password upon your first login.</p>
                     
                     <div style="text-align: center; margin-top: 32px;">
-                        <a href="${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('supabase.co', 'cashcrow.co.in') || '#'}" 
+                        <a href="https://cashcrow-inventory.vercel.app/" 
                            style="background-color: #265136; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
                             Log In to Dashboard
                         </a>
@@ -86,7 +86,7 @@ export async function sendReactivationEmail(email: string, firstName: string, la
                     </div>
                     
                     <div style="text-align: center; margin-top: 32px;">
-                        <a href="${process.env.NEXT_PUBLIC_SITE_URL || '#'}" 
+                        <a href="https://cashcrow-inventory.vercel.app/" 
                            style="background-color: #265136; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">
                             Log In to Dashboard
                         </a>

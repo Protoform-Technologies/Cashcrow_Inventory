@@ -23,6 +23,7 @@ export async function dbGetMembers() {
     const { data: members, error } = await adminClient
         .from('profiles')
         .select('*')
+        .not('email', 'like', 'DELETED_%')
         .order('first_name', { ascending: true })
 
     if (error) {
@@ -134,40 +135,57 @@ export async function dbUpdateMemberAuth(id: string, metadata: Record<string, an
 export async function dbDeleteMember(id: string) {
     const adminClient = getSupabaseAdmin()
 
-    // 1. Delete from profiles table
+    // 1. Get the member's current email
+    const { data: memberProfile } = await adminClient.from('profiles').select('email').eq('id', id).single()
+    const deletedEmail = `DELETED_${id}_${memberProfile?.email || 'unknown'}`
+
+    // 2. Soft delete: update profile email and is_active to false
     const { error: profileError } = await adminClient
         .from('profiles')
-        .delete()
+        .update({ email: deletedEmail, is_active: false })
         .eq('id', id)
 
     if (profileError) {
-        throw new Error(`Profile deletion failed: ${profileError.message}`)
+        throw new Error(`Profile soft deletion failed: ${profileError.message}`)
     }
 
-    // 2. Delete from auth users
-    const { error: authError } = await adminClient.auth.admin.deleteUser(id)
+    // 3. Also update auth metadata and email
+    const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+        email: deletedEmail,
+        app_metadata: { is_active: false }
+    })
 
     if (authError) {
-        throw new Error(`Auth deletion failed: ${authError.message}`)
+        throw new Error(`Auth metadata soft deletion failed: ${authError.message}`)
     }
+
+    // 4. Sign them out immediately
+    await adminClient.auth.admin.signOut(id)
 
     return true
 }
 
 /**
- * Force a user to log out globally (invalidates all sessions)
+ * Force a user to log out globally
+ * Uses app_metadata to signal to middleware that the user's session is revoked.
  */
 export async function dbForceLogOutMember(id: string) {
     const adminClient = getSupabaseAdmin()
     
-    // This invalidates all active sessions for the user
-    // forcing them to re-authenticate on next interaction
-    const { error } = await adminClient.auth.admin.signOut(id)
+    // Fetch user to get existing app_metadata
+    const { data: user, error: fetchError } = await adminClient.auth.admin.getUserById(id)
+    if (fetchError || !user.user) {
+        console.error('Fetch user error:', fetchError?.message)
+        return false
+    }
+
+    // Set force_logout flag
+    const { error } = await adminClient.auth.admin.updateUserById(id, {
+        app_metadata: { ...user.user.app_metadata, force_logout: true }
+    })
 
     if (error) {
-        console.error('Sign out error:', error.message)
-        // We log but don't strictly throw if signOut fails, 
-        // as the profile was already updated.
+        console.error('Force logout error:', error.message)
     }
 
     return true

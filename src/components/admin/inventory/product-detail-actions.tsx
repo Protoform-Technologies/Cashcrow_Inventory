@@ -183,7 +183,6 @@ export default function ProductDetailActions({ product, logs, userName, isAdmin 
                 toast.success('Part deleted successfully')
                 const basePath = window.location.pathname.includes('/admin') ? '/admin/parts' : '/member/parts'
                 router.push(basePath)
-                router.refresh()
             } else {
                 setDeleteError(result.error || 'Failed to delete product')
                 toast.error(result.error || 'Failed to delete product')

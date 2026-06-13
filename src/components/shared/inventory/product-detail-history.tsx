@@ -48,17 +48,17 @@ export default function ProductDetailHistory({
                     {logs.length > 0 ? logs.map((log, i) => (
                         <div key={i} className="p-5 hover:bg-slate-50 transition-colors flex items-center justify-between gap-4">
                             <div className="flex items-center gap-4 min-w-0">
-                                <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${log.type === 'IN' ? 'bg-emerald-50 text-emerald-600' :
+                                <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${log.type === 'IN' || log.type === 'RETURN' ? 'bg-emerald-50 text-emerald-600' :
                                     log.type === 'OUT' ? 'bg-blue-50 text-blue-600' :
                                         'bg-amber-50 text-amber-600'
                                     }`}>
-                                    {log.sign}{log.quantity}
+                                    {log.type === 'IN' || log.type === 'RETURN' ? '+' : '-'}{log.qty}
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-sm font-bold text-slate-900 truncate">{log.purpose || 'General Stock Update'}</p>
                                     <div className="flex flex-col gap-1.5 mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                        <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-slate-300" /> {log.date}</span>
-                                        <span className="flex items-center gap-1.5" title="User who consumed or moved the materials"><User className="w-3 h-3 text-slate-300" />{log.takenBy}</span>
+                                        <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-slate-300" /> {new Date(log.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                        <span className="flex items-center gap-1.5" title="User who consumed or moved the materials"><User className="w-3 h-3 text-slate-300" />{log.taken_by_name || log.author || 'Unknown'}</span>
                                     </div>
                                 </div>
                             </div>

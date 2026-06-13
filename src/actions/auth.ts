@@ -34,33 +34,45 @@ export async function login(formData: FormData) {
     let role = data.user?.app_metadata?.role?.toUpperCase()
     let isActive = data.user?.app_metadata?.is_active
 
-    if (!role) {
-        // Fallback to fetching user profile and role using Admin Client
+    // 3. Cache the role in app_metadata for future speed or clear force_logout
+    if (!role || data.user?.app_metadata?.force_logout) {
         const adminClient = getSupabaseAdmin()
-        const { data: profile, error: profileError } = await adminClient
-            .from('profiles')
-            .select('role, is_active')
-            .eq('id', userId)
-            .single()
+        if (!role) {
+            const { data: profile, error: profileError } = await adminClient
+                .from('profiles')
+                .select('role, is_active')
+                .eq('id', userId)
+                .single()
 
-        if (profileError) {
-            console.error('Profile fetch error:', profileError.message)
-            return { error: 'Could not fetch user profile. Please contact support.' }
+            if (profileError) {
+                console.error('Profile fetch error:', profileError.message)
+                return { error: 'Could not fetch user profile. Please contact support.' }
+            }
+
+            role = profile.role?.toUpperCase()
+            isActive = profile.is_active
         }
 
-        role = profile.role?.toUpperCase()
-        isActive = profile.is_active
-
-        // 3. Cache the role in app_metadata for future speed
-        // This will make all future logins and middleware checks instant
+        // Overwrite app_metadata with correct role, active status, and remove force_logout
         await adminClient.auth.admin.updateUserById(userId, {
-            app_metadata: { role, is_active: isActive }
+            app_metadata: { ...data.user.app_metadata, role, is_active: isActive, force_logout: false }
         })
     }
 
     // 4. Check if account is active or needs password setup
     if (isActive === false) {
-        redirect('/reset-password')
+        // Double check from DB in case app_metadata is out of sync
+        const adminClient = getSupabaseAdmin()
+        const { data: profile } = await adminClient.from('profiles').select('is_active').eq('id', userId).single()
+        
+        if (profile?.is_active === true) {
+            isActive = true
+            await adminClient.auth.admin.updateUserById(userId, {
+                app_metadata: { ...data.user?.app_metadata, is_active: true }
+            })
+        } else {
+            redirect('/reset-password')
+        }
     }
 
     // 5. Redirect based on role
@@ -115,6 +127,14 @@ export async function updatePassword(password: string) {
     if (userId) {
         const adminClient = getSupabaseAdmin()
         await adminClient.from('profiles').update({ is_active: true }).eq('id', userId)
+        
+        // Also update app_metadata so the next login is seamless
+        const { data: userRecord } = await adminClient.auth.admin.getUserById(userId)
+        if (userRecord.user) {
+            await adminClient.auth.admin.updateUserById(userId, {
+                app_metadata: { ...userRecord.user.app_metadata, is_active: true }
+            })
+        }
     }
 
     return { success: true }

@@ -105,7 +105,7 @@ export default function StockMovementChart({
       )}
       
       <div className="h-[350px] min-h-[350px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart data={data} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
             <XAxis 

@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { 
     dbGetMembers, 
     dbAddMemberAuth, 
-    dbUpsertMemberProfile, 
     dbUpdateMemberProfile, 
     dbUpdateMemberAuth, 
     dbDeleteMember,
@@ -34,32 +33,21 @@ export async function addMember(formData: FormData) {
             return { error: 'Failed to create member account.' }
         }
 
-        // 2. Insert into Profiles table with is_active = false
-        await dbUpsertMemberProfile({
-            id: user.id,
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            role: role,
-            is_active: false
-        })
-
-        // 3. Send Onboarding Email
-        await sendOnboardingEmail(email, firstName, lastName)
-
-        // 4. Create Notification
-        try {
-            await createNotification({
+        // 2, 3 & 4. Update Profile, Send Email, and Create Notification concurrently
+        await Promise.all([
+            dbUpdateMemberProfile(user.id, {
+                is_active: false
+            }),
+            sendOnboardingEmail(email, firstName, lastName).catch(e => console.error("Email error:", e)),
+            createNotification({
                 title: 'New Member Added',
                 message: `${firstName} ${lastName} has joined the team as ${role}.`,
                 type: 'MEMBER_ADDED',
                 link: '/admin/add-members',
                 target_role: 'ADMIN',
                 creator_id: admin.id
-            })
-        } catch (e) {
-            console.error("Member notification error:", e)
-        }
+            }).catch(e => console.error("Notification error:", e))
+        ])
 
         revalidatePath('/admin/add-members')
         return { success: `Successfully added ${firstName} ${lastName}! An onboarding email has been sent to ${email}.` }
@@ -99,8 +87,8 @@ export async function reactivateMember(id: string) {
         await dbUpdateMemberProfile(id, { is_active: true })
         await dbUpdateMemberAuth(id, { is_active: true })
         
-        // 3. Send Reactivation Email
-        await sendReactivationEmail(member.email, member.first_name, member.last_name)
+        // 3. Send Reactivation Email (Background)
+        sendReactivationEmail(member.email, member.first_name, member.last_name).catch(console.error)
 
         revalidatePath('/admin/add-members')
         return { success: true }

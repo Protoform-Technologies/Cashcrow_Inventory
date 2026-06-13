@@ -10,6 +10,7 @@ interface SubmittedLogsTableProps {
     onView: (log: DayLog) => void
     onDelete: (id: string) => void
     isDeleting?: boolean
+    userRole?: string
 }
 
 const getTransactionStyles = (type: TransactionType) => {
@@ -23,7 +24,7 @@ const getTransactionStyles = (type: TransactionType) => {
     }
 }
 
-export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting }: SubmittedLogsTableProps) {
+export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting, userRole }: SubmittedLogsTableProps) {
     // Hydration fix
     const [isClient, setIsClient] = React.useState(false)
     React.useEffect(() => { setIsClient(true) }, [])
@@ -129,20 +130,24 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                             </div>
                                         </td>
                                         <td className="px-6 py-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 text-slate-400">
-                                                <button
+                                            <div className="flex justify-end gap-1">
+                                                <button 
                                                     onClick={() => onView(log)}
-                                                    className="size-9 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center"
+                                                    className="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                                    title="View Details"
                                                 >
                                                     <Eye className="size-4" />
                                                 </button>
-                                                <button
-                                                    onClick={() => onDelete(log.id)}
-                                                    disabled={isDeleting}
-                                                    className="size-9 rounded-lg bg-white border border-slate-200 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center disabled:opacity-50"
-                                                >
-                                                    {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                                                </button>
+                                                {userRole === 'ADMIN' && (
+                                                    <button 
+                                                        onClick={() => onDelete(log.id)}
+                                                        disabled={isDeleting}
+                                                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
+                                                        title="Delete Log"
+                                                    >
+                                                        {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -224,21 +229,22 @@ export default function SubmittedLogsTable({ logs, onView, onDelete, isDeleting 
                                         <p className="text-[10px] font-black text-slate-800 leading-none">{date}</p>
                                         <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{time}</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
+                                    <div className="flex gap-2">
+                                        <button 
                                             onClick={() => onView(log)}
-                                            className="h-9 px-3 bg-white border border-slate-200 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                            className="flex-1 p-2 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors"
                                         >
-                                            <Eye className="size-3" />
-                                            Trace
+                                            <Eye className="size-3.5" /> View Record
                                         </button>
-                                        <button
-                                            onClick={() => onDelete(log.id)}
-                                            disabled={isDeleting}
-                                            className="size-9 bg-red-50 border border-red-100 text-red-500 rounded-lg flex items-center justify-center active:scale-95 disabled:opacity-50"
-                                        >
-                                            {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-3.5" />}
-                                        </button>
+                                        {userRole === 'ADMIN' && (
+                                            <button 
+                                                onClick={() => onDelete(log.id)}
+                                                disabled={isDeleting}
+                                                className="flex-1 p-2 flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-50"
+                                            >
+                                                {isDeleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-3.5" />} Delete
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

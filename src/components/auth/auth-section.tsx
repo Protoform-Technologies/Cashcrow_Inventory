@@ -41,8 +41,8 @@ export default function AuthSection() {
             <div className="w-full max-w-[440px]">
 
                 {/* Mobile Branding */}
-                <div className="lg:hidden flex flex-col items-center justify-center mb-4">
-                    <div className="relative w-48 h-16 mb-2">
+                <div className="lg:hidden flex flex-col items-center justify-center mb-8 mt-4">
+                    <div className="relative w-64 h-20 mb-2">
                         <Image
                             src="/Cashcrow_Logo_Mobile.png"
                             alt="Cashcrow Logo"
@@ -52,7 +52,7 @@ export default function AuthSection() {
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                     </div>
-                    <span className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-bold">Protoform Technologies</span>
+                    <span className="text-slate-400 text-xs uppercase tracking-[0.2em] font-bold">Protoform Technologies</span>
                 </div>
 
                 <div className="text-center mb-10">

@@ -116,7 +116,10 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
         formData.append('existing_image_url', part.image_url || '')
 
         // Filter out empty vendors and parse current state
-        const formattedVendors = vendors.filter(v => v.name.trim() !== '')
+        const formattedVendors = vendors.filter(v => v.name.trim() !== '').map(v => ({
+            ...v,
+            fund: Number(v.fund.toString().replace(',', '.'))
+        }))
         formData.append('vendors', JSON.stringify(formattedVendors))
 
         const result = await updateProduct(part.id, formData)
@@ -125,9 +128,7 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
             toast.error(result.error)
         } else if (result?.success) {
             toast.success('Part updated successfully!')
-            setTimeout(() => {
-                onSuccess()
-            }, 1000)
+            onSuccess()
         }
         setIsLoading(false)
     }
@@ -363,11 +364,13 @@ export default function EditPartForm({ part, onSuccess, onCancel, suppliers = []
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
                                         <input
                                             value={vendor.fund}
-                                            onChange={(e) => updateVendor(index, { fund: e.target.value })}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/[^0-9.,]/g, '');
+                                                updateVendor(index, { fund: val });
+                                            }}
                                             className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
                                             placeholder="0.00"
-                                            type="number"
-                                            step="0.01"
+                                            type="text"
                                             required
                                         />
                                     </div>

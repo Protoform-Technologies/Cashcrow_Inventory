@@ -33,9 +33,13 @@ Adding a new member follows an atomic 3-step sequence to ensure consistency:
 We use a **"Metadata-First"** approach. When a user's role is updated in the `profiles` table, the application logic simultaneously updates the Supabase Auth `app_metadata`. This ensures the user's JWT (session token) contains the most recent role for high-speed middleware redirection.
 
 ### Forced Session Invalidation
-Security is enforced immediately. If an administrator changes a member's role (e.g., from Admin to Member), the system triggers a **Global Sign-out**:
-- **`dbForceLogOutMember`**: Uses the Supabase Admin API to invalidate all active sessions for that specific user ID.
-- **Result**: The user is instantly kicked out of their current session and must log back in to receive their updated permissions.
+Security is enforced immediately without relying on Postgres Realtime (which is often disabled for core tables). 
+- **`AuthListener` (Client)**: A lightweight background process polls the `supabase.auth.getUser()` endpoint every 3 seconds.
+- **`dbForceLogOutMember` (Server)**: When an administrator changes a member's role (e.g., Admin to Member) or deactivates them, the server updates their `app_metadata` to include `force_logout: true`.
+- **Result**: The client's background check instantly detects the `force_logout` flag and hard-reloads the page. The Next.js Edge Middleware intercepts the request, destroys the local session cookies, and boots the user to the Login screen. Upon logging back in, the system detects successful authentication and automatically clears the penalty flag.
+
+### Optimistic UI Updates
+To provide a fast, app-like experience, changes to a user's role or status are updated optimistically in the React state. When an admin saves changes in the `EditMemberForm`, the updated data is instantly injected into the local table state, bypassing the need to wait for a full `router.refresh()` server trip.
 
 ---
 

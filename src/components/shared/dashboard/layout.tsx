@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from "react"
+import { usePathname } from "next/navigation"
 import Sidebar from "./sidebar"
 import Header from "./header"
+import AuthListener from "../auth-listener"
 
 interface DashboardLayoutProps {
     children: React.ReactNode
@@ -10,14 +12,40 @@ interface DashboardLayoutProps {
     userRole: string
     userId: string
     avatarUrl?: string
-    title?: string
+    title?: string // Kept for backwards compatibility if needed
 }
 
-export default function DashboardLayout({ children, userName, userRole, userId, avatarUrl, title = "Dashboard" }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, userName, userRole, userId, avatarUrl, title }: DashboardLayoutProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const pathname = usePathname()
+
+    const titleMap: Record<string, string> = {
+        '/admin': 'Dashboard',
+        '/admin/parts': 'Parts Inventory',
+        '/admin/suppliers': 'Suppliers',
+        '/admin/add-suppliers': 'Add Suppliers',
+        '/admin/add-parts': 'Add Parts',
+        '/admin/add-members': 'Add Members',
+        '/admin/daily-log': 'Daily Log',
+        '/admin/reports': 'Reports',
+        '/admin/profile': 'User Profile',
+        '/member': 'Dashboard',
+        '/member/parts': 'Parts Inventory',
+        '/member/daily-log': 'Daily Log',
+        '/member/profile': 'User Profile',
+        '/member/settings': 'Settings',
+    }
+    
+    // Check if dynamic route like /admin/parts/[id]
+    let currentTitle = title || titleMap[pathname] || 'Dashboard'
+    if (!titleMap[pathname] && pathname.includes('/parts/')) {
+        currentTitle = 'Part Details'
+    }
 
     return (
         <div className="flex min-h-screen bg-[var(--color-cashcrow-bg-light)]">
+            <AuthListener userId={userId} />
+            
             {/* Backdrop for mobile */}
             {isSidebarOpen && (
                 <div
@@ -30,7 +58,7 @@ export default function DashboardLayout({ children, userName, userRole, userId, 
 
             <main className="flex-1 lg:ml-64 min-h-screen flex flex-col max-w-full overflow-x-hidden">
                 <Header
-                    title={title}
+                    title={currentTitle}
                     userName={userName}
                     userRole={userRole}
                     userId={userId}

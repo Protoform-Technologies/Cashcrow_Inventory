@@ -167,9 +167,7 @@ export async function submitAtomicLogs(
     }
 
     try {
-        let successCount = 0
-
-        for (const entry of validEntries) {
+        const promises = validEntries.map(async (entry) => {
             // A. Create independent DayLog record
             const { data: log, error: logError } = await supabase
                 .from('day_logs')
@@ -215,7 +213,7 @@ export async function submitAtomicLogs(
             if (quantityChange !== 0) {
                 const { data: product } = await supabase
                     .from('products')
-                    .select('quantity')
+                    .select('quantity, name, min_stock_level')
                     .eq('id', entry.productId)
                     .single()
 
@@ -226,31 +224,23 @@ export async function submitAtomicLogs(
                         .update({ quantity: newQuantity })
                         .eq('id', entry.productId)
 
-                    // 🔔 LOW STOCK NOTIFICATION
-                    const { data: pData } = await supabase
-                        .from('products')
-                        .select('name, min_stock_level')
-                        .eq('id', entry.productId)
-                        .single()
-
-                    if (pData && newQuantity <= pData.min_stock_level) {
-                        try {
-                            await createNotification({
-                                title: 'Low Stock Alert',
-                                message: `${pData.name} is now at ${newQuantity} units (Min: ${pData.min_stock_level}).`,
-                                type: 'LOW_STOCK',
-                                link: `/admin/parts/${entry.productId}`,
-                                target_role: 'ADMIN'
-                            })
-                        } catch (e) {
-                            console.error("Low stock notification error:", e)
-                        }
+                    // 🔔 LOW STOCK NOTIFICATION (Background)
+                    if (newQuantity <= product.min_stock_level) {
+                        createNotification({
+                            title: 'Low Stock Alert',
+                            message: `${product.name} is now at ${newQuantity} units (Min: ${product.min_stock_level}).`,
+                            type: 'LOW_STOCK',
+                            link: `/admin/parts/${entry.productId}`,
+                            target_role: 'ADMIN'
+                        }).catch(e => console.error("Low stock notification error:", e))
                     }
                 }
             }
+            return true
+        })
 
-            successCount++
-        }
+        await Promise.all(promises)
+        const successCount = validEntries.length
 
         revalidatePath('/admin/daily-log')
         revalidatePath('/admin/parts')

@@ -37,7 +37,6 @@ export async function createNotification(params: CreateNotificationParams) {
         return { error: error.message }
     }
 
-    revalidatePath('/') // Revalidate everything to be safe for notifications
     return { success: true }
 }
 

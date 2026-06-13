@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { deactivateMember, reactivateMember, deleteMemberPermanently } from "@/actions/members"
 import EditMemberForm from "./edit-member-form"
@@ -25,12 +25,17 @@ export default function MembersList({ members, currentUserId }: { members: Profi
     const [isPending, setIsPending] = useState(false)
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
     const [deactivateConfirmId, setDeactivateConfirmId] = useState<string | null>(null)
+    const [reactivateConfirmId, setReactivateConfirmId] = useState<string | null>(null)
     const [editingMember, setEditingMember] = useState<Profile | null>(null)
     const [showAddModal, setShowAddModal] = useState(false)
     const [localMembers, setLocalMembers] = useState<Profile[]>(members)
     const [searchQuery, setSearchQuery] = useState("")
     const [currentPage, setCurrentPage] = useState(1)
     const router = useRouter()
+
+    useEffect(() => {
+        setLocalMembers(members)
+    }, [members])
 
     // Filter members based on search
     const filteredMembers = localMembers.filter(member =>
@@ -61,7 +66,10 @@ export default function MembersList({ members, currentUserId }: { members: Profi
         setEditingMember(null)
     }
 
-    const handleEditSuccess = () => {
+    const handleEditSuccess = (updatedData: { first_name: string, last_name: string, role: string, is_active: boolean }) => {
+        if (editingMember) {
+            setLocalMembers(prev => prev.map(m => m.id === editingMember.id ? { ...m, ...updatedData } : m))
+        }
         setEditingMember(null)
         router.refresh()
     }
@@ -94,15 +102,22 @@ export default function MembersList({ members, currentUserId }: { members: Profi
         setIsPending(false)
     }
 
-    const handleReactivate = async (id: string) => {
+    const handleReactivate = (id: string) => {
+        setReactivateConfirmId(id)
+    }
+
+    const confirmReactivate = async () => {
+        if (!reactivateConfirmId) return
+
         setIsPending(true)
-        const result = await reactivateMember(id)
+        const result = await reactivateMember(reactivateConfirmId)
         if (result?.success) {
-            setLocalMembers(prev => prev.map(m => m.id === id ? { ...m, is_active: true } : m))
+            setLocalMembers(prev => prev.map(m => m.id === reactivateConfirmId ? { ...m, is_active: true } : m))
             toast.success("Member reactivated successfully")
         } else {
             toast.error(result?.error || "Failed to reactivate member")
         }
+        setReactivateConfirmId(null)
         setIsPending(false)
     }
 
@@ -496,34 +511,59 @@ export default function MembersList({ members, currentUserId }: { members: Profi
 
             {/* Deactivate Confirmation Modal */}
             {deactivateConfirmId && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm m-2 overflow-hidden border border-slate-200">
-                        <div className="p-8 flex flex-col items-center text-center">
-                            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-6">
-                                <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
-                                    <ShieldAlert className="w-7 h-7" />
-                                </div>
-                            </div>
-                            <h3 className="text-xl font-black text-slate-900 mb-2">Deactivate Member?</h3>
-                            <p className="text-slate-500 font-bold mb-8">The user will be logged out instantly and will lose all access until reactivated.</p>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-xl w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-xl font-bold mb-2 text-center">Deactivate Member?</h3>
+                        <p className="text-slate-500 text-center mb-6">The user will be logged out instantly and will lose all access until reactivated.</p>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setDeactivateConfirmId(null)}
+                                disabled={isPending}
+                                className="flex-1 py-2.5 rounded-xl font-semibold border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmDeactivate}
+                                disabled={isPending}
+                                className="flex-1 py-2.5 rounded-xl font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors disabled:opacity-50 flex justify-center items-center"
+                            >
+                                {isPending ? (
+                                    <div className="w-5 h-5 border-2 border-slate-300 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    "Deactivate"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                            <div className="flex flex-col w-full gap-3">
-                                <Button
-                                    onClick={confirmDeactivate}
-                                    disabled={isPending}
-                                    className="h-12 w-full bg-amber-600 hover:bg-amber-700 text-white font-black rounded-full shadow-lg shadow-amber-200 transition-all active:scale-95"
-                                >
-                                    {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                                    Yes, Deactivate
-                                </Button>
-                                <Button
-                                    onClick={() => setDeactivateConfirmId(null)}
-                                    variant="outline"
-                                    className="h-12 w-full border-slate-200 text-slate-600 font-bold rounded-full hover:bg-slate-50 transition-all active:scale-95"
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
+            {/* Reactivate Confirmation Modal */}
+            {reactivateConfirmId && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-xl w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200">
+                        <h3 className="text-xl font-bold mb-2 text-center">Reactivate Member?</h3>
+                        <p className="text-slate-500 text-center mb-6">The user will regain access to the platform and receive a welcome back email.</p>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setReactivateConfirmId(null)}
+                                disabled={isPending}
+                                className="flex-1 py-2.5 rounded-xl font-semibold border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmReactivate}
+                                disabled={isPending}
+                                className="flex-1 py-2.5 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors disabled:opacity-50 flex justify-center items-center"
+                            >
+                                {isPending ? (
+                                    <div className="w-5 h-5 border-2 border-slate-300 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    "Reactivate"
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -73,7 +73,7 @@ export default function DayLogForm({
                                     <div className="col-span-6 space-y-3">
                                         <label className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
                                             <Package className="w-3 h-3 text-[var(--color-cashcrow-primary)]" />
-                                            Product Reference (Full Details Visible)
+                                            Product Reference
                                         </label>
                                         <SearchableSelect
                                             options={productOptions}

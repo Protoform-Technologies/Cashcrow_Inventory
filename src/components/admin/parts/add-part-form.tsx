@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { addProduct } from "@/actions/products"
 import { 
@@ -64,6 +65,7 @@ const partSchema = z.object({
 
 export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartFormProps) {
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
     const formRef = useRef<HTMLFormElement>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [datasheetFileName, setDatasheetFileName] = useState<string | null>(null)
@@ -143,7 +145,7 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
             vendors: formattedVendors.map(v => ({
                 mode: v.mode,
                 name: v.name,
-                fund: Number(v.fund),
+                fund: Number(v.fund.toString().replace(',', '.')),
                 link: v.link
             }))
         };
@@ -170,7 +172,10 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
             setDatasheetFileName(null)
             setVendors([{ mode: 'online', name: '', fund: '', link: '' }])
             if (onSuccess) {
-                setTimeout(() => onSuccess(), 1000)
+                onSuccess()
+            } else {
+                router.push('/admin/parts')
+                router.refresh()
             }
         }
         setIsLoading(false)
@@ -439,12 +444,13 @@ export default function AddPartForm({ suppliers, onSuccess, onCancel }: AddPartF
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
                                         <input
                                             value={vendor.fund}
-                                            onChange={(e) => updateVendor(index, { fund: e.target.value })}
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/[^0-9.,]/g, '');
+                                                updateVendor(index, { fund: val });
+                                            }}
                                             className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:ring-2 focus:ring-[#265136]/10 focus:border-[#265136] outline-none transition-all"
                                             placeholder="0.00"
-                                            type="number"
-                                            step="0.01"
-                                            min="0.01"
+                                            type="text"
                                             required
                                         />
                                     </div>

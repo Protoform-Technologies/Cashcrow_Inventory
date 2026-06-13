@@ -40,7 +40,7 @@ export default function SuppliersGrid({ suppliers, searchQuery, onSupplierClick 
                     {searchQuery ? 'No suppliers match your search criteria.' : "You haven't added any suppliers yet."}
                 </p>
                 {!searchQuery && (
-                    <Link href="/admin/add-suppliers" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-slate-200">
+                    <Link href="/admin/add-suppliers" className="inline-flex items-center gap-2 bg-[var(--color-cashcrow-primary)] hover:bg-[var(--color-cashcrow-lightgreen)] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-[var(--color-cashcrow-primary)]/20">
                         <PlusCircle className="w-4 h-4" />
                         Add First Supplier
                     </Link>

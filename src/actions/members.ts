@@ -8,7 +8,8 @@ import {
     dbUpdateMemberAuth, 
     dbDeleteMember,
     dbGetMemberById,
-    dbForceLogOutMember
+    dbForceLogOutMember,
+    dbUpsertMemberProfile
 } from '@/lib/members'
 import { sendOnboardingEmail, sendReactivationEmail } from '@/lib/email'
 import { getAdminProfileOrRedirect } from './auth'
@@ -35,7 +36,12 @@ export async function addMember(formData: FormData) {
 
         // 2, 3 & 4. Update Profile, Send Email, and Create Notification concurrently
         await Promise.all([
-            dbUpdateMemberProfile(user.id, {
+            dbUpsertMemberProfile({
+                id: user.id,
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                role: role as any,
                 is_active: false
             }),
             sendOnboardingEmail(email, firstName, lastName).catch(e => console.error("Email error:", e)),

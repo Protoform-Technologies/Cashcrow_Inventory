@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Instant Logout for Deactivated Users or Forced Logouts
-    if (user && (user.app_metadata?.is_active === false || user.app_metadata?.force_logout === true)) {
+    // 1. Instant Logout for Forced Logouts
+    if (user && user.app_metadata?.force_logout === true) {
         await supabase.auth.signOut()
         return NextResponse.redirect(new URL('/', request.url))
     }
@@ -66,6 +66,12 @@ export async function middleware(request: NextRequest) {
         }
 
         // Additional role-based route protection
+        if ((isAdminRoute || isMemberRoute) && user.app_metadata?.is_active === false) {
+            // If they are inactive (new user), they should be on the reset-password page.
+            // We redirect them to login, which will automatically redirect them to reset-password.
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+
         if (isAdminRoute && role !== 'ADMIN' && role !== null) {
             return NextResponse.redirect(new URL('/member', request.url))
         }

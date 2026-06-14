@@ -65,7 +65,7 @@ export default function DashboardLayout({ children, userName, userRole, userId, 
                     avatarUrl={avatarUrl}
                     onMenuClick={() => setIsSidebarOpen(true)}
                 />
-                <div className="px-4 sm:px-6 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8 flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto min-h-0">
+                <div className="px-4 sm:px-6 md:px-8 py-4 md:py-6 space-y-4 md:space-y-6 flex-1 w-full max-w-full overflow-x-hidden overflow-y-auto min-h-0">
                     {children}
                 </div>
 

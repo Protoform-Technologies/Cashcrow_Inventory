@@ -13,6 +13,7 @@ export const fetchInventoryData = cache(async (page: number = 1, limit: number =
     let dbQuery = supabase
         .from('products')
         .select('*', { count: 'exact' })
+        .eq('is_deleted', false)
 
     if (query) {
         dbQuery = dbQuery.or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
@@ -43,6 +44,7 @@ export const fetchProductById = cache(async (id: string) => {
         .from('products')
         .select('*')
         .eq('id', id)
+        .eq('is_deleted', false)
         .maybeSingle()
 
     if (error) {
@@ -63,6 +65,7 @@ export const fetchProductsForDropdown = cache(async () => {
     const { data, error } = await supabase
         .from('products')
         .select('id, name, sku, category, quantity, image_url')
+        .eq('is_deleted', false)
         .order('name', { ascending: true })
 
     if (error) {
@@ -89,7 +92,7 @@ export async function updateProductById(id: string, data: any) {
 
 export async function deleteProductById(id: string) {
     const supabase = getSupabaseAdmin()
-    return await supabase.from('products').delete().eq('id', id)
+    return await supabase.from('products').update({ is_deleted: true }).eq('id', id)
 }
 
 // Helper for status consistency

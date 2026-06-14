@@ -17,11 +17,11 @@ export const fetchDashboardStats = cache(async () => {
         { data: lowStockData },
         { count: recentLogsCount }
     ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
-        supabase.from('products').select('*', { count: 'exact', head: true }).eq('quantity', 0),
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('is_deleted', false),
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('quantity', 0).eq('is_deleted', false),
         // Column-to-column comparison still requires fetching columns, 
         // but we fetch ONLY what we need to minimize data transfer.
-        supabase.from('products').select('quantity, min_stock_level'),
+        supabase.from('products').select('quantity, min_stock_level').eq('is_deleted', false),
         supabase.from('day_logs').select('*', { count: 'exact', head: true })
             .gte('created_at', today.toISOString())
             .eq('status', 'SUBMITTED')
@@ -48,6 +48,7 @@ export const fetchInventoryData = cache(async (page: number = 1, limit: number =
     let dbQuery = supabase
         .from('products')
         .select('*', { count: 'exact' })
+        .eq('is_deleted', false)
 
     if (query) {
         dbQuery = dbQuery.or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
@@ -185,6 +186,7 @@ export const searchGlobalInventory = cache(async (query: string) => {
     const { data: products } = await supabase
         .from('products')
         .select('id, name, sku, category, quantity, image_url') 
+        .eq('is_deleted', false)
         .or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
         .limit(5)
 

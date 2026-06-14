@@ -34,7 +34,7 @@ export async function fetchReportAnalyticsData(month?: number, year?: number) {
         { data: currentLogs },
         { data: prevLogs }
     ] = await Promise.all([
-        supabase.from('products').select('*'),
+        supabase.from('products').select('*').eq('is_deleted', false),
         supabase.from('day_log_items').select('*, products(name, sku, category, vendors)')
             .gte('created_at', currentStart.toISOString())
             .lte('created_at', currentEnd.toISOString()),

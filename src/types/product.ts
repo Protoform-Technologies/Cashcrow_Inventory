@@ -15,4 +15,5 @@ export interface Product {
     unit_of_measurement: string | null
     created_at: string
     updated_at: string
+    is_deleted?: boolean
 }

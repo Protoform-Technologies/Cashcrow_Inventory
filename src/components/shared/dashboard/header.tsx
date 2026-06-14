@@ -142,95 +142,101 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
         }
     }
 
-    return (
-        <header className="h-16 bg-white border-b flex items-center justify-between px-4 md:px-8 sticky top-0 z-50 w-full max-w-full">
-
-            {/* LEFT SECTION */}
-            <div className="flex items-center gap-2 md:gap-4 flex-none shrink-0">
-                <button onClick={onMenuClick} className="p-2 lg:hidden shrink-0">
-                    <Menu className="w-6 h-6" />
+    const renderSearchUI = (isMobile: boolean) => (
+        <div className="relative w-full group/search">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within/search:text-[var(--color-cashcrow-primary)] transition-colors" />
+            <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] bg-slate-50/50 focus:bg-white transition-all text-sm"
+                placeholder="Search inventory..."
+                autoFocus={isMobile && showMobileSearch}
+            />
+            
+            {(query || (isMobile && showMobileSearch)) && (
+                <button 
+                    onClick={() => {setShowMobileSearch(false); setQuery('')}}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
+                >
+                    <X className="w-3.5 h-3.5" />
                 </button>
+            )}
 
-                <h1 className="hidden sm:block text-sm md:text-lg font-bold whitespace-nowrap overflow-hidden text-ellipsis sm:max-w-none">
-                    {title}
-                </h1>
-            </div>
-
-            {/* RIGHT SECTION: Relocated Search next to Notifications */}
-            <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end px-2 sm:px-0">
-                
-                {/* SEARCH COMPONENT (Relocated to Right) */}
-                <div className={`relative flex-1 max-w-xs transition-all duration-300 ${showMobileSearch ? 'block' : 'hidden lg:block'}`}>
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                    <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        className="pl-9 pr-8 py-1.5 border rounded-lg text-xs w-full bg-slate-50 focus:bg-white transition-all ring-0 border-slate-200 focus:border-emerald-500/50"
-                        placeholder="Search inventory..."
-                        autoFocus={showMobileSearch}
-                    />
-                    
-                    {(query || showMobileSearch) && (
-                        <button 
-                            onClick={() => {setShowMobileSearch(false); setQuery('')}}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-full"
-                        >
-                            <X className="w-3.5 h-3.5 text-slate-400" />
-                        </button>
-                    )}
-
-                    {/* SEARCH DROPDOWN - Fixed positioning on mobile to prevent clipping */}
-                    {showDropdown && (
-                        <div
-                            ref={dropdownRef}
-                            className="fixed sm:absolute top-16 sm:top-full left-4 sm:left-0 right-4 sm:right-auto mt-2 sm:w-[400px] bg-white border rounded-xl shadow-2xl z-40 overflow-hidden"
-                        >
-                            {isSearching ? (
-                                <div className="p-6 flex justify-center">
-                                    <Loader2 className="animate-spin text-[#265136]" />
+            {/* SEARCH DROPDOWN */}
+            {showDropdown && (
+                <div
+                    ref={dropdownRef}
+                    className="absolute top-full left-0 right-0 lg:w-[400px] mt-2 bg-white border rounded-xl shadow-2xl z-50 overflow-hidden"
+                >
+                    {isSearching ? (
+                        <div className="p-6 flex justify-center">
+                            <Loader2 className="animate-spin text-[#265136]" />
+                        </div>
+                    ) : results.length > 0 ? (
+                        <div className="max-h-[70vh] overflow-y-auto">
+                            {results.map(item => (
+                                <div
+                                    key={item.id}
+                                    onClick={() => handleResultClick(item)}
+                                    className="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors"
+                                >
+                                    <div className={`p-1 w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${item.type === 'product' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                                        {item.type === 'product' ? (
+                                            item.image_url ? (
+                                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-md" />
+                                            ) : <Package size={18} />
+                                        ) : <Truck size={18} />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold text-sm truncate">{item.name}</p>
+                                        <p className="text-xs text-slate-400 truncate">{item.sub}</p>
+                                    </div>
+                                    <ArrowRight size={14} className="text-slate-300" />
                                 </div>
-                            ) : results.length > 0 ? (
-                                <div className="max-h-[70vh] overflow-y-auto">
-                                    {results.map(item => (
-                                        <div
-                                            key={item.id}
-                                            onClick={() => handleResultClick(item)}
-                                            className="p-4 hover:bg-slate-50 cursor-pointer flex items-center gap-3 border-b border-slate-50 last:border-0 transition-colors"
-                                        >
-                                            <div className={`p-1 w-10 h-10 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border ${item.type === 'product' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
-                                                {item.type === 'product' ? (
-                                                    item.image_url ? (
-                                                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover rounded-md" />
-                                                    ) : <Package size={18} />
-                                                ) : <Truck size={18} />}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-sm truncate">{item.name}</p>
-                                                <p className="text-xs text-slate-400 truncate">{item.sub}</p>
-                                            </div>
-                                            <ArrowRight size={14} className="text-slate-300" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="p-8 text-center text-slate-400">
-                                    <Search className="mx-auto w-8 h-8 opacity-20 mb-2" />
-                                    <p className="text-sm">No results found for &quot;{query}&quot;</p>
-                                </div>
-                            )}
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center text-slate-400">
+                            <Search className="mx-auto w-8 h-8 opacity-20 mb-2" />
+                            <p className="text-sm">No results found for &quot;{query}&quot;</p>
                         </div>
                     )}
                 </div>
+            )}
+        </div>
+    )
 
-                {/* Mobile Search Toggle Icon */}
-                {!showMobileSearch && (
-                    <button 
-                        onClick={() => setShowMobileSearch(true)}
-                        className="p-2 lg:hidden text-slate-600 shrink-0 hover:bg-slate-50 rounded-full transition-colors"
-                    >
-                        <Search className="w-5 h-5" />
+    return (
+        <header className="bg-white flex flex-col sticky top-0 z-50 w-full max-w-full transition-all duration-300">
+            <div className="h-16 border-b border-slate-100 flex items-center justify-between px-4 md:px-8 w-full">
+                {/* LEFT SECTION */}
+                <div className="flex items-center gap-2 md:gap-4 flex-none shrink-0">
+                    <button onClick={onMenuClick} className="p-2 lg:hidden shrink-0">
+                        <Menu className="w-6 h-6" />
                     </button>
-                )}
+
+                    <h1 className="hidden sm:block text-sm md:text-lg font-bold whitespace-nowrap overflow-hidden text-ellipsis sm:max-w-none">
+                        {title}
+                    </h1>
+                </div>
+
+                {/* RIGHT SECTION */}
+                <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end px-2 sm:px-0">
+                    
+                    {/* DESKTOP SEARCH COMPONENT */}
+                    <div className="hidden lg:block relative flex-1 max-w-xs transition-all duration-300">
+                        {renderSearchUI(false)}
+                    </div>
+
+                    {/* Mobile Search Toggle Icon */}
+                    {!showMobileSearch && (
+                        <button 
+                            onClick={() => setShowMobileSearch(true)}
+                            className="p-2 lg:hidden text-slate-600 shrink-0 hover:bg-slate-50 rounded-full transition-colors"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
+                    )}
 
                 {/* 🔔 NOTIFICATIONS - z-index is 50 */}
                 <div className="relative z-50" ref={notificationRef}>
@@ -328,6 +334,14 @@ export default function Header({ title, userName, userRole, userId, avatarUrl, o
                 </div>
 
             </div>
+            </div>
+
+            {/* MOBILE SEARCH COMPONENT (Drops down pushing content) */}
+            {showMobileSearch && (
+                <div className="w-full bg-white px-4 pb-4 pt-1 lg:hidden animate-in slide-in-from-top-2 relative z-40">
+                    {renderSearchUI(true)}
+                </div>
+            )}
         </header>
     )
 }

@@ -36,8 +36,8 @@ export default function ProductCard({ product, onClick, onDownloadPdf }: Product
         >
             {/* Card Header */}
             <div className="p-5 border-b border-slate-100">
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-12 h-12 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
                             {product.image_url ? (
                                 <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
@@ -45,14 +45,14 @@ export default function ProductCard({ product, onClick, onDownloadPdf }: Product
                                 <PackageOpen className="w-6 h-6 text-slate-400" />
                             )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <h3 className="font-bold text-slate-900 text-sm truncate group-hover:text-[var(--color-cashcrow-primary)] transition-colors">
                                 {product.name}
                             </h3>
-                            <p className="text-xs font-medium text-slate-500 mt-0.5">{product.category}</p>
+                            <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">{product.category}</p>
                         </div>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold ${stockStatus.bg} ${stockStatus.text} ring-1 ${stockStatus.ring}`}>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-bold shrink-0 ${stockStatus.bg} ${stockStatus.text} ring-1 ${stockStatus.ring}`}>
                         {stockStatus.label}
                     </span>
                 </div>

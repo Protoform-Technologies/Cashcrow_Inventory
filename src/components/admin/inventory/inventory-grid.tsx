@@ -80,7 +80,7 @@ export default function InventoryGrid({
     }
 
     return (
-        <div className="space-y-8 h-full flex flex-col animate-in fade-in duration-500">
+        <div className="space-y-4 md:space-y-6 h-full flex flex-col animate-in fade-in duration-500">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -99,7 +99,7 @@ export default function InventoryGrid({
                             className="w-full pl-10 pr-10 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-cashcrow-primary)]/20 focus:border-[var(--color-cashcrow-primary)] bg-slate-50/50 focus:bg-white transition-all"
                         />
                         {inputValue && (
-                            <button 
+                            <button
                                 type="button"
                                 onClick={clearSearch}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
@@ -138,8 +138,8 @@ export default function InventoryGrid({
                 ) : (
                     products.map(product => (
                         <div key={product.id} className="cursor-pointer group">
-                             {/* Linking directly to detail page now */}
-                             <Link href={`${basePath}/${product.id}`}>
+                            {/* Linking directly to detail page now */}
+                            <Link href={`${basePath}/${product.id}`}>
                                 <ProductCard
                                     product={product}
                                     onDownloadPdf={(e: React.MouseEvent) => {
@@ -152,7 +152,7 @@ export default function InventoryGrid({
                                         }
                                     }}
                                 />
-                             </Link>
+                            </Link>
                         </div>
                     ))
                 )}

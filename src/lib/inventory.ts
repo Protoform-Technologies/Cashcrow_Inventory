@@ -1,0 +1,110 @@
+import { cache } from 'react'
+import { createServerSupabaseClient, getSupabaseAdmin } from '@/lib/supabase'
+
+/**
+ * Core inventory data service (READ)
+ */
+
+export const fetchInventoryData = cache(async (page: number = 1, limit: number = 8, query?: string, statusFilter: string = 'active') => {
+    const supabase = await createServerSupabaseClient()
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    let dbQuery = supabase
+        .from('products')
+        .select('*', { count: 'exact' })
+        .eq('is_deleted', false)
+
+    if (statusFilter === 'active') {
+        dbQuery = dbQuery.eq('is_active', true)
+    } else if (statusFilter === 'inactive') {
+        dbQuery = dbQuery.eq('is_active', false)
+    }
+
+    if (query) {
+        dbQuery = dbQuery.or(`name.ilike.%${query}%,sku.ilike.%${query}%,category.ilike.%${query}%`)
+    }
+
+    const { data, count, error } = await dbQuery
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+    if (error) {
+        console.error("Fetch inventory error:", error)
+        return { products: [], count: 0 }
+    }
+
+    const products = (data || []).map(item => ({
+        ...item,
+        status: getProductStatus(item.quantity, item.min_stock_level),
+        qtyFormatted: `${item.quantity || 0} units`
+    }))
+
+    return { products, count: count || 0 }
+})
+
+export const fetchProductById = cache(async (id: string) => {
+    const supabase = await createServerSupabaseClient()
+
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .eq('is_deleted', false)
+        .maybeSingle()
+
+    if (error) {
+        console.error("Fetch product detail error:", error)
+        return null
+    }
+
+    if (!data) return null
+
+    return {
+        ...data,
+        status: getProductStatus(data.quantity, data.min_stock_level)
+    }
+})
+
+export const fetchProductsForDropdown = cache(async () => {
+    const supabase = await createServerSupabaseClient()
+    const { data, error } = await supabase
+        .from('products')
+        .select('id, name, sku, category, quantity, image_url')
+        .eq('is_deleted', false)
+        .eq('is_active', true)
+        .order('name', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching products for dropdown:', error.message)
+        return []
+    }
+    return data || []
+})
+
+/**
+ * Core inventory mutations (WRITE)
+ * These do NOT include revalidation or notifications - that belongs in Actions.
+ */
+
+export async function createProduct(data: any) {
+    const supabase = getSupabaseAdmin()
+    return await supabase.from('products').insert(data).select().single()
+}
+
+export async function updateProductById(id: string, data: any) {
+    const supabase = getSupabaseAdmin()
+    return await supabase.from('products').update(data).eq('id', id)
+}
+
+export async function deleteProductById(id: string) {
+    const supabase = getSupabaseAdmin()
+    return await supabase.from('products').update({ is_deleted: true }).eq('id', id)
+}
+
+// Helper for status consistency
+function getProductStatus(quantity: number, minLevel: number) {
+    if (quantity === 0) return 'Out of Stock'
+    if (quantity <= minLevel) return 'Low Stock'
+    return 'In Stock'
+}
